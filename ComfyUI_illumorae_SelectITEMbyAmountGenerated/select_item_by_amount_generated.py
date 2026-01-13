@@ -1,3 +1,9 @@
+"""
+TITLE::Select ITEM By Amount Generated
+DESCRIPTIONSHORT::Selects an item from a project folder structure prioritizing low-coverage generation/ranking status, with optional prompt requirements and seeded iteration.
+VERSION::20260113
+GROUP::Select
+"""
 import re
 from pathlib import Path
 

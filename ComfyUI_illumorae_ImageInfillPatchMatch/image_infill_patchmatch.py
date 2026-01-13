@@ -2,9 +2,14 @@
 Image Infill PatchMatch
 a rough approximation of the PatchMatch algorithm
 finding nearest neighbor patches to fill a masked area ,
-ussage example = for the removal of objects from image then using the infilled image as guidance for inpainting
+usage example = for the removal of objects from image then using the infilled image as guidance for inpainting
 
 STATUS:: working , low quality 
+TITLE::Image Infill PatchMatch
+DESCRIPTIONSHORT::Approximate PatchMatch-style content fill to infill masked regions; useful as inpainting guidance.
+VERSION::20260113
+IMAGE::comfyui_illumorae_image_infill_patchmatch.png
+GROUP::Image
 """
 import torch
 import numpy as np

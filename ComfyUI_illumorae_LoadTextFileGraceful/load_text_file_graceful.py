@@ -1,3 +1,10 @@
+"""
+TITLE::Load Text File Graceful
+DESCRIPTIONSHORT::Loads a text file from a path and returns its contents without crashing if the file is missing.
+VERSION::20260113
+IMAGE::comfyui_illumorae_load_text_graceful.png
+GROUP::Load
+"""
 import os
 
 class illumoraeLoadTextFileGraceful:

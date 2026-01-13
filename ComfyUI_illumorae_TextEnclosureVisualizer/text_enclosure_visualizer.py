@@ -1,3 +1,10 @@
+"""
+TITLE::Enclosure Visualizer
+DESCRIPTIONSHORT::Visualizes prompt text enclosure nesting and mismatched parenthesis, outputting an image and analysis strings.
+VERSION::20260113
+IMAGE::comfyui_illumorae_text_enclosure_visualize.png
+GROUP::Text
+"""
 import re
 import random
 from typing import List, Tuple, Dict

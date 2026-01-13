@@ -1,3 +1,9 @@
+"""
+TITLE::Save Animated WEBP FolderPath
+DESCRIPTIONSHORT::Saves an animated WebP to a user-specified folder path with naming/counter options and optional metadata.
+VERSION::20260113
+GROUP::Save
+"""
 import os
 import sys
 import json

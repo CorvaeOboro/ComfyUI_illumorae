@@ -1,3 +1,10 @@
+"""
+TITLE::Text Token Count
+DESCRIPTIONSHORT::Counts tokens for a string using a CLIP tokenizer if available, otherwise estimates.
+VERSION::20260113
+IMAGE::comfyui_illumorae_text_token_count.png
+GROUP::Text
+"""
 
 class illumoraeTextTokenCount:
     @classmethod

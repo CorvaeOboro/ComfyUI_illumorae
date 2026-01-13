@@ -7,13 +7,13 @@
 comfyUI custom nodes focused on randomization and image variant exploration
 - loading random files by string , randomizing lora string strength , text order
 - load and save with external folderpath and filename outputs for project structures
-- each node is self-contained and could be installed separately if prefer 
+- each node is self-contained and could be installed separately if prefer specific nodes
 
 <img src="docs/comfyui_illumorae_load_checkpoint_text_file_basic.png" width="800" caption="workflow"/>
 
 # install 
-- install through the the ComfyUI Manager or manually [download](https://github.com/CorvaeOboro/ComfyUI_illumorae/sd_project_tools/archive/refs/heads/main.zip) as a zip and extract as folder into the ComfyUI `custom_nodes` directory 
-- OPTIONAL install nodes individual copying a nodes subfolder into the ComfyUI `custom_nodes` directory , each has been setup to function independently
+- install thru the ComfyUI Manager or manually [download](https://github.com/CorvaeOboro/ComfyUI_illumorae/archive/refs/heads/main.zip) as a zip and extract as folder into the ComfyUI `custom_nodes` directory 
+- OPTIONAL may install nodes individual copying a nodes subfolder into the ComfyUI `custom_nodes` directory , each has been setup to function independently
 
 # nodes 
 

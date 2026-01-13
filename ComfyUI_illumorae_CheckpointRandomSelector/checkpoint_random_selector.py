@@ -1,14 +1,14 @@
 """
 illumorae Checkpoint Random Selector - a ComfyUI custom_node
 
-Randomly selects a Stable Diffusion checkpoint from a specified category (SDXL, PONY, SD15),
+Randomly selects a Diffusion checkpoint from a specified category (SDXL, PONY, SD15),
 using a deterministic randomization at a time interval , such as every hour .
 
 - choose a category (SDXL, PONY, SD15) and specify the sub folder for each.
-- Randomly selects a checkpoint file (.ckpt or .safetensors or .sft ) from the chosen category's folder.
+- Randomly selects a checkpoint file ( .safetensors or .sft ) from the chosen category's folder.
 - The selection is stable for the duration of the interval (e.g., 1 hour), so it only changes at interval boundaries.
 - Outputs the folder path, full file path, and filename of the selected checkpoint.
-- Useful for workflows that want to periodically rotate checkpoints in a reproducible way.
+- Useful for workflows that want to periodically rotate checkpoints
 
 Inputs:
     category: Which checkpoint category to use (SDXL, PONY, SD15)
@@ -20,6 +20,10 @@ Outputs:
     file_path: The full file path to the selected checkpoint
     filename: The filename of the checkpoint
 
+TITLE::Checkpoint Random Selector
+DESCRIPTIONSHORT::Randomly selects a checkpoint from a category, changing each interval.
+VERSION::20260113
+GROUP::Checkpoint
 """
 import os
 import random
@@ -36,6 +40,10 @@ class illumoraeCheckpointRandomSelector:
                 "sdxl_folder_name": ("STRING", {"default": "SDXL 10"}),
                 "pony_folder_name": ("STRING", {"default": "Pony"}),
                 "sd15_folder_name": ("STRING", {"default": "SD15"}),
+            },
+            "optional": {
+                "safe_mode": ("BOOLEAN", {"default": True}),
+                "file_extensions": ("STRING", {"default": ".safetensors,.sft"}),
             }
         }
 
@@ -45,7 +53,7 @@ class illumoraeCheckpointRandomSelector:
     CATEGORY = "illumorae"
     DESCRIPTION = "Randomly selects a checkpoint from a category, changing only every interval. Outputs: folder, full path, filename."
 
-    def select_checkpoint(self, base_folder, category, interval_minutes, sdxl_folder_name, pony_folder_name, sd15_folder_name):
+    def select_checkpoint(self, base_folder, category, interval_minutes, sdxl_folder_name, pony_folder_name, sd15_folder_name, safe_mode=True, file_extensions=".safetensors,.sft"):
         # Map category to folder name
         folder_name_map = {
             "SDXL": sdxl_folder_name,
@@ -56,7 +64,22 @@ class illumoraeCheckpointRandomSelector:
         folder = os.path.abspath(os.path.join(base_folder, folder_name))
         if not os.path.isdir(folder):
             raise FileNotFoundError(f"Checkpoint folder does not exist: {folder}")
-        files = [f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f)) and (f.endswith('.ckpt') or f.endswith('.safetensors'))]
+
+        if safe_mode:
+            exts = (".safetensors", ".sft")
+        else:
+            exts = tuple(
+                ext.strip() if ext.strip().startswith(".") else "." + ext.strip()
+                for ext in file_extensions.split(",")
+                if ext.strip()
+            )
+
+        exts_lower = tuple(ext.lower() for ext in exts)
+        files = [
+            f
+            for f in os.listdir(folder)
+            if os.path.isfile(os.path.join(folder, f)) and any(f.lower().endswith(ext) for ext in exts_lower)
+        ]
         if not files:
             raise FileNotFoundError(f"No checkpoint files found in {folder}")
         # Use datetime and interval to create a stable seed

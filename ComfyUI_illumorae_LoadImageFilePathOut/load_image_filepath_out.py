@@ -13,6 +13,11 @@ Outputs:
     folder path: Directory containing the image file
 
 useful for workflows where you need to pass along the image's file path or name for downstream processing or logging.
+
+TITLE::Load Image w FilePath Out
+DESCRIPTIONSHORT::Loads an image from a file path string and outputs image, mask, file name, and folder path.
+VERSION::20260113
+GROUP::Load
 """
 import os
 import hashlib

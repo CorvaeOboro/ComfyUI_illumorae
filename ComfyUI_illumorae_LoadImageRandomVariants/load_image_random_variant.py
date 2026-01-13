@@ -22,6 +22,11 @@ TODO:
 variants are typically a render from a camera of a texture (on the 3d mesh) and therefore we would want to disable tiling
 random seed
 overide 
+
+TITLE::Load Image Random Variant
+DESCRIPTIONSHORT::Loads an image from a folder with optional variant selection (subfolder + suffix pattern), with seed/override controls.
+VERSION::20260113
+GROUP::Load
 """
 
 import os

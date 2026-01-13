@@ -1,3 +1,17 @@
+"""
+Image Infill Dilation
+A ComfyUI node that fills in subject areas by dilating RGB values from the background.
+
+Takes a subject mask (white=subject, black=background) and fills the subject area
+by dilating background colors inward. This creates a continuation of 
+background colors from the edges towards the center of the subject.
+Useful for preparing images for inpainting or background extension.
+
+TITLE::Image Infill Dilation
+DESCRIPTIONSHORT::Fills masked subject areas by dilating surrounding background colors inward (simple content fill for inpainting prep).
+VERSION::20260113
+GROUP::Image
+"""
 import torch
 import numpy as np
 import cv2
@@ -8,15 +22,11 @@ class illumoraeImageInfillDilationNode:
     A ComfyUI node that fills in subject areas by dilating RGB values from the background.
     
     Takes a subject mask (white=subject, black=background) and fills the subject area
-    by dilating background colors inward. This creates a seamless continuation of 
-    background colors and textures from the edges towards the center of the subject.
+    by dilating background colors inward. This creates a continuation of 
+    background colors from the edges towards the center of the subject.
     Useful for preparing images for inpainting or background extension.
     
-    Features:
-        - RGB dilation from background into subject area
-        - Preserves background perfectly
-        - Optional center blur with distance-based falloff
-        - Feathering control for smooth transitions
+
     """
 
     def __init__(self):

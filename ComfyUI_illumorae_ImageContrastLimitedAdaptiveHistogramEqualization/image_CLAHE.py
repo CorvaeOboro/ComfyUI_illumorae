@@ -1,3 +1,30 @@
+"""
+A ComfyUI node that applies Contrast Limited Adaptive Histogram Equalization (CLAHE)
+to enhance the localized relative contrast of an image. 
+
+Default Settings:
+    - clip_limit: 2.0
+    - tile_grid_width: 8
+    - tile_grid_height: 8
+
+How it works:
+    1. The input image is expected in [B, H, W, C] format.
+    2. For each image in the batch:
+        - If the image is in float format (assumed in the range [0, 1]),
+        it is converted to uint8 (range [0, 255]).
+        - For RGB images (3 channels): The image is converted from RGB to LAB,
+        CLAHE is applied to the L-channel, and then converted back to RGB.
+        - For grayscale images (1 channel): CLAHE is applied directly.
+        - The resulting image is converted back to float (range [0, 1]).
+    3. The processed images are reassembled into a torch tensor with the same
+        device as the input.
+
+
+TITLE::Image CLAHE (Contrast Limited Adaptive Histogram Equalization)
+DESCRIPTIONSHORT::Applies CLAHE to enhance local contrast; useful for localized detail/contrast improvement.
+VERSION::20260113
+GROUP::Image
+"""
 import cv2
 import torch
 import numpy as np

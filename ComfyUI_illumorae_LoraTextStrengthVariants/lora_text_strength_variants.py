@@ -1,3 +1,10 @@
+"""
+TITLE::LoRA Strength Variants
+DESCRIPTIONSHORT::Randomizes or highlights LoRA strengths in <lora:name:strength> tags with optional seed control.
+VERSION::20260113
+IMAGE::comfyui_illumorae_lora_strength_randomize.png
+GROUP::Lora
+"""
 import re
 import random
 from typing import Dict

@@ -1,3 +1,10 @@
+"""
+TITLE::Text To Filename Safe Text
+DESCRIPTIONSHORT::Converts text into a filename-safe string (Windows-safe) with normalization, character filtering, and length truncation.
+VERSION::20260113
+IMAGE::comfyui_illumorae_text_to_string_filename_safe.png
+GROUP::Text
+"""
 import re
 import string
 import unicodedata

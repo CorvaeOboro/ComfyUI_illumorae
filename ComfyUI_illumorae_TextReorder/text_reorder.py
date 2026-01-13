@@ -1,3 +1,10 @@
+"""
+TITLE::Text Reorder
+DESCRIPTIONSHORT::Reorders prompt text sections (comma/sentence/paragraph) while preserving parenthesis-enclosed blocks; supports seeded shuffle and distance constraints.
+VERSION::20260113
+IMAGE::comfyui_illumorae_text_reorder.png
+GROUP::Text
+"""
 import re
 import random
 from typing import List, Tuple

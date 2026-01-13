@@ -1,3 +1,9 @@
+"""
+TITLE::Image Retinex Enhancement (MSRCR)
+DESCRIPTIONSHORT::Applies Multi-Scale Retinex with Color Restoration (MSRCR) to enhance dynamic range and color constancy.
+VERSION::20260113
+GROUP::Image
+"""
 import cv2
 import numpy as np
 import torch

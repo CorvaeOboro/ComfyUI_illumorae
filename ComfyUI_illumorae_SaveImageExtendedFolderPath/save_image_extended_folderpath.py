@@ -1,6 +1,11 @@
 """
 SAVE IMAGE EXTENDED FOLDERPATH
 saving images to a specified folder path with optional metadata.
+
+TITLE::Save Image Extended FolderPath
+DESCRIPTIONSHORT::Saves images to a specified folder path with customizable naming, counters, and optional metadata/job data.
+VERSION::20260113
+GROUP::Save
 """
 
 import os

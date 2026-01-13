@@ -1,3 +1,10 @@
+"""
+TITLE::LoRA Strength Multiplier on Text
+DESCRIPTIONSHORT::Parses <lora:name:strength> tags and applies a multiplier, with optional individual and total caps.
+VERSION::20260113
+IMAGE::comfyui_illumorae_lora_strength_multiplier.png
+GROUP::Lora
+"""
 import re
 from typing import Dict
 

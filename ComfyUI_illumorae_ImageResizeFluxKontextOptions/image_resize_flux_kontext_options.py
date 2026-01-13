@@ -4,6 +4,10 @@ illumorae Flux Kontext Image Scale Options - a ComfyUI Custom Node
 Resizes the image to one that is more optimal for Flux Lontext.
 a modified verison of the native node , with options to stretch instead of always cropping
 
+TITLE::Image Resize Flux Kontext Scale Options
+DESCRIPTIONSHORT::Resizes images to preferred Flux Kontext resolutions with crop or stretch options.
+VERSION::20260113
+
 Inputs:
     image: The input image to resize.
     resize_mode: The mode to use for resizing (crop or stretch).
@@ -13,6 +17,7 @@ Inputs:
 Outputs:
     image: The resized image.
 
+GROUP::Image
 """
 import comfy.utils
 

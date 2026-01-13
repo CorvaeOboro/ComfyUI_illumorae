@@ -1,3 +1,10 @@
+"""
+TITLE::Text Strength Multiplier
+DESCRIPTIONSHORT::Multiplies prompt section weights while preserving <lora:...> tags; supports individual caps/minimums and total cap scaling.
+VERSION::20260113
+IMAGE::comfyui_illumorae_text_strength_multiplier.png
+GROUP::Text
+"""
 import re
 from typing import Dict
 

@@ -1,3 +1,10 @@
+"""
+TITLE::LoRA Text Strength Visualizer
+DESCRIPTIONSHORT::Creates an image visualization of LoRA strengths from <lora:name:strength> tags in prompt text.
+VERSION::20260113
+IMAGE::comfyui_illumorae_lora_strength_wordplot.png
+GROUP::Lora
+"""
 import os
 import re
 from typing import List, Tuple
