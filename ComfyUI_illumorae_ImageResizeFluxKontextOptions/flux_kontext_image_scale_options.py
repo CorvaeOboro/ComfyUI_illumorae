@@ -77,5 +77,5 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    'illumoraeFluxKontextImageScaleOptions': 'Flux Kontext Image Scale Options',
+    'illumoraeFluxKontextImageScaleOptions': 'Image Resize Flux Kontext Scale Options',
 }

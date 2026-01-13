@@ -1,6 +1,10 @@
 """
+Image Infill PatchMatch
+a rough approximation of the PatchMatch algorithm
+finding nearest neighbor patches to fill a masked area ,
+ussage example = for the removal of objects from image then using the infilled image as guidance for inpainting
 
-STATUS:: untested 
+STATUS:: working , low quality 
 """
 import torch
 import numpy as np
@@ -9,18 +13,17 @@ from typing import Tuple
 
 class illumoraePatchMatchInfillNode:
     """
-    A ComfyUI node that fills in subject areas using PatchMatch algorithm.
+    A ComfyUI node that fills in subject areas to approximate the PatchMatch algorithm.
     
-    PatchMatch is a fast algorithm for finding approximate nearest neighbor patches,
-    similar to Photoshop's Content-Aware Fill. It fills masked areas by finding and
-    copying similar patches from the surrounding unmasked regions.
+    Infill by finding approximate nearest neighbor patches,
+    this implementation is a lesser quality version of the Photoshop's Content-Aware Fill. 
+    It fills masked areas by finding andcopying similar patches from the surrounding unmasked regions.
     
-    Features:
-        - PatchMatch algorithm for intelligent patch selection
-        - Iterative refinement for better quality
-        - Configurable patch size and search radius
-        - Multi-scale processing support
-        - Preserves background perfectly
+    - PatchMatch algorithm for patch selection
+    - Iterative refinement 
+    - Configurable patch size and search radius
+    - Multi-scale processing support
+    - Preserves background 
     """
 
     def __init__(self):
@@ -446,5 +449,5 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "illumoraePatchMatchInfillNode": "Image Infill PatchMatch Content-Aware",
+    "illumoraePatchMatchInfillNode": "Image Infill PatchMatch",
 }

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/CorvaeOboro/ComfyUI_illumorae/sd_project_tools/blob/main/docs/sd_project_tools_header_long.png?raw=true" height="200" /> 
+  <img src="https://github.com/CorvaeOboro/ComfyUI_illumorae/blob/main/docs/comfyui_illumorae_title.png?raw=true" height="200" /> 
 </p>
 
 # ComfyUI illumorae
@@ -119,16 +119,19 @@ comfyUI custom nodes focused on randomization and image variant exploration
   Simple image infill using dilation-based expansion.
 - <a id="image-infill-patchmatch"></a>**[Image Infill PatchMatch](./ComfyUI_illumorae_ImageInfillPatchMatch/image_infill_patchmatch.py)**  
   PatchMatch-based image infill.
+- <img src="docs/comfyui_illumorae_image_infill_patchmatch.png" height="200" />
 - <a id="image-multi-scale-retinex-color-restoration"></a>**[Image Multi-Scale Retinex Color Restoration](./ComfyUI_illumorae_ImageMultiScaleRetinexColorRestoration/image_MSRCR.py)**  
   Applies Multi-Scale Retinex with Color Restoration for dynamic range and color enhancement.
 - <a id="video-resize-matte"></a>**[Video Resize Matte](./ComfyUI_illumorae_VideoResizeMatte/image_resize_matte_video.py)**  
   Resizes video frames with matte options for compositing.
+- <img src="docs/comfyui_illumorae_image_resize_video_matte.png" height="200" />
 - <a id="image-resize-flux-kontext-options"></a>**[Image Resize Flux Kontext Options](./ComfyUI_illumorae_ImageResizeFluxKontextOptions/flux_kontext_image_scale_options.py)**  
   Resizes images for optimal Flux Kontext input, with cropping/stretching options.
 
 ## Text & Prompt Utilities
 - <a id="text-to-string-safe-for-filename"></a>**[Text To String Safe For Filename](./ComfyUI_illumorae_TextToStringSafeForFilename/text_to_text_safe_for_filename.py)**  
   Converts text into a filename-safe string.
+- <img src="docs/comfyui_illumorae_text_to_string_filename_safe.png" height="200" />
 - <a id="text-token-count"></a>**[Text Token Count](./ComfyUI_illumorae_TextTokenCount/text_token_count.py)**  
   Counts tokens in a string (useful for prompt engineering).
 - <img src="docs/comfyui_illumorae_text_token_count.png" height="200" />
@@ -137,8 +140,10 @@ comfyUI custom nodes focused on randomization and image variant exploration
 - <img src="docs/comfyui_illumorae_text_strength_multiplier.png" height="200" />
 - <a id="text-enclosure-visualizer"></a>**[Text Enclosure Visualizer](./ComfyUI_illumorae_TextEnclosureVisualizer/text_enclosure_visualizer.py)**  
   Visualizes enclosed text ranges for prompt building.
+- <img src="docs/comfyui_illumorae_text_enclosure_visualize.png" height="200" />
 - <a id="text-reorder"></a>**[Text Reorder](./ComfyUI_illumorae_TextReorder/text_reorder.py)**  
   Reorders prompt text using configurable rules.
+- <img src="docs/comfyui_illumorae_text_reorder.png" height="200" />
 
 ## Save
 - <a id="save-image-extended-folderpath"></a>**[Save Image Extended FolderPath](./ComfyUI_illumorae_SaveImageExtendedFolderPath/save_image_extended_folderpath.py)**  
@@ -146,9 +151,6 @@ comfyUI custom nodes focused on randomization and image variant exploration
 - <a id="save-animated-webp-extended-folderpath"></a>**[Save Animated WebP Extended FolderPath](./ComfyUI_illumorae_SaveAnimatedWebPExtendedFolderPath/save_animated_webp_extended_folderpath.py)**  
   Saves animated WebP images to a user-specified folder.
 
-## VLM
-- <a id="vlm-internvl-local"></a>**[VLM InternVL Local](./ComfyUI_illumorae_VLM_InternVL_Local/vlm_internVL_local.py)**  
-  Runs InternVL locally for Image to Text vision model
 
 # LICENSE
 - free to all , [creative commons zero CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) , free to re-distribute , attribution not required
