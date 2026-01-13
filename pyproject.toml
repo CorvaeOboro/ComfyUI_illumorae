@@ -1,0 +1,15 @@
+[project]
+name = "comfyui_illumorae"
+description = "focused on variation exploration with loading and saving within a project structure . load random files by string , multiply or randomize lora string strength  , load and save to an external folderpath with filename safe outputs . load random checkpoint or load checkpoint from string matching . work in progress."
+version = "20260113"
+license = {text = "CC0 1.0 Universal"}
+dependencies = ["numpy", "pillow", "torch", "torchvision", "opencv-python", "scipy", "safetensors", "requests", "transformers", "huggingface-hub"]
+
+[project.urls]
+Repository = "https://github.com/CorvaeOboro/ComfyUI_illumorae"
+
+#  Used by Comfy Registry https://comfyregistry.org
+[tool.comfy]
+PublisherId = "CorvaeOboro"
+DisplayName = "ComfyUI_illumorae"
+Icon = ""

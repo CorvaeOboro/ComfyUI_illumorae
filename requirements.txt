@@ -1,0 +1,9 @@
+numpy
+pillow
+torchvision
+opencv-python
+scipy
+safetensors
+requests
+transformers
+huggingface-hub
