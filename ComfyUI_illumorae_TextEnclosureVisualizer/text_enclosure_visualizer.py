@@ -1,7 +1,7 @@
 """
 TITLE::Enclosure Visualizer
 DESCRIPTIONSHORT::Visualizes prompt text enclosure nesting and mismatched parenthesis, outputting an image and analysis strings.
-VERSION::20260113
+VERSION::20260127
 IMAGE::comfyui_illumorae_text_enclosure_visualize.png
 GROUP::Text
 """
@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import torch
 
-class illumoraeTextEnclosureVisualizerNode:
+class illumoraeEnclosureVisualizerNode:
     """
     A ComfyUI node that visualizes nested parenthesis in prompt text.
     
@@ -56,7 +56,7 @@ class illumoraeTextEnclosureVisualizerNode:
     FUNCTION = "visualize"
     CATEGORY = "illumorae"
     OUTPUT_NODE = False
-    DESCRIPTION = "Visualizes nested parenthesis in prompt text with color coding and error detection."
+    DESCRIPTION = "Visualizes prompt text enclosure nesting and mismatched parenthesis, outputting an image and analysis strings."
 
     def parse_enclosures(self, text: str) -> Tuple[List[Dict], List[str]]:
         """
@@ -322,7 +322,7 @@ class illumoraeTextEnclosureVisualizerNode:
 
 # ComfyUI node registration
 NODE_CLASS_MAPPINGS = {
-    "illumoraeEnclosureVisualizerNode": illumoraeTextEnclosureVisualizerNode,
+    "illumoraeEnclosureVisualizerNode": illumoraeEnclosureVisualizerNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {

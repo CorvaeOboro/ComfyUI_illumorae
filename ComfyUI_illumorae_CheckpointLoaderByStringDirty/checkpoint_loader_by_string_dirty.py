@@ -1,12 +1,13 @@
 """
-illumorae Checkpoint Loader By String Dirty - a ComfyUI Custom Node
+Checkpoint Loader By String Dirty - a ComfyUI Custom Node
 
-Loads a Diffusion checkpoint by matching a string input to available checkpoint files.
+Loads a Diffusion checkpoint by matching a partial string input to available checkpoint files.
 supporting full paths, relative paths, or filenames 
 
 Inputs:
     ckpt_name: The name or path of the checkpoint to load (string).
     DEBUG_MODE: Enable debug output 
+    safe_mode: only safetensors 
 
 Outputs:
     model: The loaded model object.
@@ -14,16 +15,19 @@ Outputs:
     vae: The loaded VAE object.
     ckpt_filename: The resolved checkpoint filename (string).
 
-TITLE::Checkpoint Loader By String (Safe by Default)
+TITLE::Checkpoint Loader By String Dirty
 DESCRIPTIONSHORT::Loads a checkpoint by fuzzy matching the text input finds available checkpoint files from partials
-VERSION::20260113
 GROUP::Checkpoint
+GROUPORDER::2
+LISTORDER::1
+IMAGE::comfyui_illumorae_checkpoint_loader_by_string_dirty.png
+VERSION::20260127
 """
 import os
 import folder_paths
 import nodes
 
-class illumoraeCheckpointLoaderByStringDirty:
+class illumoraeCheckpointLoaderByStringDirtyNode:
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -46,7 +50,7 @@ class illumoraeCheckpointLoaderByStringDirty:
     @staticmethod
     def debug_message(msg, DEBUG_MODE):
         if DEBUG_MODE:
-            print(f"[illumoraeCheckpointLoaderByStringDirty][DEBUG] {msg}")
+            print(f"[illumoraeCheckpointLoaderByStringDirtyNode][DEBUG] {msg}")
 
     @staticmethod
     def _get_all_checkpoints_recursive_all_dirs(base_dirs, exts=(".safetensors", ".sft")):
@@ -229,9 +233,9 @@ class illumoraeCheckpointLoaderByStringDirty:
         return model, clip, vae, rel_path
 
 NODE_CLASS_MAPPINGS = {
-    'illumoraeCheckpointLoaderByStringDirty': illumoraeCheckpointLoaderByStringDirty,
+    'illumoraeCheckpointLoaderByStringDirtyNode': illumoraeCheckpointLoaderByStringDirtyNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    'illumoraeCheckpointLoaderByStringDirty': 'Checkpoint Loader By String Dirty',
+    'illumoraeCheckpointLoaderByStringDirtyNode': 'Checkpoint Loader By String Dirty',
 }

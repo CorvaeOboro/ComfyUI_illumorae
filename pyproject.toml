@@ -1,9 +1,9 @@
 [project]
 name = "comfyui_illumorae"
 description = "focused on variation exploration with loading and saving within a project structure . load random files by string , multiply or randomize lora string strength  , load and save to an external folderpath with filename safe outputs . load random checkpoint or load checkpoint from string matching . work in progress."
-version = "20260114"
+version = "20260126"
 license = { file = "LICENSE" }
-dependencies = ["numpy", "pillow", "torch", "torchvision", "opencv-python", "scipy", "safetensors", "requests", "transformers", "huggingface-hub"]
+dependencies = ["numpy", "pillow", "torch", "torchvision", "opencv-python", "scipy", "safetensors", "transformers", "huggingface-hub"]
 
 [project.urls]
 Repository = "https://github.com/CorvaeOboro/ComfyUI_illumorae"

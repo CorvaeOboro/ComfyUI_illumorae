@@ -1,7 +1,7 @@
 """
 TITLE::LoRA Text Strength Visualizer
 DESCRIPTIONSHORT::Creates an image visualization of LoRA strengths from <lora:name:strength> tags in prompt text.
-VERSION::20260113
+VERSION::20260127
 IMAGE::comfyui_illumorae_lora_strength_wordplot.png
 GROUP::Lora
 """
@@ -12,7 +12,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 import torch
 
-class illumoraeLoraVisualizerWordPlotNode:
+class illumoraeLoRATextStrengthVisualizerWordPlotNode:
     """
     A ComfyUI node that analyzes a prompt text and creates a visual representation
     of LORA strengths, displaying them as text with varying sizes and brightness
@@ -49,7 +49,7 @@ class illumoraeLoraVisualizerWordPlotNode:
     FUNCTION = "process"
     CATEGORY = "illumorae"
     OUTPUT_NODE = True
-    DESCRIPTION = "Creates a visual representation of LORA strengths from a text string."
+    DESCRIPTION = "Creates an image visualization of LoRA strengths from <lora:name:strength> tags in prompt text."
 
     def extract_loras(self, text: str) -> List[Tuple[str, float]]:
         """Extract LORA names and their strengths from the prompt."""
@@ -189,9 +189,9 @@ class illumoraeLoraVisualizerWordPlotNode:
 
 # ComfyUI node registration
 NODE_CLASS_MAPPINGS = {
-    "illumoraeLoraVisualizerWordPlotNode": illumoraeLoraVisualizerWordPlotNode,
+    "illumoraeLoRATextStrengthVisualizerWordPlotNode": illumoraeLoRATextStrengthVisualizerWordPlotNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "illumoraeLoraVisualizerWordPlotNode": "LoRA Text Strength Visualizer WordPlot",
+    "illumoraeLoRATextStrengthVisualizerWordPlotNode": "LoRA Text Strength Visualizer WordPlot",
 }

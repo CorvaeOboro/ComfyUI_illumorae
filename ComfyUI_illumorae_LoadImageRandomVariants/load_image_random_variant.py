@@ -18,14 +18,11 @@ the variants are in a subfolder based on the image name, with suffix input
 there may be an unknown amount of variants with suffix number increasing from 1
 there should be a boolean whether to look for variants or not
 
-TODO:
-variants are typically a render from a camera of a texture (on the 3d mesh) and therefore we would want to disable tiling
-random seed
-overide 
 
 TITLE::Load Image Random Variant
-DESCRIPTIONSHORT::Loads an image from a folder with optional variant selection (subfolder + suffix pattern), with seed/override controls.
-VERSION::20260113
+DESCRIPTIONSHORT::Loads an image from a folder with optional variant selection (subfolder + suffix pattern), with seed and override controls.
+VERSION::20260127
+IMAGE::comfyui_illumorae_load_image_random_variant.png
 GROUP::Load
 """
 
@@ -38,7 +35,7 @@ from PIL import Image, ImageOps
 import folder_paths
 
 
-class illumoraeLoadImageRandomVariant:
+class illumoraeLoadImageRandomVariantNode:
     @classmethod
     def INPUT_TYPES(cls):
         return {"required": {
@@ -63,7 +60,7 @@ class illumoraeLoadImageRandomVariant:
     RETURN_TYPES = ("IMAGE", "MASK", "STRING", "STRING")
     RETURN_NAMES = ("image", "MASK", "file name", "folder path")
     FUNCTION = "load_image"
-    DESCRIPTION = "Loads an image or its variants from a specified file path string and outputs the image, mask, file name, and folder path."
+    DESCRIPTION = "Loads an image from a folder with optional variant selection (subfolder + suffix pattern), with seed/override controls."
 
     def load_image(self, folder, base_filename, extension, variant_suffixes, search_variants, seed, variant_index_override, debug_mode):
         # Input validation to avoid NoneType errors
@@ -254,9 +251,9 @@ class illumoraeLoadImageRandomVariant:
 
 
 NODE_CLASS_MAPPINGS = {
-    'illumoraeLoadImageRandomVariant': illumoraeLoadImageRandomVariant,
+    'illumoraeLoadImageRandomVariantNode': illumoraeLoadImageRandomVariantNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    'illumoraeLoadImageRandomVariant': 'Load Image Random Variant',
+    'illumoraeLoadImageRandomVariantNode': 'Load Image Random Variant',
 }

@@ -2,6 +2,7 @@
 TITLE::Image Retinex Enhancement (MSRCR)
 DESCRIPTIONSHORT::Applies Multi-Scale Retinex with Color Restoration (MSRCR) to enhance dynamic range and color constancy.
 VERSION::20260113
+IMAGE::comfyui_illumorae_image_retinex_enhancement_msrcr.png
 GROUP::Image
 """
 import cv2
@@ -9,7 +10,7 @@ import numpy as np
 import torch
 
 
-class illumorae_ImageRetinexEnhancementNode:
+class illumoraeImageRetinexEnhancementNode:
     """
     A ComfyUI node that applies Multi-Scale Retinex with Color Restoration (MSRCR)
     to enhance the dynamic range and color constancy of input images.
@@ -86,11 +87,7 @@ class illumorae_ImageRetinexEnhancementNode:
     RETURN_NAMES = ("enhanced_image",)
     FUNCTION = "apply_retinex_enhancement"
     CATEGORY = "illumorae"
-    DESCRIPTION = (
-        "Applies Multi-Scale Retinex with Color Restoration (MSRCR) to enhance dynamic range "
-        "and color constancy. Ideal for improving details in both shadows and highlights under "
-        "challenging lighting conditions. Exposes parameters for Gaussian blur scales, color restoration strength/offset, and output gain/offset for fine-tuning."
-    )
+    DESCRIPTION = "Applies Multi-Scale Retinex with Color Restoration (MSRCR) to enhance dynamic range and color constancy."
 
     def apply_retinex_enhancement(
         self, input_image, gaussian_sigma_small, gaussian_sigma_medium, gaussian_sigma_large,
@@ -254,10 +251,9 @@ class illumorae_ImageRetinexEnhancementNode:
 
 # ComfyUI custom node classes to load 
 NODE_CLASS_MAPPINGS = {
-    "illumoraeImageRetinexEnhancementNode": illumorae_ImageRetinexEnhancementNode,
+    "illumoraeImageRetinexEnhancementNode": illumoraeImageRetinexEnhancementNode,
 }
 
-# ComfyUI display name for node
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "illumoraeImageRetinexEnhancementNode": "Image Retinex Enhancement ",
+    "illumoraeImageRetinexEnhancementNode": "Image Retinex Enhancement",
 }

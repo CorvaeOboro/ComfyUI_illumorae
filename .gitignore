@@ -210,3 +210,5 @@ __marimo__/
 */ref/*
 */backup/*
 backup/
+*/node_linter_report.json
+*/node_validation_report.json

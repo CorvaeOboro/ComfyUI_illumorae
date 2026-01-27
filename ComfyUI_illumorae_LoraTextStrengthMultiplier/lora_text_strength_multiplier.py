@@ -1,14 +1,14 @@
 """
 TITLE::LoRA Strength Multiplier on Text
 DESCRIPTIONSHORT::Parses <lora:name:strength> tags and applies a multiplier, with optional individual and total caps.
-VERSION::20260113
+VERSION::20260127
 IMAGE::comfyui_illumorae_lora_strength_multiplier.png
 GROUP::Lora
 """
 import re
 from typing import Dict
 
-class illumoraeLoraStringMultiplierNode:
+class illumoraeLoRAStrengthMultiplierOnTextNode:
     """
     A ComfyUI node that applies a multiplier to LoRA strengths and optionally enforces hard caps on:
         - Individual LoRA strengths.
@@ -52,7 +52,7 @@ class illumoraeLoraStringMultiplierNode:
     FUNCTION = "process"
     CATEGORY = "illumorae"
     OUTPUT_NODE = False
-    DESCRIPTION = "Applies a multiplier to LoRA strengths and optionally enforces hard caps on: individual LoRA strengths and the total combined strength of all LoRAs."
+    DESCRIPTION = "Parses <lora:name:strength> tags and applies a multiplier, with optional individual and total caps."
 
     def parse_lora_syntax(self, text: str, debug_prints: bool = False) -> Dict[str, float]:
         """
@@ -127,10 +127,10 @@ class illumoraeLoraStringMultiplierNode:
 
 # ComfyUI needs to know which classes to load when scanning your .py file.
 NODE_CLASS_MAPPINGS = {
-    "illumoraeLoraStringMultiplierNode": illumoraeLoraStringMultiplierNode,
+    "illumoraeLoRAStrengthMultiplierOnTextNode": illumoraeLoRAStrengthMultiplierOnTextNode,
 }
 
 # (Optional) Provide a human-readable display name for your node.
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "illumoraeLoraStringMultiplierNode": "LoRA Strength Multiplier on Text ",
+    "illumoraeLoRAStrengthMultiplierOnTextNode": "LoRA Strength Multiplier on Text",
 }

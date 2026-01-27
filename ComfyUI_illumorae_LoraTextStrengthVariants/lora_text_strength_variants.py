@@ -1,7 +1,7 @@
 """
 TITLE::LoRA Strength Variants
 DESCRIPTIONSHORT::Randomizes or highlights LoRA strengths in <lora:name:strength> tags with optional seed control.
-VERSION::20260113
+VERSION::20260127
 IMAGE::comfyui_illumorae_lora_strength_randomize.png
 GROUP::Lora
 """
@@ -9,7 +9,7 @@ import re
 import random
 from typing import Dict
 
-class illumoraeLoraRandomizerNode:
+class illumoraeLoRARandomizeStrengthOnTextNode:
     """
     A ComfyUI node that parses LoRA strings, randomizes their strengths, highlights a single LoRA, or passes through unmodified.
 
@@ -47,7 +47,7 @@ class illumoraeLoraRandomizerNode:
     FUNCTION = "process"       # The method in this class that is called
     CATEGORY = "illumorae"          # Category name for where this node appears
     OUTPUT_NODE = False         # Whether this node can terminate a workflow
-    DESCRIPTION = "Randomizes LoRA strengths in a text string."
+    DESCRIPTION = "Randomizes or highlights LoRA strengths in <lora:name:strength> tags with optional seed control."
 
     def _debug_print(self, debug_prints, *args, **kwargs):
         if debug_prints:
@@ -153,10 +153,10 @@ class illumoraeLoraRandomizerNode:
 
 # ComfyUI needs to know which classes to load when scanning your .py file
 NODE_CLASS_MAPPINGS = {
-    "illumoraeLoraRandomizerNode": illumoraeLoraRandomizerNode,
+    "illumoraeLoRARandomizeStrengthOnTextNode": illumoraeLoRARandomizeStrengthOnTextNode,
 }
 
 # (Optional) Provide a human-readable display name for your node
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "illumoraeLoraRandomizerNode": "LoRA Randomize Strength on Text",
+    "illumoraeLoRARandomizeStrengthOnTextNode": "LoRA Randomize Strength on Text",
 }

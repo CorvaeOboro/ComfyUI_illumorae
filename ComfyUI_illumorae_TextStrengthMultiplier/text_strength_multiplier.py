@@ -53,7 +53,7 @@ class illumoraeTextStrengthMultiplierNode:
     FUNCTION = "process"
     CATEGORY = "illumorae"
     OUTPUT_NODE = False
-    DESCRIPTION = "Multiplies LoRA strengths in a text string."
+    DESCRIPTION = "Multiplies prompt section weights while preserving <lora:...> tags; supports individual caps/minimums and total cap scaling."
 
     def process(
         self,

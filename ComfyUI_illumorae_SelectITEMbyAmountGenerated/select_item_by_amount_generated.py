@@ -1,13 +1,14 @@
 """
 TITLE::Select ITEM By Amount Generated
 DESCRIPTIONSHORT::Selects an item from a project folder structure prioritizing low-coverage generation/ranking status, with optional prompt requirements and seeded iteration.
-VERSION::20260113
+VERSION::20260127
 GROUP::Select
+IMAGE::comfyui_illumorae_select_item_by_amount_generated.png
 """
 import re
 from pathlib import Path
 
-class illumoraeSelectITEMbyAmountGenerated:
+class illumoraeSelectITEMByAmountGeneratedNode:
     """
     SELECT ITEM BY AMOUNT GENERATED
     Within a project structure, prioritize items missing ranked images or with low generation coverage.
@@ -77,6 +78,8 @@ class illumoraeSelectITEMbyAmountGenerated:
 
     """
 
+    DESCRIPTION = "Selects an item from a project folder structure prioritizing low-coverage generation/ranking status, with optional prompt requirements and seeded iteration."
+
     @staticmethod
     def _debug_print(debug: bool, *args, **kwargs) -> None:
         if not debug:
@@ -102,8 +105,8 @@ class illumoraeSelectITEMbyAmountGenerated:
             }
         }
 
-    RETURN_TYPES = ('STRING', 'STRING', 'STRING')
-    RETURN_NAMES = ('item_png_filepath', 'item_folder', 'item_name')
+    RETURN_TYPES = ('STRING', 'STRING', 'STRING', 'STRING')
+    RETURN_NAMES = ('item_png_filepath', 'item_folder', 'item_name', 'item_names_list')
     FUNCTION = 'select'
     CATEGORY = 'illumorae'
 
@@ -151,7 +154,11 @@ class illumoraeSelectITEMbyAmountGenerated:
         self._debug_print(debug, f"[SelectITEMbyAmountGenerated] Discovered {len(items)} items")
         if len(items) == 0:
             self._debug_print(debug, f"[SelectITEMbyAmountGenerated][WARNING] No items found! Check base_dir and structure settings.")
-            return ('', '', '')
+            return ('', '', '', '')
+        
+        # Build list of all item names for debugging/selection output
+        all_item_names = sorted(set(item.get('name', '') for item in items if item.get('name')))
+        item_names_list = '\n'.join(all_item_names)
         
         schedule = self._select_by_amount(items, max_images_target=max_images_target, debug=debug)
 
@@ -262,7 +269,7 @@ class illumoraeSelectITEMbyAmountGenerated:
         if not item_name:
             self._debug_print(debug, f"[SelectITEMbyAmountGenerated][ERROR] item_name is EMPTY!")
         
-        return (item_png_filepath, item_folder, item_name)
+        return (item_png_filepath, item_folder, item_name, item_names_list)
 
 
     @staticmethod
@@ -276,20 +283,20 @@ class illumoraeSelectITEMbyAmountGenerated:
                 return 0
             return sum(1 for f in folder.iterdir() if f.is_file())
         except Exception as e:
-            illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated][ERROR] Counting files in '{folder}': {e}")
+            illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated][ERROR] Counting files in '{folder}': {e}")
             return 0
     
     @staticmethod
     def _build_gen_stats(gen_root: Path, gen01: Path, gen02: Path, prompt_folder: Path, debug: bool = False) -> dict:
         """Build common generation statistics dictionary for an item."""
         return {
-            'gen_folder': illumoraeSelectITEMbyAmountGenerated._safe_str(gen_root if gen_root.exists() else None),
-            'gen_count': int(illumoraeSelectITEMbyAmountGenerated._count_files(gen_root, debug=debug)) if gen_root.exists() else 0,
-            'gen01_folder': illumoraeSelectITEMbyAmountGenerated._safe_str(gen01 if gen01.exists() else None),
-            'gen01_count': int(illumoraeSelectITEMbyAmountGenerated._count_files(gen01, debug=debug)),
-            'gen02_folder': illumoraeSelectITEMbyAmountGenerated._safe_str(gen02 if gen02.exists() else None),
-            'gen02_count': int(illumoraeSelectITEMbyAmountGenerated._count_files(gen02, debug=debug)),
-            'prompt_folder': illumoraeSelectITEMbyAmountGenerated._safe_str(prompt_folder if prompt_folder.exists() else None),
+            'gen_folder': illumoraeSelectITEMByAmountGeneratedNode._safe_str(gen_root if gen_root.exists() else None),
+            'gen_count': int(illumoraeSelectITEMByAmountGeneratedNode._count_files(gen_root, debug=debug)) if gen_root.exists() else 0,
+            'gen01_folder': illumoraeSelectITEMByAmountGeneratedNode._safe_str(gen01 if gen01.exists() else None),
+            'gen01_count': int(illumoraeSelectITEMByAmountGeneratedNode._count_files(gen01, debug=debug)),
+            'gen02_folder': illumoraeSelectITEMByAmountGeneratedNode._safe_str(gen02 if gen02.exists() else None),
+            'gen02_count': int(illumoraeSelectITEMByAmountGeneratedNode._count_files(gen02, debug=debug)),
+            'prompt_folder': illumoraeSelectITEMByAmountGeneratedNode._safe_str(prompt_folder if prompt_folder.exists() else None),
         }
 
     @staticmethod
@@ -301,7 +308,7 @@ class illumoraeSelectITEMbyAmountGenerated:
             text = file_path.read_text(encoding='utf-8', errors='ignore')
             return bool(text.strip())
         except Exception as e:
-            illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated][ERROR] Reading prompt file '{file_path}': {e}")
+            illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated][ERROR] Reading prompt file '{file_path}': {e}")
             return False
     
     @staticmethod
@@ -310,13 +317,13 @@ class illumoraeSelectITEMbyAmountGenerated:
         # If no requirements are enabled, include all items
         if not any(prompt_requirements.values()):
             if debug:
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]     No prompt requirements enabled - accepting all items")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]     No prompt requirements enabled - accepting all items")
             return True
         
         if debug:
             required_list = [k for k, v in prompt_requirements.items() if v]
-            illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]     Required prompts: {', '.join(required_list)}")
-            illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]     Prompt folder exists: {prompt_folder.exists()}")
+            illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]     Required prompts: {', '.join(required_list)}")
+            illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]     Prompt folder exists: {prompt_folder.exists()}")
         
         # Check which prompt files exist
         prompt_files = {
@@ -331,20 +338,20 @@ class illumoraeSelectITEMbyAmountGenerated:
         for model_type, required in prompt_requirements.items():
             if required:
                 prompt_file = prompt_files[model_type]
-                file_exists = illumoraeSelectITEMbyAmountGenerated._file_exists_and_has_text(prompt_file, debug=debug)
+                file_exists = illumoraeSelectITEMByAmountGeneratedNode._file_exists_and_has_text(prompt_file, debug=debug)
                 if debug:
-                    illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]       {model_type}: {prompt_file.name} exists: {file_exists}")
+                    illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]       {model_type}: {prompt_file.name} exists: {file_exists}")
                 if not file_exists:
                     missing_prompts.append(model_type)
         
         # If any required prompts are missing, skip this item
         if missing_prompts:
             if debug:
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]     [FAIL] Missing required prompts: {', '.join(missing_prompts)}")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]     [FAIL] Missing required prompts: {', '.join(missing_prompts)}")
             return False
         
         if debug:
-            illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]     [PASS] All required prompts found")
+            illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]     [PASS] All required prompts found")
         return True
 
     @staticmethod
@@ -370,38 +377,38 @@ class illumoraeSelectITEMbyAmountGenerated:
         project_name = root.name
 
         structure_type = "PNG in root" if png_in_item_root else "PNG in subfolder"
-        illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] === DISCOVERY (SIMPLE - {structure_type}) ===")
-        illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] Searching in: '{root}'")
-        illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] Project: '{project_name}'")
+        illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] === DISCOVERY (SIMPLE - {structure_type}) ===")
+        illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] Searching in: '{root}'")
+        illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] Project: '{project_name}'")
 
         if png_in_item_root:
             # Structure: base_dir/ITEM.png with ITEM/prompt/ and ITEM/gen/
             # Discover items by finding .png files in root
             png_files = sorted([p for p in root.glob('*.png') if not p.name.startswith('.')], key=lambda x: x.name.lower())
-            illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] Found {len(png_files)} PNG files in root")
+            illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] Found {len(png_files)} PNG files in root")
             
             if len(png_files) == 0:
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated][WARNING] No PNG files found in root directory!")
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] Expected structure: base_dir/ITEM.png with ITEM/prompt/ and ITEM/gen/")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated][WARNING] No PNG files found in root directory!")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] Expected structure: base_dir/ITEM.png with ITEM/prompt/ and ITEM/gen/")
                 # List what IS in the directory
                 all_files = list(root.iterdir())
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] Directory contains {len(all_files)} items:")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] Directory contains {len(all_files)} items:")
                 for item in all_files[:10]:  # Show first 10
                     item_type = "DIR" if item.is_dir() else "FILE"
-                    illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [{item_type}] {item.name}")
+                    illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [{item_type}] {item.name}")
                 if len(all_files) > 10:
-                    illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]   ... and {len(all_files) - 10} more items")
+                    illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]   ... and {len(all_files) - 10} more items")
             
             for png_file in png_files:
                 name = png_file.stem
                 item_dir = root / name
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] Checking PNG: '{png_file.name}' -> item name: '{name}'")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] Checking PNG: '{png_file.name}' -> item name: '{name}'")
                 
                 if not item_dir.is_dir():
-                    illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [SKIP] No corresponding folder '{name}' found")
+                    illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [SKIP] No corresponding folder '{name}' found")
                     continue  # Skip if no corresponding folder exists
                 
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [OK] Folder exists: '{item_dir}'")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [OK] Folder exists: '{item_dir}'")
                 
                 item_png = png_file
                 gen_root = item_dir / 'gen'
@@ -410,22 +417,22 @@ class illumoraeSelectITEMbyAmountGenerated:
                 prompt_folder = item_dir / 'prompt'
                 
                 # Check folder structure
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]   Checking subfolders:")
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]     prompt/: {prompt_folder.exists()}")
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]     gen/: {gen_root.exists()}")
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]     gen/01/: {gen01.exists()}")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]   Checking subfolders:")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]     prompt/: {prompt_folder.exists()}")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]     gen/: {gen_root.exists()}")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]     gen/01/: {gen01.exists()}")
                 
                 # Filter: require existing prompt files if requested
                 if prompt_requirements is None:
                     prompt_requirements = {}
                 
                 # Check prompt requirements
-                prompt_check = illumoraeSelectITEMbyAmountGenerated._check_prompt_requirements(prompt_folder, prompt_requirements, name, debug)
+                prompt_check = illumoraeSelectITEMByAmountGeneratedNode._check_prompt_requirements(prompt_folder, prompt_requirements, name, debug)
                 if not prompt_check:
-                    illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [SKIP] Failed prompt requirements check")
+                    illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [SKIP] Failed prompt requirements check")
                     continue
                 else:
-                    illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [OK] Passed prompt requirements check")
+                    illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [OK] Passed prompt requirements check")
 
                 items.append({
                     'project': project_name,
@@ -434,27 +441,27 @@ class illumoraeSelectITEMbyAmountGenerated:
                     'name': name,
                     'base_psd': '',  # No base PSD in simple structure
                     'item_psd': '',  # No item PSD in simple structure
-                    'item_png': illumoraeSelectITEMbyAmountGenerated._safe_str(item_png if item_png.exists() else None),
-                    **illumoraeSelectITEMbyAmountGenerated._build_gen_stats(gen_root, gen01, gen02, prompt_folder, debug=debug),
+                    'item_png': illumoraeSelectITEMByAmountGeneratedNode._safe_str(item_png if item_png.exists() else None),
+                    **illumoraeSelectITEMByAmountGeneratedNode._build_gen_stats(gen_root, gen01, gen02, prompt_folder, debug=debug),
                 })
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [ADDED] Item '{name}': gen={items[-1]['gen_count']}, gen01={items[-1]['gen01_count']}, gen02={items[-1]['gen02_count']}")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [ADDED] Item '{name}': gen={items[-1]['gen_count']}, gen01={items[-1]['gen01_count']}, gen02={items[-1]['gen02_count']}")
         else:
             # Structure: base_dir/ITEM/ITEM.png with ITEM/prompt/ and ITEM/gen/
             # Iterate through immediate subdirectories as ITEMs
             item_dirs = sorted([p for p in root.iterdir() if p.is_dir() and not p.name.startswith('.')], key=lambda x: x.name.lower())
-            illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] Found {len(item_dirs)} subdirectories")
+            illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] Found {len(item_dirs)} subdirectories")
             
             if len(item_dirs) == 0:
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated][WARNING] No subdirectories found!")
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] Expected structure: base_dir/ITEM/ITEM.png with ITEM/prompt/ and ITEM/gen/")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated][WARNING] No subdirectories found!")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] Expected structure: base_dir/ITEM/ITEM.png with ITEM/prompt/ and ITEM/gen/")
                 # List what IS in the directory
                 all_files = list(root.iterdir())
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] Directory contains {len(all_files)} items:")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] Directory contains {len(all_files)} items:")
                 for item in all_files[:10]:  # Show first 10
                     item_type = "DIR" if item.is_dir() else "FILE"
-                    illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [{item_type}] {item.name}")
+                    illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [{item_type}] {item.name}")
                 if len(all_files) > 10:
-                    illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]   ... and {len(all_files) - 10} more items")
+                    illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]   ... and {len(all_files) - 10} more items")
             
             for item_dir in item_dirs:
                 name = item_dir.name
@@ -464,21 +471,21 @@ class illumoraeSelectITEMbyAmountGenerated:
                 gen02 = gen_root / '02'
                 prompt_folder = item_dir / 'prompt'
                 
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] Checking folder: '{name}'")
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]   Expected PNG: '{item_png.name}' exists: {item_png.exists()}")
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]   prompt/: {prompt_folder.exists()}")
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]   gen/: {gen_root.exists()}")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] Checking folder: '{name}'")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]   Expected PNG: '{item_png.name}' exists: {item_png.exists()}")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]   prompt/: {prompt_folder.exists()}")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]   gen/: {gen_root.exists()}")
                 
                 # Filter: require existing prompt files if requested
                 if prompt_requirements is None:
                     prompt_requirements = {}
                 
-                prompt_check = illumoraeSelectITEMbyAmountGenerated._check_prompt_requirements(prompt_folder, prompt_requirements, name, debug)
+                prompt_check = illumoraeSelectITEMByAmountGeneratedNode._check_prompt_requirements(prompt_folder, prompt_requirements, name, debug)
                 if not prompt_check:
-                    illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [SKIP] Failed prompt requirements check")
+                    illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [SKIP] Failed prompt requirements check")
                     continue
                 else:
-                    illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [OK] Passed prompt requirements check")
+                    illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [OK] Passed prompt requirements check")
 
                 items.append({
                     'project': project_name,
@@ -487,12 +494,12 @@ class illumoraeSelectITEMbyAmountGenerated:
                     'name': name,
                     'base_psd': '',  # No base PSD in simple structure
                     'item_psd': '',  # No item PSD in simple structure
-                    'item_png': illumoraeSelectITEMbyAmountGenerated._safe_str(item_png if item_png.exists() else None),
-                    **illumoraeSelectITEMbyAmountGenerated._build_gen_stats(gen_root, gen01, gen02, prompt_folder, debug=debug),
+                    'item_png': illumoraeSelectITEMByAmountGeneratedNode._safe_str(item_png if item_png.exists() else None),
+                    **illumoraeSelectITEMByAmountGeneratedNode._build_gen_stats(gen_root, gen01, gen02, prompt_folder, debug=debug),
                 })
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [ADDED] Item '{name}': gen={items[-1]['gen_count']}, gen01={items[-1]['gen01_count']}, gen02={items[-1]['gen02_count']}")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated]   [ADDED] Item '{name}': gen={items[-1]['gen_count']}, gen01={items[-1]['gen01_count']}, gen02={items[-1]['gen02_count']}")
         
-        illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] === DISCOVERY COMPLETE: {len(items)} items added ===")
+        illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] === DISCOVERY COMPLETE: {len(items)} items added ===")
         return items
 
     @staticmethod
@@ -529,13 +536,13 @@ class illumoraeSelectITEMbyAmountGenerated:
         project_name = root.name
 
         if debug:
-            illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] Discovering items (nestedupscale structure) in project: '{project_name}' at {root}")
+            illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] Discovering items (nestedupscale structure) in project: '{project_name}' at {root}")
 
         for category in sorted([p for p in root.iterdir() if p.is_dir() and not p.name.startswith('.')], key=lambda x: x.name.lower()):
             if include_categories and category.name not in include_categories:
                 continue
             if debug:
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"  [Category] {category.name}")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"  [Category] {category.name}")
             for group in sorted([p for p in category.iterdir() if p.is_dir() and not p.name.startswith('.')], key=lambda x: x.name.lower()):
                 if include_groups and group.name not in include_groups:
                     continue
@@ -560,7 +567,7 @@ class illumoraeSelectITEMbyAmountGenerated:
                             continue
                         names.add(p.stem)
                 if debug:
-                    illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"    [Group] {group.name} -> candidates: {len(names)}")
+                    illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"    [Group] {group.name} -> candidates: {len(names)}")
                 for name in sorted(names):
                     base_psd = group / f"{name}.psd"
                     item_psd = upscale / f"{name}.psd"
@@ -572,7 +579,7 @@ class illumoraeSelectITEMbyAmountGenerated:
                     # Filter: require existing prompt files if requested
                     if prompt_requirements is None:
                         prompt_requirements = {}
-                    if not illumoraeSelectITEMbyAmountGenerated._check_prompt_requirements(prompt_folder, prompt_requirements, name, debug):
+                    if not illumoraeSelectITEMByAmountGeneratedNode._check_prompt_requirements(prompt_folder, prompt_requirements, name, debug):
                         continue
 
                     items.append({
@@ -580,13 +587,13 @@ class illumoraeSelectITEMbyAmountGenerated:
                         'category': category.name,
                         'group': group.name,
                         'name': name,
-                        'base_psd': illumoraeSelectITEMbyAmountGenerated._safe_str(base_psd if base_psd.exists() else None),
-                        'item_psd': illumoraeSelectITEMbyAmountGenerated._safe_str(item_psd if item_psd.exists() else None),
-                        'item_png': illumoraeSelectITEMbyAmountGenerated._safe_str(item_png if item_png.exists() else None),
-                        **illumoraeSelectITEMbyAmountGenerated._build_gen_stats(gen_root, gen01, gen02, prompt_folder, debug=debug),
+                        'base_psd': illumoraeSelectITEMByAmountGeneratedNode._safe_str(base_psd if base_psd.exists() else None),
+                        'item_psd': illumoraeSelectITEMByAmountGeneratedNode._safe_str(item_psd if item_psd.exists() else None),
+                        'item_png': illumoraeSelectITEMByAmountGeneratedNode._safe_str(item_png if item_png.exists() else None),
+                        **illumoraeSelectITEMByAmountGeneratedNode._build_gen_stats(gen_root, gen01, gen02, prompt_folder, debug=debug),
                     })
                     if debug:
-                        illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"      [Item] {name}: gen01={items[-1]['gen01_count']}, gen02={items[-1]['gen02_count']}, prompt={'yes' if items[-1]['prompt_folder'] else 'no'}")
+                        illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"      [Item] {name}: gen01={items[-1]['gen01_count']}, gen02={items[-1]['gen02_count']}, prompt={'yes' if items[-1]['prompt_folder'] else 'no'}")
         return items
 
     @staticmethod
@@ -605,10 +612,10 @@ class illumoraeSelectITEMbyAmountGenerated:
         sorted_items = sorted(all_items, key=sort_key)
         
         # Create balanced schedule: items with fewer images appear more frequently
-        schedule = illumoraeSelectITEMbyAmountGenerated._create_balanced_schedule(sorted_items, max_images_target=max_images_target, debug=debug)
+        schedule = illumoraeSelectITEMByAmountGeneratedNode._create_balanced_schedule(sorted_items, max_images_target=max_images_target, debug=debug)
         
         if debug:
-            illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] Discovered {len(all_items)} items, created schedule with {len(schedule)} entries")
+            illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] Discovered {len(all_items)} items, created schedule with {len(schedule)} entries")
         return schedule
     
     @staticmethod
@@ -634,13 +641,13 @@ class illumoraeSelectITEMbyAmountGenerated:
             schedule_entries.append((item, repetitions))
         
         if debug:
-            illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] Balanced Schedule Calculation:")
-            illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"  Target image count: {max_images_target}")
-            illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"  Actual max image count: {actual_max}")
-            illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"  Using max count: {max_count}")
+            illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] Balanced Schedule Calculation:")
+            illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"  Target image count: {max_images_target}")
+            illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"  Actual max image count: {actual_max}")
+            illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"  Using max count: {max_count}")
             for item, reps in schedule_entries[:5]:  # Show first 5
                 total = item.get('gen_count', 0) + item.get('gen01_count', 0) + item.get('gen02_count', 0)
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"    {item.get('name')}: total_images={total}, repetitions={reps}")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"    {item.get('name')}: total_images={total}, repetitions={reps}")
         
         # Create interleaved schedule using round-robin with repetition counts
         schedule = []
@@ -656,19 +663,18 @@ class illumoraeSelectITEMbyAmountGenerated:
             remaining = next_remaining
         
         if debug:
-            illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] Created schedule with {len(schedule)} entries")
+            illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] Created schedule with {len(schedule)} entries")
             # Show first 10 entries
-            illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"[SelectITEMbyAmountGenerated] First 10 schedule entries:")
+            illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"[SelectITEMbyAmountGenerated] First 10 schedule entries:")
             for i, item in enumerate(schedule[:10]):
                 total = item.get('gen_count', 0) + item.get('gen01_count', 0) + item.get('gen02_count', 0)
-                illumoraeSelectITEMbyAmountGenerated._debug_print(debug, f"    {i}: {item.get('name')} (total_images={total})")
+                illumoraeSelectITEMByAmountGeneratedNode._debug_print(debug, f"    {i}: {item.get('name')} (total_images={total})")
         
         return schedule
 
 NODE_CLASS_MAPPINGS = {
-    'illumoraeSelectByAmount': illumoraeSelectITEMbyAmountGenerated,
+    'illumoraeSelectITEMByAmountGeneratedNode': illumoraeSelectITEMByAmountGeneratedNode,
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
-    'illumoraeSelectByAmount': 'Select ITEM By Amount Generated',
+    'illumoraeSelectITEMByAmountGeneratedNode': 'Select ITEM By Amount Generated',
 }
-

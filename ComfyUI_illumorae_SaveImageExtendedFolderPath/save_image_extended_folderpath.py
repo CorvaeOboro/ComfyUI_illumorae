@@ -4,7 +4,8 @@ saving images to a specified folder path with optional metadata.
 
 TITLE::Save Image Extended FolderPath
 DESCRIPTIONSHORT::Saves images to a specified folder path with customizable naming, counters, and optional metadata/job data.
-VERSION::20260113
+VERSION::20260127
+IMAGE::comfyui_illumorae_save_image_extended_folderpath.png
 GROUP::Save
 """
 
@@ -22,7 +23,7 @@ import string
 
 import folder_paths
 
-class illumoraeSaveImageExtendedFolderPath:
+class illumoraeSaveImageExtendedFolderPathNode:
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -49,7 +50,7 @@ class illumoraeSaveImageExtendedFolderPath:
     FUNCTION = 'save_images'
     OUTPUT_NODE = True
     CATEGORY = 'illumorae'
-    DESCRIPTION = "Saves images to a specified folder path with optional metadata."
+    DESCRIPTION = "Saves images to a specified folder path with customizable naming, counters, and optional metadata/job data."
 
     def __init__(self):
         self.output_dir = folder_paths.get_output_directory()
@@ -110,7 +111,7 @@ class illumoraeSaveImageExtendedFolderPath:
             if key in keys_to_find:
                 found_values[key] = value
             if isinstance(value, dict):
-                illumoraeSaveImageExtendedFolderPath.find_keys_recursively(value, keys_to_find, found_values)
+                illumoraeSaveImageExtendedFolderPathNode.find_keys_recursively(value, keys_to_find, found_values)
 
     @staticmethod
     def remove_file_extension(value):
@@ -137,17 +138,17 @@ class illumoraeSaveImageExtendedFolderPath:
                 # Match both formats: lora_xx and lora_name_x
                 if re.match(r'lora(_name)?(_\d+)?', key):
                     if value.endswith('.safetensors'):
-                        value = illumoraeSaveImageExtendedFolderPath.remove_file_extension(value)
+                        value = illumoraeSaveImageExtendedFolderPathNode.remove_file_extension(value)
                     if value != 'None':
                         loras_string += f'{value}, '
 
             if key in target_keys:
                 if (isinstance(value, str) and value.endswith('.safetensors')) or (isinstance(value, str) and value.endswith('.pt')):
-                    value = illumoraeSaveImageExtendedFolderPath.remove_file_extension(value)
+                    value = illumoraeSaveImageExtendedFolderPathNode.remove_file_extension(value)
                 found_values[key] = value
 
             if isinstance(value, dict):
-                illumoraeSaveImageExtendedFolderPath.find_parameter_values(target_keys, value, found_values)
+                illumoraeSaveImageExtendedFolderPathNode.find_parameter_values(target_keys, value, found_values)
 
         if 'loras' in target_keys and loras_string:
             found_values['loras'] = loras_string.strip(', ')
@@ -163,7 +164,7 @@ class illumoraeSaveImageExtendedFolderPath:
 
         if prompt is not None and len(keys_to_extract) > 0:
             found_values = {'resolution': resolution}
-            illumoraeSaveImageExtendedFolderPath.find_keys_recursively(prompt, keys_to_extract, found_values)
+            illumoraeSaveImageExtendedFolderPathNode.find_keys_recursively(prompt, keys_to_extract, found_values)
             for key in keys_to_extract:
                 value = found_values.get(key)
                 if value is not None:
@@ -174,7 +175,7 @@ class illumoraeSaveImageExtendedFolderPath:
                             pass
 
                     if (isinstance(value, str) and value.endswith('.safetensors')) or (isinstance(value, str) and value.endswith('.pt')):
-                        value = illumoraeSaveImageExtendedFolderPath.remove_file_extension(value)
+                        value = illumoraeSaveImageExtendedFolderPathNode.remove_file_extension(value)
 
                     custom_name += f'{delimiter_char}{value}'
 
@@ -191,7 +192,7 @@ class illumoraeSaveImageExtendedFolderPath:
             prompt_keys_to_save['custom_text'] = job_custom_text
 
         if 'models' in save_job_data:
-            models = illumoraeSaveImageExtendedFolderPath.find_parameter_values(['ckpt_name', 'loras', 'vae_name', 'model_name'], prompt)
+            models = illumoraeSaveImageExtendedFolderPathNode.find_parameter_values(['ckpt_name', 'loras', 'vae_name', 'model_name'], prompt)
             if models.get('ckpt_name'):
                 prompt_keys_to_save['checkpoint'] = models['ckpt_name']
             if models.get('loras'):
@@ -202,7 +203,7 @@ class illumoraeSaveImageExtendedFolderPath:
                 prompt_keys_to_save['upscale_model'] = models['model_name']
 
         if 'sampler' in save_job_data:
-            prompt_keys_to_save['sampler_parameters'] = illumoraeSaveImageExtendedFolderPath.find_parameter_values(['seed', 'steps', 'cfg', 'sampler_name', 'scheduler', 'denoise'], prompt)
+            prompt_keys_to_save['sampler_parameters'] = illumoraeSaveImageExtendedFolderPathNode.find_parameter_values(['seed', 'steps', 'cfg', 'sampler_name', 'scheduler', 'denoise'], prompt)
 
         if 'prompt' in save_job_data:
             if positive_text_opt is not None:
@@ -360,9 +361,9 @@ class illumoraeSaveImageExtendedFolderPath:
             return {'ui': {'images': results}}
 
 NODE_CLASS_MAPPINGS = {
-    'illumoraeSaveImageExtendedFolderPath': illumoraeSaveImageExtendedFolderPath,
+    'illumoraeSaveImageExtendedFolderPathNode': illumoraeSaveImageExtendedFolderPathNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    'illumoraeSaveImageExtendedFolderPath': 'Save Image Extended FolderPath',
+    'illumoraeSaveImageExtendedFolderPathNode': 'Save Image Extended FolderPath',
 }

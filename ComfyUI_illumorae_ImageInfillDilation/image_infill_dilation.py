@@ -9,7 +9,8 @@ Useful for preparing images for inpainting or background extension.
 
 TITLE::Image Infill Dilation
 DESCRIPTIONSHORT::Fills masked subject areas by dilating surrounding background colors inward (simple content fill for inpainting prep).
-VERSION::20260113
+VERSION::20260127
+IMAGE::comfyui_illumorae_image_infill_dilation.png
 GROUP::Image
 """
 import torch
@@ -79,7 +80,7 @@ class illumoraeImageInfillDilationNode:
     FUNCTION = "infill_background"
     CATEGORY = "illumorae"
     OUTPUT_NODE = False
-    DESCRIPTION = "Fills subject areas by dilating background RGB values inward. Outputs: infilled image, distance map visualization, blur weight visualization."
+    DESCRIPTION = "Fills masked subject areas by dilating surrounding background colors inward (simple content fill for inpainting prep)."
 
     def _debug_print(self, debug_prints, *args, **kwargs):
         if debug_prints:
@@ -106,6 +107,9 @@ class illumoraeImageInfillDilationNode:
         
         # Use mask directly as fill mask (1=subject to fill, 0=background to dilate from)
         fill_mask = mask_uint8
+        
+        # Keep original background for final compositing
+        original_background = image_uint8.copy()
         
         # Create result image - start with background only, zero out subject area
         result = image_uint8.copy()
@@ -136,8 +140,13 @@ class illumoraeImageInfillDilationNode:
             if np.sum(fill_mask) == 0:
                 break
         
+        # Composite: use dilated subject area + original background
+        # Where mask > 0 (subject): use dilated result
+        # Where mask = 0 (background): use original
+        final_result = np.where(mask_3ch > 0, result, original_background)
+        
         # Convert back to float [0, 1]
-        result_float = result.astype(np.float32) / 255.0
+        result_float = final_result.astype(np.float32) / 255.0
         
         return result_float
 
@@ -344,12 +353,9 @@ class illumoraeImageInfillDilationNode:
                 self._debug_print(debug_prints, f"Applying center blur: strength={blur_strength}, falloff={blur_falloff_distance}")
                 infilled = self.apply_center_blur(infilled, msk_feathered, blur_strength, blur_falloff_distance)
             
-            # Blend with original using mask
-            # Stack mask to match image channels (RGB or RGBA)
-            # Mask: 1=subject (fill with infilled), 0=background (keep original)
-            num_channels = img.shape[2] if len(img.shape) == 3 else 1
-            msk_nch = np.stack([msk_feathered] * num_channels, axis=-1)
-            final = img * (1 - msk_nch) + infilled * msk_nch
+            # The infilled result already has background preserved and subject filled
+            # Just use it directly as the final result
+            final = infilled
             
             self._debug_print(debug_prints, f"Final image range: [{final.min():.3f}, {final.max():.3f}]")
             self._debug_print(debug_prints, f"Distance map range: [{dist_map_norm.min():.3f}, {dist_map_norm.max():.3f}]")
@@ -382,5 +388,5 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "illumoraeImageInfillDilationNode": "Image Infill Simple Dilation",
+    "illumoraeImageInfillDilationNode": "Image Infill Dilation",
 }

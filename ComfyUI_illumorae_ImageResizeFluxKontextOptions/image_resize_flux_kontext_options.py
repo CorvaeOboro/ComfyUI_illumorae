@@ -6,7 +6,9 @@ a modified verison of the native node , with options to stretch instead of alway
 
 TITLE::Image Resize Flux Kontext Scale Options
 DESCRIPTIONSHORT::Resizes images to preferred Flux Kontext resolutions with crop or stretch options.
-VERSION::20260113
+VERSION::20260127
+IMAGE::comfyui_illumorae_image_resize_flux_kontext_options.png
+GROUP::Image
 
 Inputs:
     image: The input image to resize.
@@ -21,27 +23,7 @@ GROUP::Image
 """
 import comfy.utils
 
-PREFERED_KONTEXT_RESOLUTIONS = [
-    (672, 1568),
-    (688, 1504),
-    (720, 1456),
-    (752, 1392),
-    (800, 1328),
-    (832, 1248),
-    (880, 1184),
-    (944, 1104),
-    (1024, 1024),
-    (1104, 944),
-    (1184, 880),
-    (1248, 832),
-    (1328, 800),
-    (1392, 752),
-    (1456, 720),
-    (1504, 688),
-    (1568, 672),
-]
-
-class illumoraeFluxKontextImageScaleOptions:
+class illumoraeImageResizeFluxKontextScaleOptionsNode:
     """
     Flux Kontext Image Scale with Options
     modded to provide options other then only "cropping" to scale the image to a prefered resolution
@@ -61,13 +43,33 @@ class illumoraeFluxKontextImageScaleOptions:
     FUNCTION = "scale"
 
     CATEGORY = "illumorae"
-    DESCRIPTION = " resizes the image to one that is more optimal for flux kontext with crop or stretch options"
+    DESCRIPTION = "Resizes images to preferred Flux Kontext resolutions with crop or stretch options."
+
+    PREFERED_KONTEXT_RESOLUTIONS = [
+        (672, 1568),
+        (688, 1504),
+        (720, 1456),
+        (752, 1392),
+        (800, 1328),
+        (832, 1248),
+        (880, 1184),
+        (944, 1104),
+        (1024, 1024),
+        (1104, 944),
+        (1184, 880),
+        (1248, 832),
+        (1328, 800),
+        (1392, 752),
+        (1456, 720),
+        (1504, 688),
+        (1568, 672),
+    ]
 
     def scale(self, image, resize_mode="crop", interpolation="lanczos", crop_anchor="center"):
         width = image.shape[2]
         height = image.shape[1]
         aspect_ratio = width / height
-        _, width, height = min((abs(aspect_ratio - w / h), w, h) for w, h in PREFERED_KONTEXT_RESOLUTIONS)
+        _, width, height = min((abs(aspect_ratio - w / h), w, h) for w, h in self.PREFERED_KONTEXT_RESOLUTIONS)
         if resize_mode == "stretch":
             # Stretch: use interpolation, ignore crop_anchor
             # Assuming comfy.utils.common_upscale with anchor=None does plain resize
@@ -78,9 +80,9 @@ class illumoraeFluxKontextImageScaleOptions:
         return (image, )
 
 NODE_CLASS_MAPPINGS = {
-    'illumoraeFluxKontextImageScaleOptions': illumoraeFluxKontextImageScaleOptions,
+    'illumoraeImageResizeFluxKontextScaleOptionsNode': illumoraeImageResizeFluxKontextScaleOptionsNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    'illumoraeFluxKontextImageScaleOptions': 'Image Resize Flux Kontext Scale Options',
+    'illumoraeImageResizeFluxKontextScaleOptionsNode': 'Image Resize Flux Kontext Scale Options',
 }

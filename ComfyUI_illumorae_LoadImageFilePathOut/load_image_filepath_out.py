@@ -16,7 +16,8 @@ useful for workflows where you need to pass along the image's file path or name 
 
 TITLE::Load Image w FilePath Out
 DESCRIPTIONSHORT::Loads an image from a file path string and outputs image, mask, file name, and folder path.
-VERSION::20260113
+VERSION::20260127
+IMAGE::comfyui_illumorae_load_image_filepath_out.png
 GROUP::Load
 """
 import os
@@ -27,7 +28,7 @@ import torch
 from PIL import Image, ImageOps
 import folder_paths
 
-class illumoraeLoadImageFilePathOut:
+class illumoraeLoadImageWFilePathOutNode:
     @classmethod
     def INPUT_TYPES(s):
         return {"required":
@@ -39,11 +40,11 @@ class illumoraeLoadImageFilePathOut:
     RETURN_TYPES = ("IMAGE", "MASK", "STRING", "STRING")
     RETURN_NAMES = ("image","MASK","file name","folder path")
     FUNCTION = "load_image"
-    DESCRIPTION = "Loads an image from a specified file path string and outputs the image, mask, file name, and folder path."
+    DESCRIPTION = "Loads an image from a file path string and outputs image, mask, file name, and folder path."
     
     def load_image(self, image):
         print(f"[LoadImageFilePathOut] Input image string: '{image}'")
-        image_path = illumoraeLoadImageFilePathOut._resolve_path(image)
+        image_path = illumoraeLoadImageWFilePathOutNode._resolve_path(image)
         print(f"[LoadImageFilePathOut] Resolved path: '{image_path}'")
         print(f"[LoadImageFilePathOut] Path exists: {image_path.exists()}")
 
@@ -66,6 +67,10 @@ class illumoraeLoadImageFilePathOut:
     @staticmethod
     def _resolve_path(image) -> Path:
         print(f"[LoadImageFilePathOut._resolve_path] Input: '{image}' (type: {type(image)})")
+        
+        # Handle None input (can happen during IS_CHANGED before validation)
+        if image is None:
+            return None
         
         # If input is already a valid path, use it directly
         if isinstance(image, (str, Path)):
@@ -98,7 +103,9 @@ class illumoraeLoadImageFilePathOut:
 
     @classmethod
     def IS_CHANGED(s, image):
-        image_path = illumoraeLoadImageFilePathOut._resolve_path(image)
+        image_path = illumoraeLoadImageWFilePathOutNode._resolve_path(image)
+        if image_path is None:
+            return ""
         m = hashlib.sha256()
         with open(image_path, 'rb') as f:
             m.update(f.read())
@@ -110,7 +117,7 @@ class illumoraeLoadImageFilePathOut:
         if image is None:
             return True
 
-        image_path = illumoraeLoadImageFilePathOut._resolve_path(image)
+        image_path = illumoraeLoadImageWFilePathOutNode._resolve_path(image)
         if not image_path.exists():
             return "Invalid image path: {}".format(image_path)
 
@@ -123,9 +130,9 @@ class illumoraeLoadImageFilePathOut:
         return file_name
 
 NODE_CLASS_MAPPINGS = {
-    'illumoraeLoadImageFilePathOut': illumoraeLoadImageFilePathOut,
+    'illumoraeLoadImageWFilePathOutNode': illumoraeLoadImageWFilePathOutNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    'illumoraeLoadImageFilePathOut': 'Load Image w FilePath Out',
+    'illumoraeLoadImageWFilePathOutNode': 'Load Image w FilePath Out',
 }

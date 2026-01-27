@@ -1,7 +1,7 @@
 """
 TITLE::Image Resize w Matte
 DESCRIPTIONSHORT::Resizes images with optional aspect preservation, divisibility constraints, and optional matte canvas compositing.
-VERSION::20260113
+VERSION::20260127
 IMAGE::comfyui_illumorae_image_resize_video_matte.png
 GROUP::Image
 """
@@ -13,7 +13,7 @@ from comfy.utils import ProgressBar, common_upscale
 # Define a maximum resolution constant for widget limits
 MAX_RESOLUTION = 4096
 
-class illumoraeImageResizeMatteVideo:
+class illumoraeImageResizeWMatteNode:
     """
     A ComfyUI node that resizes an input image to a target width and height.
     The final dimensions are determined by the following priority:
@@ -54,16 +54,7 @@ class illumoraeImageResizeMatteVideo:
     RETURN_NAMES = ("IMAGE", "width", "height",)
     FUNCTION = "resize"
     CATEGORY = "illumorae"
-    DESCRIPTION = """
-Resizes the input image to a specified width and height.
-The target size is determined by the following order of precedence:
-  1. Use dimensions from get_image_size (if provided).
-  2. Use width_input and height_input (if provided).
-  3. Use the widget width and height values.
-
-Optionally, the node can preserve the image's aspect ratio and adjust dimensions so they are divisible by a specified number.
-If apply_matte is enabled, the resized image is composited onto a black matte canvas of size matte_width x matte_height.
-    """
+    DESCRIPTION = "Resizes images with optional aspect preservation, divisibility constraints, and optional matte canvas compositing."
 
     def resize(
         self,
@@ -211,10 +202,10 @@ If apply_matte is enabled, the resized image is composited onto a black matte ca
 
 # ComfyUI custom node classes to load
 NODE_CLASS_MAPPINGS = {
-    "illumoraeImageResizeMatteVideoNode": illumoraeImageResizeMatteVideo,
+    "illumoraeImageResizeWMatteNode": illumoraeImageResizeWMatteNode,
 }
 
 # ComfyUI display name for node
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "illumoraeImageResizeMatteVideoNode": "Image Resize w Matte ",
+    "illumoraeImageResizeWMatteNode": "Image Resize w Matte",
 }

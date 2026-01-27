@@ -1,12 +1,12 @@
 """
 TITLE::Text Token Count
 DESCRIPTIONSHORT::Counts tokens for a string using a CLIP tokenizer if available, otherwise estimates.
-VERSION::20260113
+VERSION::20260127
 IMAGE::comfyui_illumorae_text_token_count.png
 GROUP::Text
 """
 
-class illumoraeTextTokenCount:
+class illumoraeTextTokenCountNode:
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -18,7 +18,7 @@ class illumoraeTextTokenCount:
     RETURN_NAMES = ("token_count", "status")
     FUNCTION = "count_tokens"
     CATEGORY = "illumorae"
-    DESCRIPTION = "Count the tokens of a string using the provided CLIP model's tokenizer if available, otherwise estimate."
+    DESCRIPTION = "Counts tokens for a string using a CLIP tokenizer if available, otherwise estimates."
 
     def count_tokens(self, text, clip=None):
         """
@@ -51,9 +51,9 @@ class illumoraeTextTokenCount:
 
 
 NODE_CLASS_MAPPINGS = {
-    'illumoraeTextTokenCount': illumoraeTextTokenCount,
+    'illumoraeTextTokenCountNode': illumoraeTextTokenCountNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    'illumoraeTextTokenCount': 'Text Token Count',
+    'illumoraeTextTokenCountNode': 'Text Token Count',
 }

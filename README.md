@@ -5,15 +5,15 @@
 # ComfyUI illumorae
 
 comfyUI custom nodes focused on randomization and image variant exploration
-- loading random files by string , randomizing lora string strength , text order
+- loading files by partial string match , randomizing lora string strength , text reordering
 - load and save with external folderpath and filename outputs for project structures
 - each node is self-contained and could be installed separately if prefer specific nodes
 
 <img src="docs/comfyui_illumorae_load_checkpoint_text_file_basic.png" width="800" caption="workflow"/>
 
 # install 
-- install thru the ComfyUI Manager or manually [download](https://github.com/CorvaeOboro/ComfyUI_illumorae/archive/refs/heads/main.zip) as a zip and extract as folder into the ComfyUI `custom_nodes` directory 
-- OPTIONAL may install nodes individual copying a nodes subfolder into the ComfyUI `custom_nodes` directory , each has been setup to function independently
+- install thru the [ComfyUI Manager](https://github.com/Comfy-Org/ComfyUI-Manager) search for "illumorae" or manually [download](https://github.com/CorvaeOboro/ComfyUI_illumorae/archive/refs/heads/main.zip) as a zip and extract as folder into the ComfyUI `custom_nodes` directory 
+- OPTIONAL may install nodes individually by copying a nodes subfolder into the ComfyUI `custom_nodes` directory , each has been setup to function independently
 
 # nodes 
 
@@ -85,9 +85,9 @@ comfyUI custom nodes focused on randomization and image variant exploration
 
 ## Checkpoint
 - <a id="checkpoint-loader-by-string-dirty"></a>**[Checkpoint Loader By String Dirty](./ComfyUI_illumorae_CheckpointLoaderByStringDirty/checkpoint_loader_by_string_dirty.py)**  
-  Loads a Stable Diffusion checkpoint by matching a string input (full path, relative path, or filename) to any registered checkpoint.
+  Loads a checkpoint by matching a partial string input to closest registered checkpoint.
 - <a id="checkpoint-random-selector"></a>**[Checkpoint Random Selector](./ComfyUI_illumorae_CheckpointRandomSelector/checkpoint_random_selector.py)**  
-  Randomly selects a checkpoint from a category/folder at a set interval for reproducible model rotation.
+  Randomly selects a checkpoint from a category/folder at a set interval for model rotation.
 
 ## LoRA 
 - <a id="lora-text-strength-variants"></a>**[LoRA Text Strength Variants](./ComfyUI_illumorae_LoraTextStrengthVariants/lora_text_strength_variants.py)**  
@@ -103,7 +103,7 @@ comfyUI custom nodes focused on randomization and image variant exploration
 - <a id="load-image-filepath-out"></a>**[Load Image FilePath Out](./ComfyUI_illumorae_LoadImageFilePathOut/load_image_filepath_out.py)**  
   Loads an image from a file path and outputs the image, mask, file name, and folder path.
 - <a id="load-image-random-variants"></a>**[Load Image Random Variants](./ComfyUI_illumorae_LoadImageRandomVariants/load_image_random_variant.py)**  
-  Loads a random variant of an image from a folder, with debug and suffix options.
+  Loads a random variant of an image from a folder, with suffix options.
 - <a id="load-text-file-graceful"></a>**[Load Text File Graceful](./ComfyUI_illumorae_LoadTextFileGraceful/load_text_file_graceful.py)**  
   Loads text from a file, gracefully handling missing/invalid files.
 - <img src="docs/comfyui_illumorae_load_text_graceful.png" height="200" />
@@ -116,7 +116,7 @@ comfyUI custom nodes focused on randomization and image variant exploration
 - <a id="image-clahe"></a>**[Image CLAHE (Contrast Limited Adaptive Histogram Equalization)](./ComfyUI_illumorae_ImageContrastLimitedAdaptiveHistogramEqualization/image_CLAHE.py)**  
   Enhances local image contrast using CLAHE.
 - <a id="image-infill-dilation"></a>**[Image Infill Dilation](./ComfyUI_illumorae_ImageInfillSimple/image_infill_dilation.py)**  
-  Simple image infill using dilation-based expansion.
+  image infill using Simple dilation expansion.
 - <a id="image-infill-patchmatch"></a>**[Image Infill PatchMatch](./ComfyUI_illumorae_ImageInfillPatchMatch/image_infill_patchmatch.py)**  
   PatchMatch-based image infill.
 - <img src="docs/comfyui_illumorae_image_infill_patchmatch.png" height="200" />
@@ -133,16 +133,16 @@ comfyUI custom nodes focused on randomization and image variant exploration
   Converts text into a filename-safe string.
 - <img src="docs/comfyui_illumorae_text_to_string_filename_safe.png" height="200" />
 - <a id="text-token-count"></a>**[Text Token Count](./ComfyUI_illumorae_TextTokenCount/text_token_count.py)**  
-  Counts tokens in a string (useful for prompt engineering).
+  Counts tokens in a string using clip
 - <img src="docs/comfyui_illumorae_text_token_count.png" height="200" />
 - <a id="text-strength-multiplier"></a>**[Text Strength Multiplier](./ComfyUI_illumorae_TextStrengthMultiplier/text_strength_multiplier.py)**  
   Multiplies the strength of text prompt components.
 - <img src="docs/comfyui_illumorae_text_strength_multiplier.png" height="200" />
 - <a id="text-enclosure-visualizer"></a>**[Text Enclosure Visualizer](./ComfyUI_illumorae_TextEnclosureVisualizer/text_enclosure_visualizer.py)**  
-  Visualizes enclosed text ranges for prompt building.
+  Visualizes enclosed text , nested separation , and warnings on open ended enclosures
 - <img src="docs/comfyui_illumorae_text_enclosure_visualize.png" height="200" />
 - <a id="text-reorder"></a>**[Text Reorder](./ComfyUI_illumorae_TextReorder/text_reorder.py)**  
-  Reorders prompt text using configurable rules.
+  Reorders prompt text using different scales of rules.
 - <img src="docs/comfyui_illumorae_text_reorder.png" height="200" />
 
 ## Save

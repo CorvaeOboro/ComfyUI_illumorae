@@ -1,13 +1,13 @@
 """
 TITLE::Load Text File Graceful
 DESCRIPTIONSHORT::Loads a text file from a path and returns its contents without crashing if the file is missing.
-VERSION::20260113
+VERSION::20260127
 IMAGE::comfyui_illumorae_load_text_graceful.png
 GROUP::Load
 """
 import os
 
-class illumoraeLoadTextFileGraceful:
+class illumoraeLoadTextFileGracefulNode:
     """
     A ComfyUI node that loads text from a file. 
     Non-comment lines (lines that do not start with '#') are:
@@ -43,7 +43,7 @@ class illumoraeLoadTextFileGraceful:
     FUNCTION = "load_file"            # The method in this class that is called
     CATEGORY = "illumorae"                 # Category name for where this node appears
     OUTPUT_NODE = False               # Whether this node can terminate a workflow
-    DESCRIPTION = "Loads a text file from a file path string and outputs the text string , doesnt crash if file not found"
+    DESCRIPTION = "Loads a text file from a path and returns its contents without crashing if the file is missing."
 
     def load_file(self, 
                   file_path="",
@@ -101,8 +101,8 @@ class illumoraeLoadTextFileGraceful:
         return text_output, status
 
 NODE_CLASS_MAPPINGS = {
-    "illumoraeLoadTextFileGraceful": illumoraeLoadTextFileGraceful, # ComfyUI needs to know which classes to load when scanning your .py file
+    "illumoraeLoadTextFileGracefulNode": illumoraeLoadTextFileGracefulNode, # ComfyUI needs to know which classes to load when scanning your .py file
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "illumoraeLoadTextFileGraceful": "Load Text File Graceful", # Provide a human-readable display name for your node
+    "illumoraeLoadTextFileGracefulNode": "Load Text File Graceful", # Provide a human-readable display name for your node
 }

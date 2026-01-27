@@ -1,24 +1,25 @@
 """
+Save Animated WEBP FolderPath - a custom node for ComfyUI
+webp is ideal video format , loops like gif with lossless quality , contains the comfy workflow in metadata
+this version is a minor modification of the core node with added inputs for saving to an external project structure
+
 TITLE::Save Animated WEBP FolderPath
-DESCRIPTIONSHORT::Saves an animated WebP to a user-specified folder path with naming/counter options and optional metadata.
-VERSION::20260113
+DESCRIPTIONSHORT::Saves an animated WebP to an external folder path
+VERSION::20260127
+IMAGE::comfyui_illumorae_save_animated_webp_folderpath.png
 GROUP::Save
 """
 import os
-import sys
 import json
+from datetime import datetime
 from PIL import Image
 import numpy as np
-from datetime import datetime
-from pathlib import Path
-
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "comfy"))
-
 import folder_paths
-from nodes import common_ksampler
 from comfy.cli_args import args
 
-class illumoraeSaveAnimatedWEBPExtendedFolderPath:
+class illumoraeSaveAnimatedWEBPFolderPathNode:
+    TITLE = "Save Animated WEBP FolderPath"
+
     def __init__(self):
         self.output_dir = folder_paths.get_output_directory()
         self.type = "output"
@@ -45,11 +46,12 @@ class illumoraeSaveAnimatedWEBPExtendedFolderPath:
             "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
         }
 
-    RETURN_TYPES = ()
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("filepath",)
     FUNCTION = "save_images"
     OUTPUT_NODE = True
     CATEGORY = "illumorae"
-    DESCRIPTION = "Saves an animated WebP file to a specified folder path with optional metadata."
+    DESCRIPTION = "Saves an animated WebP to an external folder path"
 
     def create_folder_structure(self, base_path, folder_name):
         """Create folder structure and return full path"""
@@ -130,7 +132,8 @@ class illumoraeSaveAnimatedWEBPExtendedFolderPath:
                 method=method
             )
 
-            print(f"[SaveAnimatedWEBPExtendedFolderPath] Saved animated WebP file to: {file_path}")
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f"[SaveAnimatedWEBPExtendedFolderPath] [{timestamp}] Saved animated WebP to: {file_path}")
 
             results.append({
                 "filename": filename,
@@ -139,15 +142,15 @@ class illumoraeSaveAnimatedWEBPExtendedFolderPath:
                 "folder": full_output_folder
             })
 
-            return {"ui": {"images": results, "animated": (True,)}}
+            return {"ui": {"images": results, "animated": (True,)}, "result": (file_path,)}
         except Exception as e:
             print(f"[SaveAnimatedWEBPExtendedFolderPath] Error saving animated WebP: {str(e)}")
             raise
 
 NODE_CLASS_MAPPINGS = {
-    "illumoraeSaveAnimatedWEBPExtendedFolderPath": illumoraeSaveAnimatedWEBPExtendedFolderPath,
+    "illumoraeSaveAnimatedWEBPFolderPathNode": illumoraeSaveAnimatedWEBPFolderPathNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "illumoraeSaveAnimatedWEBPExtendedFolderPath": "Save Animated WEBP FolderPath",
+    "illumoraeSaveAnimatedWEBPFolderPathNode": "Save Animated WEBP FolderPath",
 }

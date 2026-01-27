@@ -1,7 +1,7 @@
 """
 TITLE::Text Reorder
 DESCRIPTIONSHORT::Reorders prompt text sections (comma/sentence/paragraph) while preserving parenthesis-enclosed blocks; supports seeded shuffle and distance constraints.
-VERSION::20260113
+VERSION::20260127
 IMAGE::comfyui_illumorae_text_reorder.png
 GROUP::Text
 """
@@ -44,7 +44,7 @@ class illumoraeTextReorderNode:
     FUNCTION = "reorder"
     CATEGORY = "illumorae"
     OUTPUT_NODE = False
-    DESCRIPTION = "Reorders text sections (enclosed or orphaned) with optional distance constraints."
+    DESCRIPTION = "Reorders prompt text sections (comma/sentence/paragraph) while preserving parenthesis-enclosed blocks; supports seeded shuffle and distance constraints."
 
     def parse_sections(self, text: str) -> Tuple[List[str], List[int]]:
         """
@@ -203,13 +203,19 @@ class illumoraeTextReorderNode:
         current_pos = 0
         i = 0
         depth = 0
+        angle_depth = 0
         section_start = 0
         in_enclosed_section = False
 
         while i < len(text):
             char = text[i]
 
-            if char == '(' and depth == 0:
+            if char == '<':
+                angle_depth += 1
+            elif char == '>':
+                angle_depth -= 1
+
+            if char == '(' and depth == 0 and angle_depth == 0:
                 if i > section_start:
                     orphaned = text[section_start:i]
                     if orphaned.strip():
@@ -223,7 +229,11 @@ class illumoraeTextReorderNode:
                 i += 1
 
                 while i < len(text):
-                    if text[i] == '(':
+                    if text[i] == '<':
+                        angle_depth += 1
+                    elif text[i] == '>':
+                        angle_depth -= 1
+                    elif text[i] == '(':
                         depth += 1
                     elif text[i] == ')':
                         depth -= 1
@@ -246,7 +256,7 @@ class illumoraeTextReorderNode:
 
                 continue
 
-            if depth == 0 and not in_enclosed_section:
+            if depth == 0 and angle_depth == 0 and not in_enclosed_section:
                 if reorder_mode == "comma" and (char == ',' or char == '\n'):
                     segment = text[section_start:i+1]
                     if segment.strip():

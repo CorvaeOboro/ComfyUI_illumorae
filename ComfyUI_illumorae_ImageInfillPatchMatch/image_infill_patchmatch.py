@@ -7,7 +7,7 @@ usage example = for the removal of objects from image then using the infilled im
 STATUS:: working , low quality 
 TITLE::Image Infill PatchMatch
 DESCRIPTIONSHORT::Approximate PatchMatch-style content fill to infill masked regions; useful as inpainting guidance.
-VERSION::20260113
+VERSION::20260127
 IMAGE::comfyui_illumorae_image_infill_patchmatch.png
 GROUP::Image
 """
@@ -16,7 +16,7 @@ import numpy as np
 import cv2
 from typing import Tuple
 
-class illumoraePatchMatchInfillNode:
+class illumoraeImageInfillPatchMatchNode:
     """
     A ComfyUI node that fills in subject areas to approximate the PatchMatch algorithm.
     
@@ -79,7 +79,7 @@ class illumoraePatchMatchInfillNode:
     FUNCTION = "patchmatch_infill"
     CATEGORY = "illumorae"
     OUTPUT_NODE = False
-    DESCRIPTION = "Fills subject areas using PatchMatch algorithm (Content-Aware Fill). Input mask: white=subject (fill), black=background (preserve)."
+    DESCRIPTION = "Approximate PatchMatch-style content fill to infill masked regions; useful as inpainting guidance."
 
     def _debug_print(self, debug_prints, *args, **kwargs):
         if debug_prints:
@@ -450,9 +450,9 @@ class illumoraePatchMatchInfillNode:
 
 # ComfyUI node registration
 NODE_CLASS_MAPPINGS = {
-    "illumoraePatchMatchInfillNode": illumoraePatchMatchInfillNode,
+    "illumoraeImageInfillPatchMatchNode": illumoraeImageInfillPatchMatchNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "illumoraePatchMatchInfillNode": "Image Infill PatchMatch",
+    "illumoraeImageInfillPatchMatchNode": "Image Infill PatchMatch",
 }

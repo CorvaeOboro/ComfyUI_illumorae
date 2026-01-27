@@ -22,14 +22,15 @@ Outputs:
 
 TITLE::Checkpoint Random Selector
 DESCRIPTIONSHORT::Randomly selects a checkpoint from a category, changing each interval.
-VERSION::20260113
+VERSION::20260127
 GROUP::Checkpoint
+IMAGE::comfyui_illumorae_checkpoint_random_selector.png
 """
 import os
 import random
 from datetime import datetime, timedelta
 
-class illumoraeCheckpointRandomSelector:
+class illumoraeCheckpointRandomSelectorNode:
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -51,7 +52,7 @@ class illumoraeCheckpointRandomSelector:
     RETURN_NAMES = ("folder_path", "file_path", "filename")
     FUNCTION = "select_checkpoint"
     CATEGORY = "illumorae"
-    DESCRIPTION = "Randomly selects a checkpoint from a category, changing only every interval. Outputs: folder, full path, filename."
+    DESCRIPTION = "Randomly selects a checkpoint from a category, changing each interval."
 
     def select_checkpoint(self, base_folder, category, interval_minutes, sdxl_folder_name, pony_folder_name, sd15_folder_name, safe_mode=True, file_extensions=".safetensors,.sft"):
         # Map category to folder name
@@ -92,9 +93,9 @@ class illumoraeCheckpointRandomSelector:
         return folder, file_path, filename
 
 NODE_CLASS_MAPPINGS = {
-    'illumoraeCheckpointRandomSelector': illumoraeCheckpointRandomSelector,
+    'illumoraeCheckpointRandomSelectorNode': illumoraeCheckpointRandomSelectorNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    'illumoraeCheckpointRandomSelector': 'Checkpoint Random Selector',
+    'illumoraeCheckpointRandomSelectorNode': 'Checkpoint Random Selector',
 }
