@@ -33,12 +33,22 @@ NOT ALLOWED (will be rejected):
   - Loose partial matches (e.g., matching on single tokens like "wan" or "lora")
 
 MODEL TYPE MODE (toggle on the node):
-  - T2V_ONLY (default): Accept files with T2V or no T2V/I2V marker. REJECT files with I2V only.
+  - NONE (default): No model type filtering at all. Accept any file regardless of T2V/I2V markers.
+  - T2V_ONLY: Accept files with T2V or no T2V/I2V marker. REJECT files with I2V only.
   - I2V_ONLY: Accept files with I2V or no T2V/I2V marker. REJECT files with T2V only.
   - INCLUSIVE: Accept files with BOTH T2V and I2V in name, or NEITHER. Reject files with only one.
-  - NONE: No model type filtering at all. Accept any file regardless of T2V/I2V markers.
   
   Skipped files due to model type mode restrictions are shown in lora_info output for debugging.
+
+FALLBACK CLASSIFICATION (toggle on the node):
+  When a matched lora file has NEITHER a HIGH nor LOW marker in its name (e.g.
+  the user supplied a tag like <lora:MyStyle:1.0> and the file on disk is just
+  'MyStyle.safetensors' with no HIGH/LOW suffix), this toggle decides what to
+  do with the standalone match:
+  - HIGH (default): apply the file as the HIGH variant (no pair search).
+  - LOW: apply the file as the LOW variant (no pair search).
+  - SKIP: do not apply the file at all (legacy strict behavior).
+  This handles loras that ship as a single file without a HIGH/LOW pair 
 
 HIGH/LOW KEYWORDS:
   - HIGH variants: highnoise, highres, highfreq, high_noise, high, hn (as whole words), _h_ or -h- or _h. (suffix patterns)
@@ -85,7 +95,8 @@ class illumoraeWan22LoraLoaderByTextNode:
                 "model_high": ("MODEL",),
                 "model_low": ("MODEL",),
                 "clip": ("CLIP",),
-                "model_type_mode": (["T2V_ONLY", "I2V_ONLY", "INCLUSIVE", "NONE"], {"default": "T2V_ONLY"}),
+                "model_type_mode": (["NONE", "T2V_ONLY", "I2V_ONLY", "INCLUSIVE"], {"default": "NONE"}),
+                "fallback_classification": (["HIGH", "LOW", "SKIP"], {"default": "HIGH"}),
             },
             "optional": {
                 "DEBUG_MODE": ("BOOLEAN", {"default": False}),
@@ -139,7 +150,8 @@ class illumoraeWan22LoraLoaderByTextNode:
         cls, 
         lora_name: str, 
         filenames_with_dirs: List[Tuple[str, str]], 
-        model_type_mode: str = "T2V_ONLY",
+        model_type_mode: str = "NONE",
+        fallback_classification: str = "HIGH",
         DEBUG_MODE: bool = False
     ) -> Dict:
         """
@@ -305,6 +317,7 @@ class illumoraeWan22LoraLoaderByTextNode:
         
         primary_match = None
         primary_is_high = False
+        primary_is_low = False
         primary_score = 0
         skipped_model_type = []
         
@@ -314,9 +327,6 @@ class illumoraeWan22LoraLoaderByTextNode:
             
             file_is_high = is_high_variant(base_name_norm)
             file_is_low = is_low_variant(base_name_norm)
-            
-            if not file_is_high and not file_is_low:
-                continue
             
             if input_is_high and not file_is_high:
                 continue
@@ -356,8 +366,15 @@ class illumoraeWan22LoraLoaderByTextNode:
             if match_score > primary_score:
                 primary_match = (rel_path, base_dir)
                 primary_is_high = file_is_high
+                primary_is_low = file_is_low
                 primary_score = match_score
-                cls.debug_message(f"  [+] Primary candidate: {rel_path} | score: {match_score} | reason: {match_reason} | type: {'HIGH' if file_is_high else 'LOW'}", DEBUG_MODE)
+                if file_is_high:
+                    type_label = 'HIGH'
+                elif file_is_low:
+                    type_label = 'LOW'
+                else:
+                    type_label = 'NO-VARIANT'
+                cls.debug_message(f"  [+] Primary candidate: {rel_path} | score: {match_score} | reason: {match_reason} | type: {type_label}", DEBUG_MODE)
         
         if not primary_match or primary_score < 90:
             cls.debug_message(f"\n[-] No strong primary match found for '{lora_name}' (best score: {primary_score})", DEBUG_MODE)
@@ -367,6 +384,30 @@ class illumoraeWan22LoraLoaderByTextNode:
                 'skipped_model_type': skipped_model_type,
                 'search_mode': model_type_mode
             }
+        
+        if not primary_is_high and not primary_is_low:
+            cls.debug_message(f"\n[*] Primary match has no HIGH/LOW marker: {primary_match[0]} | applying fallback_classification='{fallback_classification}'", DEBUG_MODE)
+            if fallback_classification == "HIGH":
+                return {
+                    'high_match': primary_match,
+                    'low_match': None,
+                    'skipped_model_type': skipped_model_type,
+                    'search_mode': model_type_mode
+                }
+            elif fallback_classification == "LOW":
+                return {
+                    'high_match': None,
+                    'low_match': primary_match,
+                    'skipped_model_type': skipped_model_type,
+                    'search_mode': model_type_mode
+                }
+            else:
+                return {
+                    'high_match': None,
+                    'low_match': None,
+                    'skipped_model_type': skipped_model_type,
+                    'search_mode': model_type_mode
+                }
         
         cls.debug_message(f"\n[*] Primary match found: {primary_match[0]} ({'HIGH' if primary_is_high else 'LOW'})", DEBUG_MODE)
         
@@ -478,7 +519,8 @@ class illumoraeWan22LoraLoaderByTextNode:
         model_high,
         model_low,
         clip,
-        model_type_mode: str = "T2V_ONLY",
+        model_type_mode: str = "NONE",
+        fallback_classification: str = "HIGH",
         DEBUG_MODE: bool = False,
         *args,
         **kwargs
@@ -495,6 +537,7 @@ class illumoraeWan22LoraLoaderByTextNode:
         self.debug_message(f"\n{'#'*60}", DEBUG_MODE)
         self.debug_message(f"WAN2.2 LORA LOADER - PROCESSING START", DEBUG_MODE)
         self.debug_message(f"Model type mode: {model_type_mode}", DEBUG_MODE)
+        self.debug_message(f"Fallback classification: {fallback_classification}", DEBUG_MODE)
         self.debug_message(f"{'#'*60}", DEBUG_MODE)
         self.debug_message(f"Processing text for lora tags...", DEBUG_MODE)
         
@@ -513,6 +556,7 @@ class illumoraeWan22LoraLoaderByTextNode:
         info_lines = [
             "=== WAN2.2 LORA LOADING INFO ===",
             f"Model Type Mode: {model_type_mode}",
+            f"Fallback Classification: {fallback_classification}",
             f"Total LoRA tags parsed: {len(parsed_loras)}",
             ""
         ]
@@ -527,7 +571,7 @@ class illumoraeWan22LoraLoaderByTextNode:
         for lora_name, strength in parsed_loras:
             info_lines.append(f"Processing: <lora:{lora_name}:{strength}>")
             
-            result = self.find_matching_lora_pair(lora_name, filenames_with_dirs, model_type_mode, DEBUG_MODE)
+            result = self.find_matching_lora_pair(lora_name, filenames_with_dirs, model_type_mode, fallback_classification, DEBUG_MODE)
             high_match = result['high_match']
             low_match = result['low_match']
             skipped_model_type = result['skipped_model_type']
