@@ -607,7 +607,7 @@ class NodeMetadataScanner:
     #endregion
 
     #region S-NOTES
-    # Load Obsidian-style fields from notes/*.md (see review §2.11 — unintended path)
+    # Load Obsidian-style fields from notes/*.md (see review (section)2.11 - unintended path)
     def _load_notes(self, node: NodeMetadata) -> None:
         notes_dir = os.path.join(node.folder_path, "notes")
         if not os.path.isdir(notes_dir):
@@ -1133,7 +1133,7 @@ class NodeMetadataDashboard:
         legend_frame = ttk.Frame(parent)
         legend_frame.grid(row=2, column=0, sticky=tk.W, pady=(3, 0))
 
-        legend_text = "Legend: G=GROUP | T=TITLE | V=VERSION | D=DESC | I=IMAGE | M=ClassMappings | DM=DisplayMappings | ID=NodeID ends 'Node' | NF=NodeID format | PF=PyFile format | FD=Folder | PY=PyFile | CL=Class | \u21bb=Update Version | "
+        legend_text = "Legend: G=GROUP | T=TITLE | V=VERSION | D=DESC | I=IMAGE | M=ClassMappings | DM=DisplayMappings | ID=NodeID ends 'Node' | NF=NodeID format | PF=PyFile format | FD=Folder | PY=PyFile | CL=Class | ~>=Update Version | "
         ttk.Label(legend_frame, text=legend_text, font=("TkDefaultFont", 8), foreground=COLORS["fg_dim"]).pack(side=tk.LEFT)
 
         # Color-coded status indicators (small colored canvas squares)
@@ -1214,7 +1214,7 @@ class NodeMetadataDashboard:
             # Header text (append arrow if sorted)
             label = col["label"]
             if is_sorted:
-                label = label + (" \u25BC" if self.sort_reverse else " \u25B2")
+                label = label + (" v" if self.sort_reverse else " ^")
             text_x = x + col["width"] // 2 if col.get("align") == "center" else x + 5
             anchor = "center" if col.get("align") == "center" else "w"
             self.table_canvas.create_text(
@@ -1337,7 +1337,7 @@ class NodeMetadataDashboard:
         for row_idx in range(len(self.table_data)):
             btn = tk.Button(
                 self.table_canvas,
-                text="\u21bb",  # clockwise refresh arrow
+                text="~>",  # clockwise refresh arrow
                 bg=COLORS["accent_blue"], fg=COLORS["fg_text"],
                 activebackground=COLORS["bg_light"],
                 activeforeground=COLORS["fg_text"],
