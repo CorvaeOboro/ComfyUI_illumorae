@@ -1,0 +1,265 @@
+{
+  "id": "illumorae-workflow",
+  "revision": 0,
+  "last_node_id": 6,
+  "last_link_id": 3,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "illumoraeCheckpointRandomSelectorNode",
+      "pos": [
+        620,
+        360
+      ],
+      "size": [
+        320,
+        260
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "folder_path",
+          "type": "STRING",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "file_path",
+          "type": "STRING",
+          "links": [
+            2
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "filename",
+          "type": "STRING",
+          "links": [
+            3
+          ],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui_illumorae",
+        "Node name for S&R": "illumoraeCheckpointRandomSelectorNode",
+        "aux_id": "CorvaeOboro/ComfyUI_illumorae",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "D:/CODE/STABLEDIFFUSION_AUTO/models/Stable-diffusion",
+        "SDXL",
+        60,
+        "SDXL 10",
+        "Pony",
+        "SD15",
+        true,
+        ".safetensors,.sft"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 2,
+      "type": "PreviewAny",
+      "pos": [
+        1080,
+        360
+      ],
+      "size": [
+        240,
+        120
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 1
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewAny",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 3,
+      "type": "PreviewAny",
+      "pos": [
+        1080,
+        580
+      ],
+      "size": [
+        240,
+        120
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 2
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewAny",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 4,
+      "type": "PreviewAny",
+      "pos": [
+        1080,
+        800
+      ],
+      "size": [
+        240,
+        120
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 3
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewAny",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 5,
+      "type": "Note",
+      "pos": [
+        620,
+        60
+      ],
+      "size": [
+        360,
+        110
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "Checkpoint Random Selector\n[illumoraeCheckpointRandomSelectorNode]\nGroup: Checkpoint  Status: working"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 6,
+      "type": "Note",
+      "pos": [
+        620,
+        690
+      ],
+      "size": [
+        420,
+        200
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "Randomly selects a checkpoint from a category, changing each interval.\n\nInputs (required): base_folder:STRING, category:STRING, interval_minutes:INT, sdxl_folder_name:STRING, pony_folder_name:STRING, sd15_folder_name:STRING\nOutputs: folder_path:STRING, file_path:STRING, filename:STRING\n\nCheckpoint-group node. ckpt_name is a partial-match string widget; MODEL / CLIP / VAE outputs are shown via PreviewAny and would normally feed a KSampler."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "*"
+    ],
+    [
+      2,
+      1,
+      1,
+      3,
+      0,
+      "*"
+    ],
+    [
+      3,
+      1,
+      2,
+      4,
+      0,
+      "*"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Checkpoint: Checkpoint Random Selector",
+      "bounding": [
+        580.0,
+        20.0,
+        780.0,
+        940.0
+      ],
+      "color": "#8A8",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    "ue_links": [],
+    "links_added_by_ue": []
+  },
+  "version": 0.4
+}

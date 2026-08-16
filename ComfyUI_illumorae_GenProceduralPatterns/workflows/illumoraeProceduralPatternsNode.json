@@ -1,0 +1,278 @@
+{
+  "id": "illumorae-workflow",
+  "revision": 0,
+  "last_node_id": 6,
+  "last_link_id": 3,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "illumoraeProceduralPatternsNode",
+      "pos": [
+        620,
+        360
+      ],
+      "size": [
+        320,
+        260
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "pattern_image",
+          "type": "IMAGE",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "pattern_mask",
+          "type": "MASK",
+          "links": [
+            3
+          ],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui_illumorae",
+        "Node name for S&R": "illumoraeProceduralPatternsNode",
+        "aux_id": "CorvaeOboro/ComfyUI_illumorae",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        512,
+        512,
+        "random",
+        8,
+        0.3,
+        0.5,
+        12,
+        0.3,
+        0.5,
+        0.5,
+        0.5,
+        0.0,
+        1.0,
+        false,
+        false,
+        false,
+        0,
+        "fixed",
+        "#000000",
+        "#FFFFFF"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 2,
+      "type": "PreviewImage",
+      "pos": [
+        1080,
+        360
+      ],
+      "size": [
+        210,
+        250
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 1
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewImage",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 3,
+      "type": "MaskToImage",
+      "pos": [
+        1080,
+        580
+      ],
+      "size": [
+        220,
+        90
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "MaskToImage",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 4,
+      "type": "PreviewImage",
+      "pos": [
+        1320,
+        580
+      ],
+      "size": [
+        210,
+        250
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewImage",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 5,
+      "type": "Note",
+      "pos": [
+        620,
+        60
+      ],
+      "size": [
+        360,
+        110
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "Procedural Patterns\n[illumoraeProceduralPatternsNode]\nGroup: Image  Status: working"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 6,
+      "type": "Note",
+      "pos": [
+        620,
+        690
+      ],
+      "size": [
+        420,
+        200
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "Generates procedural symmetrical patterns (torus rings, radial beams, spiral rings, combined) for visual influence in image generation. Seed only affects output when pattern_type='random' or chaos_mode=True.\n\nInputs (required): width:INT, height:INT, pattern_type:ENUM, ring_count:INT, ring_thickness:FLOAT, ring_falloff:FLOAT, beam_count:INT, beam_width:FLOAT, beam_falloff:FLOAT, center_x:FLOAT, center_y:FLOAT, rotation:FLOAT, scale:FLOAT, invert:BOOLEAN, colorize:BOOLEAN, chaos_mode:BOOLEAN, seed:INT\nOutputs: pattern_image:IMAGE, pattern_mask:MASK\n\nImage-group node fed by an EmptyImage provider. Output is previewed with PreviewImage (or MaskToImage -> PreviewImage for MASK outputs)."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      3,
+      0,
+      4,
+      0,
+      "IMAGE"
+    ],
+    [
+      3,
+      1,
+      1,
+      3,
+      0,
+      "MASK"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Image: Procedural Patterns",
+      "bounding": [
+        580.0,
+        20.0,
+        990.0,
+        910.0
+      ],
+      "color": "#8A8",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    "ue_links": [],
+    "links_added_by_ue": []
+  },
+  "version": 0.4
+}

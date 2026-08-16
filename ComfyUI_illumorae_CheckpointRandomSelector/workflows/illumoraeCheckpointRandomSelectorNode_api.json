@@ -1,0 +1,42 @@
+{
+  "1": {
+    "class_type": "illumoraeCheckpointRandomSelectorNode",
+    "inputs": {
+      "base_folder": "D:/CODE/STABLEDIFFUSION_AUTO/models/Stable-diffusion",
+      "category": "SDXL",
+      "interval_minutes": 60,
+      "sdxl_folder_name": "SDXL 10",
+      "pony_folder_name": "Pony",
+      "sd15_folder_name": "SD15",
+      "safe_mode": true,
+      "file_extensions": ".safetensors,.sft"
+    }
+  },
+  "2": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        0
+      ]
+    }
+  },
+  "3": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        1
+      ]
+    }
+  },
+  "4": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        2
+      ]
+    }
+  }
+}

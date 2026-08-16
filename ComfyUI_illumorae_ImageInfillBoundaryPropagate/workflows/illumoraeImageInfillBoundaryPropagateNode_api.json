@@ -1,0 +1,72 @@
+{
+  "1": {
+    "class_type": "illumoraeImageInfillBoundaryPropagateNode",
+    "inputs": {
+      "mask_mode": "auto",
+      "propagate_iterations": 50,
+      "use_angular_drift": true,
+      "drift_radius": 3,
+      "use_center_blend": true,
+      "center_blend_strength": 0.1,
+      "blur_center": true,
+      "blur_strength": 10.0,
+      "blur_falloff_distance": 50,
+      "feather_amount": 10,
+      "debug_prints": false,
+      "image": [
+        "2",
+        0
+      ],
+      "mask": [
+        "3",
+        1
+      ]
+    }
+  },
+  "2": {
+    "class_type": "EmptyImage",
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "color": 0,
+      "batch_size": 1
+    }
+  },
+  "3": {
+    "class_type": "CreateShapeMask",
+    "inputs": {
+      "side_length": 512,
+      "side_mask": 0,
+      "shape": "circle",
+      "image_width": 512,
+      "image_height": 512
+    }
+  },
+  "4": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "1",
+        0
+      ]
+    }
+  },
+  "5": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "1",
+        1
+      ]
+    }
+  },
+  "6": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "1",
+        2
+      ]
+    }
+  }
+}

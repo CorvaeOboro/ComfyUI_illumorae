@@ -1,0 +1,32 @@
+{
+  "1": {
+    "class_type": "illumoraeImageContrastLimitedAdaptiveHistogramEqualizationNode",
+    "inputs": {
+      "clip_limit": 2.0,
+      "tile_grid_width": 8,
+      "tile_grid_height": 8,
+      "input_image": [
+        "2",
+        0
+      ]
+    }
+  },
+  "2": {
+    "class_type": "EmptyImage",
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "color": 0,
+      "batch_size": 1
+    }
+  },
+  "3": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "1",
+        0
+      ]
+    }
+  }
+}

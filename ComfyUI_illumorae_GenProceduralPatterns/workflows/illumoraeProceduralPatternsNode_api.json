@@ -1,0 +1,53 @@
+{
+  "1": {
+    "class_type": "illumoraeProceduralPatternsNode",
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "pattern_type": "random",
+      "ring_count": 8,
+      "ring_thickness": 0.3,
+      "ring_falloff": 0.5,
+      "beam_count": 12,
+      "beam_width": 0.3,
+      "beam_falloff": 0.5,
+      "center_x": 0.5,
+      "center_y": 0.5,
+      "rotation": 0.0,
+      "scale": 1.0,
+      "invert": false,
+      "colorize": false,
+      "chaos_mode": false,
+      "seed": 0,
+      "color_a": "#000000",
+      "color_b": "#FFFFFF"
+    }
+  },
+  "2": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "1",
+        0
+      ]
+    }
+  },
+  "3": {
+    "class_type": "MaskToImage",
+    "inputs": {
+      "mask": [
+        "1",
+        1
+      ]
+    }
+  },
+  "4": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "3",
+        0
+      ]
+    }
+  }
+}

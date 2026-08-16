@@ -1,0 +1,47 @@
+{
+  "1": {
+    "class_type": "illumoraeCheckpointLoaderByStringDirtyNode",
+    "inputs": {
+      "ckpt_name": "sd_xl_base",
+      "DEBUG_MODE": false,
+      "safe_mode": true,
+      "file_extensions": ".safetensors,.sft"
+    }
+  },
+  "2": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        0
+      ]
+    }
+  },
+  "3": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        1
+      ]
+    }
+  },
+  "4": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        2
+      ]
+    }
+  },
+  "5": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        3
+      ]
+    }
+  }
+}
