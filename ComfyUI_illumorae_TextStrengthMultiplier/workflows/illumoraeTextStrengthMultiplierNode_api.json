@@ -1,0 +1,33 @@
+{
+  "1": {
+    "class_type": "illumoraeTextStrengthMultiplierNode",
+    "inputs": {
+      "multiplier": 1.0,
+      "individual_cap_enabled": false,
+      "individual_cap": 1.0,
+      "individual_min_enabled": false,
+      "individual_min": 0.0,
+      "total_cap_enabled": false,
+      "total_cap": 1.0,
+      "text": [
+        "2",
+        0
+      ]
+    }
+  },
+  "2": {
+    "class_type": "PrimitiveStringMultiline",
+    "inputs": {
+      "string": "( berry : 1.2) , carrot , ( radish :1.3)\nplants , <lora:berry:0.6>\n<lora:carrot:0.3>"
+    }
+  },
+  "3": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        0
+      ]
+    }
+  }
+}

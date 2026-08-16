@@ -3,9 +3,10 @@ TITLE::Text To Filename Safe Text
 DESCRIPTIONSHORT::Converts text into a filename-safe string (Windows-safe) with normalization, character filtering, and length truncation.
 IMAGE::comfyui_illumorae_text_to_string_filename_safe.png
 GROUP::Text
-GROUPORDER::3
-LISTORDER::4
-VERSION::20260127
+GROUPORDER::5
+LISTORDER::110
+VERSION::20260811
+STATUS::working
 """
 import re
 import string
@@ -60,11 +61,13 @@ class illumoraeTextToFilenameSafeTextNode:
         "-": "_",
     }
 
-    # ---- BAD FILENAME CHARACTERS & CATEGORIES ----
-    BAD_FILENAME_CHAR_SET = set([
-        '\\', '/', ':', '*', '?', '"', '<', '>', '|', '@', '~', '`', '^', '=', '+', '[', ']', '{', '}', '(', ')', ';', ',',
-        '…', '–', '—', '•', '“', '”', '‘', '’', '′', '″', '‽', '†', '‡', '∑', '∯', '∫', '∉', '∈', '∋', '∂', '∇', '∩', '∪', '∧', '∨', '∃', '∄', '∅', '∏', '−', '∓', '∔', '∗', '∘', '√', '∞', '∟', '∠', '∡', '∢', '∣', '∤', '∥', '∦', '∧', '∨', '∩', '∪', '∫', '∬', '∭', '∮', '∯', '∰', '∱', '∲', '∳', '∴', '∵', '∶', '∷', '∸', '∹', '∺', '∻', '∼', '∽', '∾', '≁', '≃', '≄', '≅', '≆', '≇', '≈', '≉', '≊', '≋', '≌', '≍', '≎', '≏', '≐', '≑', '≒', '≓', '≔', '≕', '≖', '≗', '≘', '≙', '≚', '≛', '≜', '≝', '≞', '≟', '≠', '≡', '≢', '≣', '≤', '≥', '≦', '≧', '≨', '≩', '≪', '≫', '≬', '≭', '≮', '≯', '≰', '≱', '≲', '≳', '≴', '≵', '≶', '≷', '≸', '≹', '≺', '≻', '≼', '≽', '≾', '≿', '⊀', '⊁', '⊂', '⊃', '⊄', '⊅', '⊆', '⊇', '⊈', '⊉', '⊊', '⊋', '⊌', '⊍', '⊎', '⊏', '⊐', '⊑', '⊒', '⊓', '⊔', '⊕', '⊖', '⊗', '⊘', '⊙', '⊚', '⊛', '⊜', '⊝', '⊞', '⊟', '⊠', '⊡', '⊢', '⊣', '⊤', '⊥', '⊦', '⊧', '⊨', '⊩', '⊪', '⊫', '⊬', '⊭', '⊮', '⊯', '⊰', '⊱', '⊲', '⊳', '⊴', '⊵', '⊶', '⊷', '⊸', '⊹', '⊺', '⊻', '⊼', '⊽', '⊾', '⊿', '⋀', '⋁', '⋂', '⋃', '⋄', '⋅', '⋆', '⋇', '⋈', '⋉', '⋊', '⋋', '⋌', '⋍', '⋎', '⋏', '⋐', '⋑', '⋒', '⋓', '⋔', '⋕', '⋖', '⋗', '⋘', '⋙', '⋚', '⋛', '⋜', '⋝', '⋞', '⋟', '⋠', '⋡', '⋢', '⋣', '⋤', '⋥', '⋦', '⋧', '⋨', '⋩', '⋪', '⋫', '⋬', '⋭', '⋮', '⋯', '⋰', '⋱', '⋲', '⋳', '⋴', '⋵', '⋶', '⋷', '⋸', '⋹', '⋺', '⋻', '⋼', '⋽', '⋾', '⋿', '⌀', '⌁', '⌂', '⌃', '⌄', '⌅', '⌆', '⌇', '⌈', '⌉', '⌊', '⌋', '⌌', '⌍', '⌎', '⌏', '⌐', '⌑', '⌒', '⌓', '⌔', '⌕', '⌖', '⌗', '⌘', '⌙', '⌚', '⌛', '⌜', '⌝', '⌞', '⌟', '⌠', '⌡', '⌢', '⌣', '⌤', '⌥', '⌦', '⌧', '⌨', '〈', '〉', '⌫', '⌬', '⌭', '⌮', '⌯', '⌰', '⌱', '⌲', '⌳', '⌴', '⌵', '⌶', '⌷', '⌸', '⌹', '⌺', '⌻', '⌼', '⌽', '⌾', '⌿', '⍀', '⍁', '⍂', '⍃', '⍄', '⍅', '⍆', '⍇', '⍈', '⍉', '⍊', '⍋', '⍌', '⍍', '⍎', '⍏', '⍐', '⍑', '⍒', '⍓', '⍔', '⍕', '⍖', '⍗', '⍘', '⍙', '⍚', '⍛', '⍜', '⍝', '⍞', '⍟', '⍠', '⍡', '⍢', '⍣', '⍤', '⍥', '⍦', '⍧', '⍨', '⍩', '⍪', '⍫', '⍬', '⍭', '⍮', '⍯', '⍰', '⍱', '⍲', '⍳', '⍴', '⍵', '⍶', '⍷', '⍸', '⍹', '⍺', '⍻', '⍼', '⍽', '⍾', '⍿', '⎀', '⎁', '⎂', '⎃', '⎄', '⎅', '⎆', '⎇', '⎈', '⎉', '⎊', '⎋', '⎌', '⎍', '⎎', '⎏', '⎐', '⎑', '⎒', '⎓', '⎔', '⎕', '⎖', '⎗', '⎘', '⎙', '⎚', '⎛', '⎜', '⎝', '⎞', '⎟', '⎠', '⎡', '⎢', '⎣', '⎤', '⎥', '⎦', '⎧', '⎨', '⎩', '⎪', '⎫', '⎬', '⎭', '⎮', '⎯', '⎰', '⎱', '⎲', '⎳', '⎴', '⎵', '⎶', '⎷', '⎸', '⎹', '⎺', '⎻', '⎼', '⎽', '⎾', '⎿', '⏀', '⏁', '⏂', '⏃', '⏄', '⏅', '⏆', '⏇', '⏈', '⏉', '⏊', '⏋', '⏌', '⏍', '⏎', '⏏', '⏐', '⏑', '⏒', '⏓', '⏔', '⏕', '⏖', '⏗', '⏘', '⏙', '⏚', '⏛', '⏜', '⏝', '⏞', '⏟', '⏠', '⏡', '⏢', '⏣', '⏤', '⏥', '⏦', '⏧', '⏨', '⏩', '⏪', '⏫', '⏬', '⏭', '⏮', '⏯', '⏰', '⏱', '⏲', '⏳', '⏴', '⏵', '⏶', '⏷', '⏸', '⏹', '⏺', '⏻', '⏼', '⏽', '⏾', '⏿'
-    ])
+    # ---- BAD FILENAME CHARACTERS ----
+    # No per-character enumeration. After NFKD normalization decomposes
+    # accented letters into base + combining marks, any remaining non-ASCII
+    # character (combining marks, CJK, math symbols, emoji, box-drawing,
+    # technical symbols, etc.) is rejected by the ord > 127 catch-all in
+    # is_bad_char. ASCII punctuation is handled separately by the
+    # string.punctuation regex strip below.
     BAD_UNICODE_CATEGORIES = ("C", "M", "S")
 
     # Reserved Windows filenames
@@ -126,14 +129,17 @@ class illumoraeTextToFilenameSafeTextNode:
         return (string_in,)
 
     def is_bad_char(self, c):
+        # Underscore is always kept (it is the filename word separator).
         if c == "_":
             return False
-        cat = unicodedata.category(c)
-        if c in self.BAD_FILENAME_CHAR_SET:
-            return True
-        if cat.startswith(self.BAD_UNICODE_CATEGORIES):
-            return True
+        # Reject all non-ASCII. After NFKD normalization this catches
+        # combining marks, CJK, math symbols, emoji, box-drawing, and any
+        # other unicode that did not decompose to ASCII base letters.
         if ord(c) > 127:
+            return True
+        # Reject control characters and combining marks by unicode category.
+        cat = unicodedata.category(c)
+        if cat.startswith(self.BAD_UNICODE_CATEGORIES):
             return True
         return False
 

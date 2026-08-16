@@ -1,0 +1,28 @@
+{
+  "1": {
+    "class_type": "illumoraeLoRATextStrengthVisualizerWordPlotNode",
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "text": [
+        "2",
+        0
+      ]
+    }
+  },
+  "2": {
+    "class_type": "PrimitiveStringMultiline",
+    "inputs": {
+      "string": "a portrait of a wizard , <lora:style:0.8> , <lora:detail:0.4>"
+    }
+  },
+  "3": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "1",
+        0
+      ]
+    }
+  }
+}
