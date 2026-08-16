@@ -1,0 +1,39 @@
+{
+  "1": {
+    "class_type": "illumoraeSaveAnimatedWEBPFolderPathNode",
+    "inputs": {
+      "folderpath_input": "C:/output",
+      "foldername_prefix": "gen",
+      "filename_prefix": "demo",
+      "fps": 20.0,
+      "lossless": true,
+      "quality": 100,
+      "method": "",
+      "save_metadata": "enabled",
+      "counter_digits": 3,
+      "counter_position": "last",
+      "images": [
+        "2",
+        0
+      ]
+    }
+  },
+  "2": {
+    "class_type": "EmptyImage",
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "color": 0,
+      "batch_size": 1
+    }
+  },
+  "3": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        0
+      ]
+    }
+  }
+}

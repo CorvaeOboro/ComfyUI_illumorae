@@ -1,0 +1,27 @@
+{
+  "1": {
+    "class_type": "illumoraeLoadTextFileGracefulNode",
+    "inputs": {
+      "file_path": "",
+      "debug_mode": false
+    }
+  },
+  "2": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        0
+      ]
+    }
+  },
+  "3": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        1
+      ]
+    }
+  }
+}

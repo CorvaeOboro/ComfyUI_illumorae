@@ -1,0 +1,60 @@
+{
+  "1": {
+    "class_type": "illumoraeLoadRandomFileFromPathByPrefixNode",
+    "inputs": {
+      "folder": "C:/input",
+      "prefix": "image",
+      "extension": ".md",
+      "recursive": false,
+      "case_sensitive": false,
+      "seed": -1,
+      "index_override": -1,
+      "debug_mode": false
+    }
+  },
+  "2": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        0
+      ]
+    }
+  },
+  "3": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        1
+      ]
+    }
+  },
+  "4": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        2
+      ]
+    }
+  },
+  "5": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        3
+      ]
+    }
+  },
+  "6": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        4
+      ]
+    }
+  }
+}

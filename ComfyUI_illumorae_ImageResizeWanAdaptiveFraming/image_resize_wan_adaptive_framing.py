@@ -1,9 +1,12 @@
 """
 TITLE::Image Resize WAN Adaptive Framing
 DESCRIPTIONSHORT::Auto-selects WAN-friendly vertical/horizontal resolution and applies optional human-centric framing before resize.
-VERSION::20260412
+VERSION::20260511
 IMAGE::comfyui_illumorae_image_resize_wan_adaptive_framing.png
 GROUP::Image
+GROUPORDER::1
+LISTORDER::91
+STATUS::working
 
 NOTES:
 - Uses lightweight OpenCV detectors (Haar face + HOG person), not deep checkpoints.
@@ -12,15 +15,28 @@ NOTES:
 - Supports crop mode (content-preserving framing) and pad mode (fit with soft bars).
 - Prioritizes low memory over detector accuracy.
 """
-
+#region IMPORTS
 from typing import List, Optional, Tuple
 
 import cv2
 import numpy as np
 import torch
-from comfy.utils import common_upscale
 
+try:
+    from comfy.utils import common_upscale
+    _HAS_COMMON_UPSCALE = True
+except ImportError:
+    # Fallback for environments without ComfyUI (e.g. unit tests). The
+    # cv2.resize fallback produces equivalent results for plain resize
+    # (common_upscale is always called with crop=None in this node).
+    common_upscale = None
+    _HAS_COMMON_UPSCALE = False
+
+# Source images with a longest side above this are downscaled before running
+# the CV detectors (Haar/HOG) to keep detection runtime bounded; detection
+# coordinates are scaled back to the original resolution afterwards.
 MAX_RESOLUTION = 4096
+#endregion
 
 
 class illumoraeImageResizeWanAdaptiveFramingNode:
@@ -31,7 +47,15 @@ class illumoraeImageResizeWanAdaptiveFramingNode:
     - Automatically map source images to WAN resolution presets.
     - Preserve subject framing using low-cost face/body detection and anchor .
     - Avoid loading any additional neural model checkpoints into VRAM.
+
+    Framing priority for `auto_subject`: face anchoring is attempted first;
+    body anchoring is used only when no face is detected. `human_face` mode
+    has no body fallback (falls back to center when no face is found).
     """
+
+    #region C-CONFIG
+    # WAN resolution presets (landscape orientation). Vertical presets are
+    # derived by transposing these at selection time.
 
     WAN_TIER_PRESETS_LANDSCAPE = {
         "small": [(416, 240)],   # half of main
@@ -39,40 +63,199 @@ class illumoraeImageResizeWanAdaptiveFramingNode:
         "high": [(1280, 720)],
     }
 
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "image": ("IMAGE",),
-                "orientation_mode": (["auto", "force_horizontal", "force_vertical"], {"default": "auto"}),
-                "framing_mode": (["auto_subject", "human_face", "human_body", "center"], {"default": "auto_subject"}),
-                "resize_mode": (["crop", "pad"], {"default": "crop"}),
-                "resolution_tier": (["auto", "small", "main", "high"], {"default": "auto"}),
-                "upscale_method": (["nearest-exact", "bilinear", "area", "bicubic", "lanczos"], {"default": "lanczos"}),
-                "anchor_strength": ("FLOAT", {"default": 0.85, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "top_bias": ("FLOAT", {"default": 0.18, "min": -0.5, "max": 0.5, "step": 0.01}),
-                "face_min_percent": ("FLOAT", {"default": 3.0, "min": 0.5, "max": 40.0, "step": 0.5}),
-                "detect_scale_factor": ("FLOAT", {"default": 1.1, "min": 1.01, "max": 1.5, "step": 0.01}),
-                "detect_min_neighbors": ("INT", {"default": 5, "min": 1, "max": 12, "step": 1}),
-            },
-            "optional": {
-                "debug_prints": ("BOOLEAN", {"default": False}),
-            },
-        }
-
-    RETURN_TYPES = ("IMAGE", "IMAGE", "INT", "INT", "STRING")
-    RETURN_NAMES = ("resized_image", "debug_image", "width", "height", "selected_preset")
-    FUNCTION = "resize_adaptive"
-    CATEGORY = "illumorae"
-    DESCRIPTION = "Auto-selects WAN-friendly resolution and applies subject/human-centric framing to fit source images for video prep."
-
     def __init__(self):
         self._face_cascade = None
         self._hog = None
+    #endregion
 
-    def _debug_print(self, debug_prints: bool, *args):
-        if debug_prints:
-            print(*args)
+    #region C-PIPE
+    # Main batch pipeline and FUNCTION entry point. Orchestrates the per-image
+    # workflow: orient -> select preset -> detect subjects -> compute anchor ->
+    # compute crop box -> resize (crop/pad) -> emit resized + debug tensors.
+
+    def resize_adaptive(
+        self,
+        image: torch.Tensor,
+        orientation_mode: str,
+        framing_mode: str,
+        resize_mode: str,
+        resolution_tier: str,
+        upscale_method: str,
+        anchor_strength: float,
+        top_bias: float,
+        face_min_percent: float,
+        detect_scale_factor: float,
+        detect_min_neighbors: int,
+        debug_prints: bool = False,
+        emit_debug_image: bool = True,
+    ) -> Tuple[torch.Tensor, torch.Tensor, int, int, str]:
+        """
+        Main adaptive resize pipeline.
+
+        Steps per image:
+        1) Resolve orientation (auto/forced).
+        2) Select WAN-friendly preset resolution.
+        3) Detect faces and people with lightweight CV detectors.
+        4) Compute anchor and crop box.
+        5) Apply crop or pad resize mode.
+        6) Return resized image, debug overlay, and chosen preset metadata.
+        """
+        if image.dim() == 3:
+            image = image.unsqueeze(0)
+
+        batch_size = image.shape[0]
+        outputs = []
+        debug_outputs = []
+
+        selected_w = 0
+        selected_h = 0
+        selected_label = ""
+
+        for b in range(batch_size):
+            src_np = image[b].detach().cpu().numpy().astype(np.float32)
+            src_h, src_w = src_np.shape[:2]
+
+            orientation = self._choose_orientation(src_w, src_h, orientation_mode)
+            target_w, target_h = self._select_preset(src_w, src_h, orientation, resolution_tier)
+            selected_w = target_w
+            selected_h = target_h
+            selected_label = f"{target_w}x{target_h} ({orientation})"
+
+            faces, people = self._detect_subjects(
+                src_np, src_w, src_h, detect_scale_factor, detect_min_neighbors, face_min_percent
+            )
+
+            anchor_x, anchor_y, primary_face, primary_person, chosen_type = self._get_anchor(
+                src_w=src_w,
+                src_h=src_h,
+                faces=faces,
+                people=people,
+                framing_mode=framing_mode,
+                anchor_strength=anchor_strength,
+                top_bias=top_bias,
+            )
+
+            crop_w, crop_h = self._compute_crop_size(src_w, src_h, target_w, target_h)
+            crop_box = self._compute_crop_box(src_w, src_h, crop_w, crop_h, anchor_x, anchor_y)
+            x0, y0, cw, ch = crop_box
+
+            if resize_mode == "pad":
+                resized_np = self._resize_pad(src_np, target_w, target_h, anchor_x, anchor_y, upscale_method)
+            else:
+                crop_np = src_np[y0:y0 + ch, x0:x0 + cw, :]
+                resized_np = self._resize_crop(crop_np, target_w, target_h, upscale_method)
+
+            if emit_debug_image:
+                debug_np = self._build_debug(
+                    src_np=src_np,
+                    crop_box=crop_box,
+                    target_w=target_w,
+                    target_h=target_h,
+                    primary_face=primary_face,
+                    primary_person=primary_person,
+                    chosen_type=chosen_type,
+                )
+            else:
+                # Debug overlay skipped; pass source through unchanged to keep
+                # the debug_image output shape consistent with the source batch.
+                debug_np = src_np
+
+            self._debug_print(
+                debug_prints,
+                f"batch={b} src={src_w}x{src_h} target={target_w}x{target_h} mode={resize_mode} anchor={chosen_type}",
+            )
+
+            outputs.append(torch.from_numpy(resized_np).float())
+            debug_outputs.append(torch.from_numpy(debug_np).float())
+
+        return (
+            torch.stack(outputs, dim=0),
+            torch.stack(debug_outputs, dim=0),
+            int(selected_w),
+            int(selected_h),
+            selected_label,
+        )
+    #endregion
+
+    #region C-ORIENT
+    # Resolve output orientation from source geometry or user override.
+
+    def _choose_orientation(self, src_w: int, src_h: int, orientation_mode: str) -> str:
+        """Resolve output orientation: forced horizontal/vertical or auto by source geometry."""
+        if orientation_mode == "force_vertical":
+            return "vertical"
+        if orientation_mode == "force_horizontal":
+            return "horizontal"
+        return "horizontal" if src_w >= src_h else "vertical"
+    #endregion
+
+    #region C-PRESET
+    # Build candidate list from WAN tiers and pick the best-fitting preset
+    # using aspect-ratio + area scoring.
+
+    def _get_candidates(self, orientation: str, tier: str) -> List[Tuple[int, int]]:
+        """
+        Build candidate preset list based on orientation and WAN tier.
+
+        Requested WAN tiers:
+        - high: 1280x720 (or 720x1280)
+        - main: 832x480 (or 480x832)
+        - small: half main = 416x240 (or 240x416)
+
+        Vertical presets are derived by transposing landscape presets.
+        """
+        if tier in self.WAN_TIER_PRESETS_LANDSCAPE:
+            landscape_candidates = list(self.WAN_TIER_PRESETS_LANDSCAPE[tier])
+        else:
+            # auto: allow chooser to match against all known WAN tiers
+            landscape_candidates = []
+            for tier_name in ("small", "main", "high"):
+                landscape_candidates.extend(self.WAN_TIER_PRESETS_LANDSCAPE[tier_name])
+
+        if orientation == "vertical":
+            all_candidates = [(h, w) for (w, h) in landscape_candidates]
+        else:
+            all_candidates = landscape_candidates
+
+        return all_candidates
+
+    def _select_preset(
+        self,
+        src_w: int,
+        src_h: int,
+        orientation: str,
+        tier: str,
+    ) -> Tuple[int, int]:
+        """
+        Pick best preset using ratio + area scoring.
+
+        Score favors aspect-ratio match first, then closeness of pixel area.
+        """
+        candidates = self._get_candidates(orientation, tier)
+        src_ratio = src_w / src_h
+        src_area = float(src_w * src_h)
+
+        best = candidates[0]
+        best_score = 1e18
+
+        for tw, th in candidates:
+            ratio = tw / th
+            ratio_error = abs(src_ratio - ratio)
+            area_error = abs(np.log(max(1.0, src_area) / float(max(1, tw * th))))
+            # 4.0 weights aspect-ratio match 4x over area match; preserving
+            # ratio is prioritized over matching exact pixel count.
+            score = ratio_error * 4.0 + area_error
+            if score < best_score:
+                best_score = score
+                best = (tw, th)
+
+        return best
+    #endregion
+
+    #region C-DETECT
+    # Lightweight OpenCV detectors (Haar face cascade + HOG person descriptor).
+    # _detect_subjects wraps both with optional downscaling for large images
+    # and rescales boxes back to source coordinates.
 
     def _get_face_cascade(self):
         """Lazily load and cache OpenCV Haar face detector."""
@@ -127,107 +310,77 @@ class illumoraeImageResizeWanAdaptiveFramingNode:
         face_list.sort(key=lambda r: r[2] * r[3], reverse=True)
         return face_list
 
-    def _detect_people(self, image_rgb: np.ndarray) -> List[Tuple[int, int, int, int]]:
+    def _detect_people(self, image_rgb: np.ndarray, scale_factor: float = 1.05) -> List[Tuple[int, int, int, int]]:
         """
         Detect human body boxes with OpenCV HOG descriptor.
 
         Used as fallback when face detection is unavailable/weak.
+        ``scale_factor`` controls the multi-scale step (analogous to Haar's
+        ``scaleFactor``); larger values run faster but may miss small bodies.
         """
         hog = self._get_hog()
         if hog is None:
             return []
 
         img_u8 = (np.clip(image_rgb, 0.0, 1.0) * 255.0).astype(np.uint8)
+        # Histogram equalization is intentionally skipped here: HOG is robust
+        # to contrast variation (gradient normalization), unlike Haar which
+        # benefits from equalization.
         gray = cv2.cvtColor(img_u8, cv2.COLOR_RGB2GRAY)
 
         rects, _ = hog.detectMultiScale(
             gray,
             winStride=(8, 8),
             padding=(8, 8),
-            scale=1.05,
+            scale=scale_factor,
         )
 
         people = [(int(x), int(y), int(w), int(h)) for (x, y, w, h) in rects]
         people.sort(key=lambda r: r[2] * r[3], reverse=True)
         return people
 
-    def _choose_orientation(self, src_w: int, src_h: int, orientation_mode: str) -> str:
-        """Resolve output orientation: forced horizontal/vertical or auto by source geometry."""
-        if orientation_mode == "force_vertical":
-            return "vertical"
-        if orientation_mode == "force_horizontal":
-            return "horizontal"
-        return "horizontal" if src_w >= src_h else "vertical"
-
-    def _get_candidates(self, orientation: str, tier: str) -> List[Tuple[int, int]]:
-        """
-        Build candidate preset list based on orientation and WAN tier.
-
-        Requested WAN tiers:
-        - high: 1280x720 (or 720x1280)
-        - main: 832x480 (or 480x832)
-        - small: half main = 416x240 (or 240x416)
-
-        Vertical presets are derived by transposing landscape presets.
-        """
-        if tier in self.WAN_TIER_PRESETS_LANDSCAPE:
-            landscape_candidates = list(self.WAN_TIER_PRESETS_LANDSCAPE[tier])
-        else:
-            # auto: allow chooser to match against all known WAN tiers
-            landscape_candidates = []
-            for tier_name in ("small", "main", "high"):
-                landscape_candidates.extend(self.WAN_TIER_PRESETS_LANDSCAPE[tier_name])
-
-        if orientation == "vertical":
-            all_candidates = [(h, w) for (w, h) in landscape_candidates]
-        else:
-            all_candidates = landscape_candidates
-
-        return all_candidates
-
-    def _select_preset(
+    def _detect_subjects(
         self,
+        src_np: np.ndarray,
         src_w: int,
         src_h: int,
-        orientation: str,
-        tier: str,
-    ) -> Tuple[int, int]:
+        scale_factor: float,
+        min_neighbors: int,
+        face_min_percent: float,
+    ) -> Tuple[List[Tuple[int, int, int, int]], List[Tuple[int, int, int, int]]]:
         """
-        Pick best preset using ratio + area scoring.
+        Run face + person detection with bounded runtime.
 
-        Score favors aspect-ratio match first, then closeness of pixel area.
+        If the source image's longest side exceeds ``MAX_RESOLUTION``, the
+        image is downscaled to that cap for detection only; returned boxes
+        are rescaled back to the original source coordinates so downstream
+        anchor/crop math operates in source space.
         """
-        candidates = self._get_candidates(orientation, tier)
-        src_ratio = src_w / src_h
-        src_area = float(src_w * src_h)
+        longest = max(src_w, src_h)
+        scale = min(1.0, float(MAX_RESOLUTION) / float(max(1, longest)))
+        if scale >= 1.0:
+            faces = self._detect_faces(src_np, scale_factor, min_neighbors, face_min_percent)
+            people = self._detect_people(src_np, scale_factor)
+            return faces, people
 
-        best = candidates[0]
-        best_score = 1e18
+        det_w = max(1, int(round(src_w * scale)))
+        det_h = max(1, int(round(src_h * scale)))
+        det_np = self._resize_crop(src_np, det_w, det_h, "area")
 
-        for tw, th in candidates:
-            ratio = tw / th
-            ratio_error = abs(src_ratio - ratio)
-            area_error = abs(np.log(max(1.0, src_area) / float(max(1, tw * th))))
-            score = ratio_error * 4.0 + area_error
-            if score < best_score:
-                best_score = score
-                best = (tw, th)
+        # face_min_percent is relative to the detection image, so it scales
+        # naturally; no adjustment needed since it is a percentage of min dim.
+        faces = self._detect_faces(det_np, scale_factor, min_neighbors, face_min_percent)
+        people = self._detect_people(det_np, scale_factor)
 
-        return best
+        inv = 1.0 / scale
+        faces = [(int(round(x * inv)), int(round(y * inv)), int(round(w * inv)), int(round(h * inv))) for (x, y, w, h) in faces]
+        people = [(int(round(x * inv)), int(round(y * inv)), int(round(w * inv)), int(round(h * inv))) for (x, y, w, h) in people]
+        return faces, people
+    #endregion
 
-    def _compute_crop_size(self, src_w: int, src_h: int, target_w: int, target_h: int) -> Tuple[int, int]:
-        """Compute maximal in-bounds crop that matches target aspect ratio."""
-        src_ratio = src_w / src_h
-        target_ratio = target_w / target_h
-
-        if src_ratio > target_ratio:
-            crop_h = src_h
-            crop_w = max(1, int(round(crop_h * target_ratio)))
-        else:
-            crop_w = src_w
-            crop_h = max(1, int(round(crop_w / target_ratio)))
-
-        return min(crop_w, src_w), min(crop_h, src_h)
+    #region C-ANCHOR
+    # Compute framing anchor from face/person/center heuristics, blending
+    # the chosen target point with the geometric center via anchor_strength.
 
     def _get_anchor(
         self,
@@ -268,11 +421,34 @@ class illumoraeImageResizeWanAdaptiveFramingNode:
             target_y = y + h * 0.32
             chosen_type = "person"
 
+        # Positive top_bias shifts the anchor downward, placing the subject
+        # higher in the output frame (more headroom below, less above).
+        # The 0.2 factor damps the bias to a maximum of 10% of image height
+        # at top_bias=0.5, keeping the shift compositional rather than extreme.
         target_y = target_y + (src_h * top_bias * 0.2)
         anchor_x = center_x * (1.0 - anchor_strength) + target_x * anchor_strength
         anchor_y = center_y * (1.0 - anchor_strength) + target_y * anchor_strength
 
         return anchor_x, anchor_y, primary_face, primary_person, chosen_type
+    #endregion
+
+    #region C-CROP
+    # Compute maximal in-bounds crop dimensions matching the target aspect
+    # ratio, then convert anchor + crop size into clamped integer bounds.
+
+    def _compute_crop_size(self, src_w: int, src_h: int, target_w: int, target_h: int) -> Tuple[int, int]:
+        """Compute maximal in-bounds crop that matches target aspect ratio."""
+        src_ratio = src_w / src_h
+        target_ratio = target_w / target_h
+
+        if src_ratio > target_ratio:
+            crop_h = src_h
+            crop_w = max(1, int(round(crop_h * target_ratio)))
+        else:
+            crop_w = src_w
+            crop_h = max(1, int(round(crop_w / target_ratio)))
+
+        return min(crop_w, src_w), min(crop_h, src_h)
 
     def _compute_crop_box(
         self,
@@ -290,12 +466,35 @@ class illumoraeImageResizeWanAdaptiveFramingNode:
         x0 = int(np.clip(x0, 0, max(0, src_w - crop_w)))
         y0 = int(np.clip(y0, 0, max(0, src_h - crop_h)))
         return x0, y0, crop_w, crop_h
+    #endregion
+
+    #region C-RESIZE
+    # Resize a crop region to exact target dimensions (via ComfyUI
+    # common_upscale or cv2.resize fallback) and pad-mode fit with
+    # soft-bar background fill.
 
     def _resize_crop(self, crop_np: np.ndarray, target_w: int, target_h: int, upscale_method: str) -> np.ndarray:
-        """Resize a cropped region to exact target size via ComfyUI common_upscale."""
-        crop_t = torch.from_numpy(crop_np).float().unsqueeze(0)
-        resized = common_upscale(crop_t.movedim(-1, 1), target_w, target_h, upscale_method, None).movedim(1, -1)
-        return resized[0].detach().cpu().numpy().astype(np.float32)
+        """Resize a cropped region to exact target size via ComfyUI common_upscale.
+
+        Falls back to ``cv2.resize`` when ``comfy.utils`` is not available
+        (e.g. unit tests outside a ComfyUI install). ``common_upscale`` is
+        always called with ``crop=None`` here, so the fallback is equivalent.
+        """
+        if _HAS_COMMON_UPSCALE:
+            crop_t = torch.from_numpy(crop_np).float().unsqueeze(0)
+            resized = common_upscale(crop_t.movedim(-1, 1), target_w, target_h, upscale_method, None).movedim(1, -1)
+            return resized[0].detach().cpu().numpy().astype(np.float32)
+
+        method_map = {
+            "nearest-exact": cv2.INTER_NEAREST_EXACT,
+            "bilinear": cv2.INTER_LINEAR,
+            "area": cv2.INTER_AREA,
+            "bicubic": cv2.INTER_CUBIC,
+            "lanczos": cv2.INTER_LANCZOS4,
+        }
+        interp = method_map.get(upscale_method, cv2.INTER_LANCZOS4)
+        resized = cv2.resize(crop_np, (target_w, target_h), interpolation=interp)
+        return resized.astype(np.float32)
 
     def _resize_pad(
         self,
@@ -322,6 +521,8 @@ class illumoraeImageResizeWanAdaptiveFramingNode:
         x_ratio = anchor_x / max(1.0, src_w)
         y_ratio = anchor_y / max(1.0, src_h)
 
+        # 0.6 damps anchor influence to +-30% of available slack, preventing
+        # extreme corner placement of the fitted image within the padded canvas.
         x0 = int(round((target_w - fit_w) * (0.5 + (x_ratio - 0.5) * 0.6)))
         y0 = int(round((target_h - fit_h) * (0.5 + (y_ratio - 0.5) * 0.6)))
         x0 = int(np.clip(x0, 0, max(0, target_w - fit_w)))
@@ -335,6 +536,11 @@ class illumoraeImageResizeWanAdaptiveFramingNode:
         mask[y0:y0 + fit_h, x0:x0 + fit_w] = 1.0
         mask_3 = np.stack([mask] * 3, axis=-1)
         return canvas * mask_3 + blur * (1.0 - mask_3)
+    #endregion
+
+    #region C-DEBUG
+    # Build debug overlay image with crop box, detection boxes, and text
+    # summary of the selected anchor mode and target dimensions.
 
     def _build_debug(
         self,
@@ -374,104 +580,50 @@ class illumoraeImageResizeWanAdaptiveFramingNode:
             y += 24
 
         return cv2.cvtColor(dbg, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
+    #endregion
 
-    def resize_adaptive(
-        self,
-        image: torch.Tensor,
-        orientation_mode: str,
-        framing_mode: str,
-        resize_mode: str,
-        resolution_tier: str,
-        upscale_method: str,
-        anchor_strength: float,
-        top_bias: float,
-        face_min_percent: float,
-        detect_scale_factor: float,
-        detect_min_neighbors: int,
-        debug_prints: bool = False,
-    ):
-        """
-        Main adaptive resize pipeline.
+    #region C-UTIL
+    # Small helper shared across pipeline stages.
 
-        Steps per image:
-        1) Resolve orientation (auto/forced).
-        2) Select WAN-friendly preset resolution.
-        3) Detect faces and people with lightweight CV detectors.
-        4) Compute anchor and crop box.
-        5) Apply crop or pad resize mode.
-        6) Return resized image, debug overlay, and chosen preset metadata.
-        """
-        if image.dim() == 3:
-            image = image.unsqueeze(0)
+    def _debug_print(self, debug_prints: bool, *args) -> None:
+        if debug_prints:
+            print(*args)
+    #endregion
 
-        batch_size = image.shape[0]
-        outputs = []
-        debug_outputs = []
+    #region C-UI
+    # ComfyUI-facing declarations: input schema, return types, display metadata.
 
-        selected_w = 0
-        selected_h = 0
-        selected_label = ""
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": ("IMAGE",),
+                "orientation_mode": (["auto", "force_horizontal", "force_vertical"], {"default": "auto"}),
+                "framing_mode": (["auto_subject", "human_face", "human_body", "center"], {"default": "auto_subject"}),
+                "resize_mode": (["crop", "pad"], {"default": "crop"}),
+                "resolution_tier": (["auto", "small", "main", "high"], {"default": "auto"}),
+                "upscale_method": (["nearest-exact", "bilinear", "area", "bicubic", "lanczos"], {"default": "lanczos"}),
+                "anchor_strength": ("FLOAT", {"default": 0.85, "min": 0.0, "max": 1.0, "step": 0.01}),
+                "top_bias": ("FLOAT", {"default": 0.18, "min": -0.5, "max": 0.5, "step": 0.01}),
+                "face_min_percent": ("FLOAT", {"default": 3.0, "min": 0.5, "max": 40.0, "step": 0.5}),
+                "detect_scale_factor": ("FLOAT", {"default": 1.1, "min": 1.01, "max": 1.5, "step": 0.01}),
+                "detect_min_neighbors": ("INT", {"default": 5, "min": 1, "max": 12, "step": 1}),
+            },
+            "optional": {
+                "debug_prints": ("BOOLEAN", {"default": False}),
+                "emit_debug_image": ("BOOLEAN", {"default": True}),
+            },
+        }
 
-        for b in range(batch_size):
-            src_np = image[b].detach().cpu().numpy().astype(np.float32)
-            src_h, src_w = src_np.shape[:2]
-
-            orientation = self._choose_orientation(src_w, src_h, orientation_mode)
-            target_w, target_h = self._select_preset(src_w, src_h, orientation, resolution_tier)
-            selected_w = target_w
-            selected_h = target_h
-            selected_label = f"{target_w}x{target_h} ({orientation})"
-
-            faces = self._detect_faces(src_np, detect_scale_factor, detect_min_neighbors, face_min_percent)
-            people = self._detect_people(src_np)
-
-            anchor_x, anchor_y, primary_face, primary_person, chosen_type = self._get_anchor(
-                src_w=src_w,
-                src_h=src_h,
-                faces=faces,
-                people=people,
-                framing_mode=framing_mode,
-                anchor_strength=anchor_strength,
-                top_bias=top_bias,
-            )
-
-            crop_w, crop_h = self._compute_crop_size(src_w, src_h, target_w, target_h)
-            crop_box = self._compute_crop_box(src_w, src_h, crop_w, crop_h, anchor_x, anchor_y)
-            x0, y0, cw, ch = crop_box
-
-            if resize_mode == "pad":
-                resized_np = self._resize_pad(src_np, target_w, target_h, anchor_x, anchor_y, upscale_method)
-            else:
-                crop_np = src_np[y0:y0 + ch, x0:x0 + cw, :]
-                resized_np = self._resize_crop(crop_np, target_w, target_h, upscale_method)
-
-            debug_np = self._build_debug(
-                src_np=src_np,
-                crop_box=crop_box,
-                target_w=target_w,
-                target_h=target_h,
-                primary_face=primary_face,
-                primary_person=primary_person,
-                chosen_type=chosen_type,
-            )
-
-            self._debug_print(
-                debug_prints,
-                f"batch={b} src={src_w}x{src_h} target={target_w}x{target_h} mode={resize_mode} anchor={chosen_type}",
-            )
-
-            outputs.append(torch.from_numpy(resized_np).float())
-            debug_outputs.append(torch.from_numpy(debug_np).float())
-
-        return (
-            torch.stack(outputs, dim=0),
-            torch.stack(debug_outputs, dim=0),
-            int(selected_w),
-            int(selected_h),
-            selected_label,
-        )
+    RETURN_TYPES = ("IMAGE", "IMAGE", "INT", "INT", "STRING")
+    RETURN_NAMES = ("resized_image", "debug_image", "width", "height", "selected_preset")
+    FUNCTION = "resize_adaptive"
+    CATEGORY = "illumorae"
+    DESCRIPTION = "Auto-selects WAN-friendly resolution and applies subject/human-centric framing via crop or soft-bar pad resize modes for video prep."
+    #endregion
 
 
+#region REG
 NODE_CLASS_MAPPINGS = {
     "illumoraeImageResizeWanAdaptiveFramingNode": illumoraeImageResizeWanAdaptiveFramingNode,
 }
@@ -479,3 +631,4 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "illumoraeImageResizeWanAdaptiveFramingNode": "Image Resize WAN Adaptive Framing",
 }
+#endregion

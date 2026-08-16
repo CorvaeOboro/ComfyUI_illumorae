@@ -1,0 +1,360 @@
+{
+  "id": "illumorae-workflow",
+  "revision": 0,
+  "last_node_id": 8,
+  "last_link_id": 5,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "illumoraeLoadRandomFileFromPathByPrefixNode",
+      "pos": [
+        620,
+        360
+      ],
+      "size": [
+        320,
+        260
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "file_name",
+          "type": "STRING",
+          "links": [
+            2
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "file_path",
+          "type": "STRING",
+          "links": [
+            3
+          ],
+          "slot_index": 2
+        },
+        {
+          "name": "folder_path",
+          "type": "STRING",
+          "links": [
+            4
+          ],
+          "slot_index": 3
+        },
+        {
+          "name": "status",
+          "type": "STRING",
+          "links": [
+            5
+          ],
+          "slot_index": 4
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui_illumorae",
+        "Node name for S&R": "illumoraeLoadRandomFileFromPathByPrefixNode",
+        "aux_id": "CorvaeOboro/ComfyUI_illumorae",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "C:/input",
+        "image",
+        ".md",
+        false,
+        false,
+        -1,
+        "fixed",
+        -1,
+        false
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 2,
+      "type": "PreviewAny",
+      "pos": [
+        1080,
+        360
+      ],
+      "size": [
+        240,
+        120
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 1
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewAny",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 3,
+      "type": "PreviewAny",
+      "pos": [
+        1080,
+        580
+      ],
+      "size": [
+        240,
+        120
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 2
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewAny",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 4,
+      "type": "PreviewAny",
+      "pos": [
+        1080,
+        800
+      ],
+      "size": [
+        240,
+        120
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 3
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewAny",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 5,
+      "type": "PreviewAny",
+      "pos": [
+        1080,
+        1020
+      ],
+      "size": [
+        240,
+        120
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 4
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewAny",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 6,
+      "type": "PreviewAny",
+      "pos": [
+        1080,
+        1240
+      ],
+      "size": [
+        240,
+        120
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 5
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewAny",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 7,
+      "type": "Note",
+      "pos": [
+        620,
+        60
+      ],
+      "size": [
+        360,
+        110
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "Load Random File From Path By Prefix\n[illumoraeLoadRandomFileFromPathByPrefixNode]\nGroup: Load  Status: working"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 8,
+      "type": "Note",
+      "pos": [
+        620,
+        690
+      ],
+      "size": [
+        420,
+        200
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "Pick a random file from a folder filtered by filename prefix and extension; return its text contents and path.\n\nInputs (required): folder:STRING, prefix:STRING, extension:STRING, recursive:BOOLEAN, case_sensitive:BOOLEAN, seed:INT, index_override:INT\nOutputs: text:STRING, file_name:STRING, file_path:STRING, folder_path:STRING, status:STRING\n\nLoad-group node. Folder / path inputs are left as widgets with their declared defaults; point them at a real folder on your machine before running. IMAGE outputs preview directly; STRING outputs (file name / path) show in PreviewAny."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "*"
+    ],
+    [
+      2,
+      1,
+      1,
+      3,
+      0,
+      "*"
+    ],
+    [
+      3,
+      1,
+      2,
+      4,
+      0,
+      "*"
+    ],
+    [
+      4,
+      1,
+      3,
+      5,
+      0,
+      "*"
+    ],
+    [
+      5,
+      1,
+      4,
+      6,
+      0,
+      "*"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Load: Load Random File From Path By Prefix",
+      "bounding": [
+        580.0,
+        20.0,
+        780.0,
+        1380.0
+      ],
+      "color": "#8A8",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    "ue_links": [],
+    "links_added_by_ue": []
+  },
+  "version": 0.4
+}

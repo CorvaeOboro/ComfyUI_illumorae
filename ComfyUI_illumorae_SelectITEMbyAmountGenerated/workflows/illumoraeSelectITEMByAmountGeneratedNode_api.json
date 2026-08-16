@@ -1,0 +1,53 @@
+{
+  "1": {
+    "class_type": "illumoraeSelectITEMByAmountGeneratedNode",
+    "inputs": {
+      "base_dir": "",
+      "use_nestedupscale_structure": false,
+      "png_in_item_root": false,
+      "require_prompt_sdxl": false,
+      "require_prompt_flux": false,
+      "require_prompt_sd15": false,
+      "require_prompt_video": false,
+      "max_images_target": 5,
+      "seed": 0,
+      "debug": false
+    }
+  },
+  "2": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        0
+      ]
+    }
+  },
+  "3": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        1
+      ]
+    }
+  },
+  "4": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        2
+      ]
+    }
+  },
+  "5": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        3
+      ]
+    }
+  }
+}

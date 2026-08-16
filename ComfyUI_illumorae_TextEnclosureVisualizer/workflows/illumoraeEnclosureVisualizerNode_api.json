@@ -1,0 +1,48 @@
+{
+  "1": {
+    "class_type": "illumoraeEnclosureVisualizerNode",
+    "inputs": {
+      "font_size": 24,
+      "line_height": 1.5,
+      "padding": 20,
+      "background_color": "dark",
+      "text": [
+        "2",
+        0
+      ]
+    }
+  },
+  "2": {
+    "class_type": "PrimitiveStringMultiline",
+    "inputs": {
+      "string": "( berry : 1.2) , carrot , ( radish :1.3)\nplants , <lora:berry:0.6>\n<lora:carrot:0.3>"
+    }
+  },
+  "3": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "1",
+        0
+      ]
+    }
+  },
+  "4": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        1
+      ]
+    }
+  },
+  "5": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        2
+      ]
+    }
+  }
+}

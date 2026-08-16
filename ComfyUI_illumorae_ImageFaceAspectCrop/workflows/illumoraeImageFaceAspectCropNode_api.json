@@ -6,7 +6,7 @@
       "height": 576,
       "face_anchor_strength": 0.9,
       "center_bias_weight": 0.1,
-      "top_bias_weight": 0.2,
+      "subject_top_bias": 0.2,
       "secondary_face_weight": 0.15,
       "max_anchor_shift_ratio": 1.0,
       "detect_scale_factor": 1.1,

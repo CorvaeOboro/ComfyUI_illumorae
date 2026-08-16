@@ -1,0 +1,416 @@
+{
+  "id": "illumorae-workflow",
+  "revision": 0,
+  "last_node_id": 9,
+  "last_link_id": 6,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "illumoraeImageResizeWanAdaptiveFramingNode",
+      "pos": [
+        620,
+        360
+      ],
+      "size": [
+        320,
+        260
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "resized_image",
+          "type": "IMAGE",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "debug_image",
+          "type": "IMAGE",
+          "links": [
+            3
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": [
+            4
+          ],
+          "slot_index": 2
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": [
+            5
+          ],
+          "slot_index": 3
+        },
+        {
+          "name": "selected_preset",
+          "type": "STRING",
+          "links": [
+            6
+          ],
+          "slot_index": 4
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui_illumorae",
+        "Node name for S&R": "illumoraeImageResizeWanAdaptiveFramingNode",
+        "aux_id": "CorvaeOboro/ComfyUI_illumorae",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "auto",
+        "auto_subject",
+        "crop",
+        "auto",
+        "lanczos",
+        0.85,
+        0.18,
+        3.0,
+        1.1,
+        5,
+        false,
+        true
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 2,
+      "type": "EmptyImage",
+      "pos": [
+        120,
+        360
+      ],
+      "size": [
+        315,
+        130
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "EmptyImage",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        512,
+        512,
+        0,
+        1
+      ],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 3,
+      "type": "PreviewImage",
+      "pos": [
+        1080,
+        360
+      ],
+      "size": [
+        210,
+        250
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewImage",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 4,
+      "type": "PreviewImage",
+      "pos": [
+        1080,
+        580
+      ],
+      "size": [
+        210,
+        250
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 3
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewImage",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 5,
+      "type": "PreviewAny",
+      "pos": [
+        1080,
+        800
+      ],
+      "size": [
+        240,
+        120
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 4
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewAny",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 6,
+      "type": "PreviewAny",
+      "pos": [
+        1080,
+        1020
+      ],
+      "size": [
+        240,
+        120
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 5
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewAny",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 7,
+      "type": "PreviewAny",
+      "pos": [
+        1080,
+        1240
+      ],
+      "size": [
+        240,
+        120
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 6
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewAny",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 8,
+      "type": "Note",
+      "pos": [
+        620,
+        60
+      ],
+      "size": [
+        360,
+        110
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "Image Resize WAN Adaptive Framing\n[illumoraeImageResizeWanAdaptiveFramingNode]\nGroup: Image  Status: working"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 9,
+      "type": "Note",
+      "pos": [
+        620,
+        690
+      ],
+      "size": [
+        420,
+        200
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "Auto-selects WAN-friendly vertical/horizontal resolution and applies optional human-centric framing before resize.\n\nInputs (required): image:IMAGE, orientation_mode:ENUM, framing_mode:ENUM, resize_mode:ENUM, resolution_tier:ENUM, upscale_method:ENUM, anchor_strength:FLOAT, top_bias:FLOAT, face_min_percent:FLOAT, detect_scale_factor:FLOAT, detect_min_neighbors:INT\nOutputs: resized_image:IMAGE, debug_image:IMAGE, width:INT, height:INT, selected_preset:STRING\n\nImage-group node fed by an EmptyImage provider. Output is previewed with PreviewImage (or MaskToImage -> PreviewImage for MASK outputs)."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      1,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      1,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      3,
+      1,
+      1,
+      4,
+      0,
+      "IMAGE"
+    ],
+    [
+      4,
+      1,
+      2,
+      5,
+      0,
+      "*"
+    ],
+    [
+      5,
+      1,
+      3,
+      6,
+      0,
+      "*"
+    ],
+    [
+      6,
+      1,
+      4,
+      7,
+      0,
+      "*"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Image: Image Resize WAN Adaptive Framing",
+      "bounding": [
+        80.0,
+        20.0,
+        1280.0,
+        1380.0
+      ],
+      "color": "#8A8",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    "ue_links": [],
+    "links_added_by_ue": []
+  },
+  "version": 0.4
+}

@@ -1,0 +1,27 @@
+{
+  "1": {
+    "class_type": "illumoraeSaveImageExtendedFolderPathNode",
+    "inputs": {
+      "folderpath_input": "C:/output",
+      "foldername_prefix": "gen",
+      "filename_prefix": "demo",
+      "delimiter": "underscore",
+      "save_metadata": "enabled",
+      "counter_digits": 3,
+      "counter_position": "last",
+      "images": [
+        "2",
+        0
+      ]
+    }
+  },
+  "2": {
+    "class_type": "EmptyImage",
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "color": 0,
+      "batch_size": 1
+    }
+  }
+}

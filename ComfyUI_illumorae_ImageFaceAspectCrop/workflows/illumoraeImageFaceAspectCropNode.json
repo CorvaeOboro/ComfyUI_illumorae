@@ -211,7 +211,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Crops an image to a target aspect ratio with face-detection-biased anchoring and debug overlay output.\n\nInputs (required): image:IMAGE, width:INT, height:INT, face_anchor_strength:FLOAT, center_bias_weight:FLOAT, top_bias_weight:FLOAT, secondary_face_weight:FLOAT, max_anchor_shift_ratio:FLOAT, detect_scale_factor:FLOAT, detect_min_neighbors:INT, min_face_percent:FLOAT\nOutputs: cropped_image:IMAGE, debug_image:IMAGE\n\nImage-group node fed by an EmptyImage provider. Output is previewed with PreviewImage (or MaskToImage -> PreviewImage for MASK outputs)."
+        "Crops an image to a target aspect ratio with face-detection-biased anchoring and debug overlay output.\n\nInputs (required): image:IMAGE, width:INT, height:INT, face_anchor_strength:FLOAT, center_bias_weight:FLOAT, subject_top_bias:FLOAT, secondary_face_weight:FLOAT, max_anchor_shift_ratio:FLOAT, detect_scale_factor:FLOAT, detect_min_neighbors:INT, min_face_percent:FLOAT\nOutputs: cropped_image:IMAGE, debug_image:IMAGE\n\nImage-group node fed by an EmptyImage provider. Output is previewed with PreviewImage (or MaskToImage -> PreviewImage for MASK outputs)."
       ],
       "color": "#432",
       "bgcolor": "#653"

@@ -213,3 +213,14 @@ backup/
 */node_linter_report.json
 */node_validation_report.json
 docs/comfyui_illumorae_title.psd
+ComfyUI_illumorae_ImageInfillPatchMatch/tests/README.md
+ComfyUI_illumorae_ImageInfillPatchMatch/tests/out/fix_verify/results.csv
+ComfyUI_illumorae_ImageInfillPatchMatch/tests/out/fix_verify/summary.csv
+ComfyUI_illumorae_ImageInfillPatchMatch/tests/out/techniques/results.csv
+ComfyUI_illumorae_ImageInfillPatchMatch/tests/out/techniques/summary.csv
+ComfyUI_illumorae_SaveImageExtendedFolderPath/tests/_test_output_tmp/gen/output_001.png
+ComfyUI_illumorae_SaveImageExtendedFolderPath/tests/_test_output_tmp/gen/output_002.png
+ComfyUI_illumorae_SaveImageExtendedFolderPath/tests/_test_output_tmp/gen/output_003.png
+ComfyUI_illumorae_SaveImageExtendedFolderPath/tests/_test_output_tmp/gen/output_004.png
+ComfyUI_illumorae_SaveImageExtendedFolderPath/tests/_test_output_tmp/gen/output_005.png
+ComfyUI_illumorae_SaveImageExtendedFolderPath/tests/_test_output_tmp/gen/output_006.png

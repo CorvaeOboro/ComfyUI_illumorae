@@ -17,19 +17,25 @@ Example
         prompt_sdxl_english.md   (prefix mismatch)
         prompt_wan22_notes.txt   (extension mismatch)
 
-Multiple extensions are accepted as a comma-separated list, 
-``.md,.txt``. A single asterisk ``*`` extension disables the extension filter.
+Multiple extensions are accepted as a comma-separated list,
+``.md,.txt``. A single asterisk ``*`` (or an empty string) disables the
+extension filter. Extension matching is always case-insensitive;
+``case_sensitive`` applies only to the prefix comparison.
 
 TITLE::Load Random File From Path By Prefix
 DESCRIPTIONSHORT::Pick a random file from a folder filtered by filename prefix and extension; return its text contents and path.
 VERSION::20260517
 IMAGE::comfyui_illumorae_load_random_file_from_path_by_prefix.png
 GROUP::Load
+GROUPORDER::3
+LISTORDER::4
+STATUS::working
 """
 
-import os
+#region IMPORTS
 import random
 from pathlib import Path
+#endregion
 
 
 class illumoraeLoadRandomFileFromPathByPrefixNode:
@@ -41,122 +47,19 @@ class illumoraeLoadRandomFileFromPathByPrefixNode:
     randomly using ``seed``, or deterministically when
     ``index_override`` is a positive 1-based index.
 
+    ``case_sensitive`` governs only the prefix comparison; extension
+    matching is always case-insensitive (so ``.MD`` and ``.md`` are
+    treated as equivalent), matching common filesystem conventions.
+
     Returns the file text, the file stem, the absolute file path, and
     the parent folder path. If no file matches, empty strings are
     returned and a status string describes the cause.
     """
 
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "folder": ("STRING", {"default": r"C:/prompts"}),
-                "prefix": ("STRING", {"default": "prompt_wan22_"}),
-                "extension": ("STRING", {"default": ".md"}),
-                "recursive": ("BOOLEAN", {"default": False}),
-                "case_sensitive": ("BOOLEAN", {"default": False}),
-                "seed": ("INT", {"default": -1, "min": -1}),
-                "index_override": ("INT", {"default": -1, "min": -1}),
-            },
-            "optional": {
-                "debug_mode": ("BOOLEAN", {"default": False}),
-            },
-        }
-
-    CATEGORY = "illumorae"
-    RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING", "STRING")
-    RETURN_NAMES = ("text", "file_name", "file_path", "folder_path", "status")
-    FUNCTION = "load_random_file"
-    OUTPUT_NODE = False
-    DESCRIPTION = (
-        "Pick a random file from a folder filtered by filename prefix "
-        "and extension; return text contents and path metadata."
-    )
-
-    def _dprint(self, debug_mode, *args, **kwargs):
-        if debug_mode:
-            print(*args, **kwargs)
-
-    @staticmethod
-    def _parse_extensions(extension_field):
-        """Parse the extension input into a normalized list.
-
-        Returns a list of lowercase extensions starting with ``.``.
-        A single entry ``*`` (or empty string after split) disables
-        the extension filter and is signalled by returning ``None``.
-        """
-        if extension_field is None:
-            return [".md"]
-        raw = [e.strip() for e in str(extension_field).split(",") if e.strip()]
-        if not raw:
-            return None
-        if any(e == "*" for e in raw):
-            return None
-        out = []
-        for e in raw:
-            if not e.startswith("."):
-                e = "." + e
-            out.append(e.lower())
-        return out
-
-    def _collect_matches(self, folder_path, prefix, extensions, recursive,
-                         case_sensitive, debug_mode):
-        """Walk ``folder_path`` and classify every file.
-
-        Returns a tuple ``(matches, skipped)`` where ``matches`` is a
-        list of ``Path`` and ``skipped`` is a list of
-        ``(Path, reason)`` tuples. ``reason`` is a short string such
-        as ``"prefix mismatch"`` or ``"extension mismatch (.txt)"``.
-        """
-        matches = []
-        skipped = []
-        if not folder_path.exists() or not folder_path.is_dir():
-            return matches, skipped
-
-        cmp_prefix = prefix if case_sensitive else prefix.lower()
-
-        if recursive:
-            iterator = folder_path.rglob("*")
-        else:
-            iterator = folder_path.iterdir()
-
-        for entry in iterator:
-            if not entry.is_file():
-                continue
-            name = entry.name
-            stem = entry.stem
-            ext = entry.suffix.lower()
-
-            cmp_name = name if case_sensitive else name.lower()
-            cmp_stem = stem if case_sensitive else stem.lower()
-
-            # Prefix is matched against the file name (without folder),
-            # so a prefix like "prompt_wan22_" will match either
-            # "prompt_wan22_english.md" or "prompt_wan22_v2.md".
-            prefix_ok = (
-                cmp_prefix == ""
-                or cmp_name.startswith(cmp_prefix)
-                or cmp_stem.startswith(cmp_prefix)
-            )
-            ext_ok = extensions is None or ext in extensions
-
-            if not prefix_ok and not ext_ok:
-                skipped.append((entry, f"prefix mismatch and extension mismatch ({ext or '<none>'})"))
-                continue
-            if not prefix_ok:
-                skipped.append((entry, f"prefix mismatch (expected {prefix!r})"))
-                continue
-            if not ext_ok:
-                skipped.append((entry, f"extension mismatch ({ext or '<none>'})"))
-                continue
-
-            matches.append(entry)
-            self._dprint(debug_mode, f"  match: {entry}")
-
-        # Deterministic order across platforms before any random pick.
-        matches.sort(key=lambda p: str(p).lower())
-        skipped.sort(key=lambda t: str(t[0]).lower())
-        return matches, skipped
+    #region CORE
+    # Main entry point and FUNCTION target. Validates inputs, scans the
+    # folder for matches, picks one (seeded random or index override),
+    # reads its text, and returns (text, stem, path, folder, status).
 
     def load_random_file(self, folder, prefix, extension, recursive,
                          case_sensitive, seed, index_override,
@@ -203,17 +106,23 @@ class illumoraeLoadRandomFileFromPathByPrefixNode:
             print(f"[LoadRandomFileFromPathByPrefix] {header}")
             return "", "", "", str(folder_path), report
 
-        # Seed for reproducibility. seed=-1 uses non-deterministic state.
+        # Local RNG so seeding is scoped to this node and does not perturb
+        # the process-global random state used by other nodes. seed=-1 (or
+        # any negative value) leaves the RNG unseeded for non-deterministic
+        # picks.
+        rng = random.Random()
         if seed is not None and seed >= 0:
-            random.seed(seed)
+            rng = random.Random(seed)
 
         chosen = None
+        override_fell_back = False
         if index_override is not None and index_override > 0:
             idx = index_override - 1
             if 0 <= idx < len(matches):
                 chosen = matches[idx]
                 self._dprint(debug_mode, f"  override index {index_override} -> {chosen}")
             else:
+                override_fell_back = True
                 self._dprint(
                     debug_mode,
                     f"  index_override {index_override} out of range "
@@ -221,7 +130,7 @@ class illumoraeLoadRandomFileFromPathByPrefixNode:
                 )
 
         if chosen is None:
-            chosen = random.choice(matches)
+            chosen = rng.choice(matches)
             self._dprint(debug_mode, f"  random pick: {chosen}")
 
         try:
@@ -231,7 +140,10 @@ class illumoraeLoadRandomFileFromPathByPrefixNode:
             # Fallback for non-utf8 files; lossy decode preserves a usable string.
             with open(chosen, "r", encoding="utf-8", errors="replace") as f:
                 text = f.read()
-        except Exception as e:
+        except OSError as e:
+            # Filesystem-level failures (permissions, vanished file, I/O
+            # error). Programming errors are intentionally not caught here so
+            # they surface rather than being masked as a status string.
             msg = f"Error reading {chosen}: {e}"
             print(f"[LoadRandomFileFromPathByPrefix] {msg}")
             return "", chosen.stem, str(chosen), str(chosen.parent), msg
@@ -241,12 +153,117 @@ class illumoraeLoadRandomFileFromPathByPrefixNode:
             f"({len(matches)} match{'es' if len(matches) != 1 else ''}, "
             f"{len(skipped)} skipped)"
         )
+        if override_fell_back:
+            header += (
+                f" (index_override {index_override} out of range "
+                f"with {len(matches)} matches, fell back to random)"
+            )
         report = self._format_report(
             folder_path, prefix, ext_display, recursive,
             case_sensitive, matches, skipped, chosen=chosen, header=header,
         )
         self._dprint(debug_mode, f"  {header}")
         return text, chosen.stem, str(chosen), str(chosen.parent), report
+
+    #endregion
+
+    #region SCAN
+    # Walk a folder (optionally recursive) and classify every file as a
+    # match or a skip with a short reason. Returns sorted lists so the
+    # pick and report are deterministic across platforms.
+
+    def _collect_matches(self, folder_path, prefix, extensions, recursive,
+                         case_sensitive, debug_mode):
+        """Walk ``folder_path`` and classify every file.
+
+        Returns a tuple ``(matches, skipped)`` where ``matches`` is a
+        list of ``Path`` and ``skipped`` is a list of
+        ``(Path, reason)`` tuples. ``reason`` is a short string such
+        as ``"prefix mismatch"`` or ``"extension mismatch (.txt)"``.
+        """
+        matches = []
+        skipped = []
+        if not folder_path.exists() or not folder_path.is_dir():
+            return matches, skipped
+
+        cmp_prefix = prefix if case_sensitive else prefix.lower()
+
+        if recursive:
+            iterator = folder_path.rglob("*")
+        else:
+            iterator = folder_path.iterdir()
+
+        for entry in iterator:
+            if not entry.is_file():
+                continue
+            name = entry.name
+            ext = entry.suffix.lower()
+
+            cmp_name = name if case_sensitive else name.lower()
+
+            # Prefix is matched against the file name (without folder),
+            # so a prefix like "prompt_wan22_" will match either
+            # "prompt_wan22_english.md" or "prompt_wan22_v2.md". Matching
+            # against the full name (stem + "." + suffix) subsumes matching
+            # against the stem alone, so a separate stem check is unnecessary.
+            prefix_ok = cmp_prefix == "" or cmp_name.startswith(cmp_prefix)
+            ext_ok = extensions is None or ext in extensions
+
+            if not prefix_ok and not ext_ok:
+                skipped.append((entry, f"prefix mismatch and extension mismatch ({ext or '<none>'})"))
+                continue
+            if not prefix_ok:
+                skipped.append((entry, f"prefix mismatch (expected {prefix!r})"))
+                continue
+            if not ext_ok:
+                skipped.append((entry, f"extension mismatch ({ext or '<none>'})"))
+                continue
+
+            matches.append(entry)
+            self._dprint(debug_mode, f"  match: {entry}")
+
+        # Deterministic order across platforms before any random pick.
+        matches.sort(key=lambda p: str(p).lower())
+        skipped.sort(key=lambda t: str(t[0]).lower())
+        return matches, skipped
+
+    #endregion
+
+    #region PARSE
+    # Normalize the extension input string into a list of lowercase
+    # ".ext" entries, or None when the filter is disabled (None, empty,
+    # or "*"). Called by the core before scanning.
+
+    @staticmethod
+    def _parse_extensions(extension_field):
+        """Parse the extension input into a normalized list.
+
+        Returns a list of lowercase extensions starting with ``.``, or
+        ``None`` to signal that the extension filter is disabled. The
+        filter is disabled when the input is ``None``, an empty string,
+        or contains a ``*`` entry (matching the module docstring). This
+        keeps ``None`` and ``""`` consistent: both mean "any extension".
+        """
+        if extension_field is None:
+            return None
+        raw = [e.strip() for e in str(extension_field).split(",") if e.strip()]
+        if not raw:
+            return None
+        if any(e == "*" for e in raw):
+            return None
+        out = []
+        for e in raw:
+            if not e.startswith("."):
+                e = "." + e
+            out.append(e.lower())
+        return out
+
+    #endregion
+
+    #region REPORT
+    # Build the multi-line status report returned as the 5th output.
+    # Sections: header, filter summary, matches (chosen marked), skips
+    # grouped by reason. Paths render relative to folder when possible.
 
     @staticmethod
     def _format_report(folder_path, prefix, ext_display, recursive,
@@ -294,16 +311,102 @@ class illumoraeLoadRandomFileFromPathByPrefixNode:
 
         return "\n".join(lines)
 
+    #endregion
+
+    #region UTIL
+    # Debug print helper: only emits output when debug_mode is True.
+    # Used by core and scan to trace inputs, matches, and picks.
+
+    def _dprint(self, debug_mode, *args, **kwargs):
+        if debug_mode:
+            print(*args, **kwargs)
+
+    #endregion
+
+    #region CACHE
+    # On-disk folder signature + IS_CHANGED cache key. The signature
+    # folds folder mtime and entry count into the key so adding, removing,
+    # or renaming a file invalidates the cache even when inputs are stable.
+
+    @staticmethod
+    def _folder_signature(folder, recursive):
+        """Return a cheap on-disk signature for ``folder``.
+
+        Combines the folder's modification time with the count of entries
+        (recursive when requested) so that adding, removing, or renaming a
+        file invalidates the cache. Returns ``"<missing>"`` when the folder
+        does not exist or is not a directory, so a missing folder and a
+        later-created folder produce different cache keys.
+        """
+        try:
+            p = Path(folder) if folder else None
+            if p is None or not p.exists() or not p.is_dir():
+                return "<missing>"
+            mtime = int(p.stat().st_mtime)
+            if recursive:
+                count = sum(1 for _ in p.rglob("*"))
+            else:
+                count = sum(1 for _ in p.iterdir())
+            return f"{mtime}:{count}"
+        except OSError:
+            return "<unreadable>"
+
     @classmethod
     def IS_CHANGED(cls, folder="", prefix="", extension="", recursive=False,
                    case_sensitive=False, seed=-1, index_override=-1,
-                   debug_mode=False, **kwargs):
-        # Re-run when any input changes, and when seed=-1 (non-deterministic).
+                   **kwargs):
+        # Re-run when any input changes, when seed=-1 (non-deterministic),
+        # and when the folder's on-disk contents change (added/removed/renamed
+        # files, or folder mtime). The folder signature is folded into the
+        # cache key so a stable input set still picks up new files.
         if seed is None or seed < 0:
             return float("nan")
-        return f"{folder}|{prefix}|{extension}|{recursive}|{case_sensitive}|{seed}|{index_override}"
+        sig = cls._folder_signature(folder, recursive)
+        return (
+            f"{folder}|{prefix}|{extension}|{recursive}|{case_sensitive}|"
+            f"{seed}|{index_override}|{sig}"
+        )
+
+    #endregion
+
+    #region UI
+    # ComfyUI interface declarations: input schema, return types, and
+    # node metadata. These are read by ComfyUI at registration time and
+    # do not execute during graph runs.
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "folder": ("STRING", {"default": r"C:/prompts"}),
+                "prefix": ("STRING", {"default": "prompt_wan22_"}),
+                "extension": ("STRING", {"default": ".md"}),
+                "recursive": ("BOOLEAN", {"default": False}),
+                "case_sensitive": ("BOOLEAN", {"default": False}),
+                "seed": ("INT", {"default": -1, "min": -1}),
+                "index_override": ("INT", {"default": -1, "min": -1}),
+            },
+            "optional": {
+                "debug_mode": ("BOOLEAN", {"default": False}),
+            },
+        }
+
+    CATEGORY = "illumorae"
+    RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("text", "file_name", "file_path", "folder_path", "status")
+    FUNCTION = "load_random_file"
+    OUTPUT_NODE = False
+    DESCRIPTION = (
+        "Pick a random file from a folder filtered by filename prefix "
+        "and extension; return text contents and path metadata."
+    )
+
+    #endregion
 
 
+#region MAPPING
+# ComfyUI registration: node class + display name mappings exported via
+# __init__.py so ComfyUI can discover and instantiate the node.
 NODE_CLASS_MAPPINGS = {
     "illumoraeLoadRandomFileFromPathByPrefixNode": illumoraeLoadRandomFileFromPathByPrefixNode,
 }
@@ -311,3 +414,4 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "illumoraeLoadRandomFileFromPathByPrefixNode": "Load Random File From Path By Prefix",
 }
+#endregion

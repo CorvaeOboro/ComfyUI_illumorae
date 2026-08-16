@@ -1,29 +1,55 @@
 """
 TITLE::Load Text File Graceful
 DESCRIPTIONSHORT::Loads a text file from a path and returns its contents without crashing if the file is missing.
-VERSION::20260127
+VERSION::20260816
 IMAGE::comfyui_illumorae_load_text_graceful.png
 GROUP::Load
+GROUPORDER::3
+LISTORDER::5
+STATUS::working
 """
+#region IMPORTS
 import os
+#endregion
+
 
 class illumoraeLoadTextFileGracefulNode:
     """
-    A ComfyUI node that loads text from a file. 
-    Non-comment lines (lines that do not start with '#') are:
-      - joined into a single output string, and 
-      - also stored in a dictionary under the user-specified key.
+    A ComfyUI node that loads text from a file.
 
-    If the file path is invalid or the file cannot be read, an empty 
-    string and empty list are returned gracefully (no crash).
+    Lines whose first non-whitespace character is '#' are treated as comments
+    and skipped; inline trailing '#' is preserved. The remaining lines are
+    joined with newlines into a single output string. Original line content
+    (including indentation) is preserved; only the line terminator is removed.
+
+    If the file path is invalid or the file cannot be read, an empty string
+    and a status describing the failure are returned (no crash). Non-UTF-8
+    files are decoded lossily with errors='replace' so a usable string is
+    still produced.
+
+    Returns (text, status) where status is a short human-readable string.
     """
 
-    def __init__(self):
-        """
-        Node initialization can hold default values or references 
-        to external modules if necessary.
-        """
-        pass
+    #region CACHE
+    # On-disk file signature folded into the IS_CHANGED cache key so editing
+    # the text file refreshes the output even when file_path is stable.
+
+    @classmethod
+    def IS_CHANGED(cls, file_path="", **kwargs):
+        # Re-run when file_path changes or when the file's on-disk state
+        # changes (mtime or size). A missing/unreadable file yields a
+        # distinct key so a later-created file is picked up.
+        try:
+            st = os.stat(file_path)
+            return f"{file_path}|{st.st_mtime_ns}|{st.st_size}"
+        except OSError:
+            return f"{file_path}|<missing>"
+
+    #endregion
+
+    #region UI
+    # ComfyUI interface declarations: input schema, return types, and node
+    # metadata. Read by ComfyUI at registration time; not executed per run.
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -34,75 +60,109 @@ class illumoraeLoadTextFileGracefulNode:
             "optional": {
                 "debug_mode": ("BOOLEAN", {"default": False}),
             },
-            "hidden": {},
         }
 
-    # ComfyUI expects certain class variables that define how the node behaves
-    RETURN_TYPES = ("STRING", "DICT", "LABEL")  # Add LABEL output for status
-    RETURN_NAMES = ("text", "lines_dict", "status")
-    FUNCTION = "load_file"            # The method in this class that is called
-    CATEGORY = "illumorae"                 # Category name for where this node appears
-    OUTPUT_NODE = False               # Whether this node can terminate a workflow
+    RETURN_TYPES = ("STRING", "STRING")  # text, status
+    RETURN_NAMES = ("text", "status")
+    FUNCTION = "load_file"
+    CATEGORY = "illumorae"
+    OUTPUT_NODE = False
     DESCRIPTION = "Loads a text file from a path and returns its contents without crashing if the file is missing."
 
-    def load_file(self, 
-                  file_path="",
-                  debug_mode=False,
-                  *args, 
-                  **kwargs):
-        """
-        Main logic to load a text file:
+    #endregion
 
-        1. The dictionary key is always the base filename (no extension).
-        2. If file_path does not exist, return an empty string and empty dictionary.
-        3. Skip any line that starts with '#'.
-        4. Return a single string (joined with newlines), a dict {filename: [list_of_lines]}, and a status label.
+    #region CORE
+    # Main entry point and FUNCTION target. Validates the path, reads the
+    # file (UTF-8 with a lossy fallback), strips comment lines, and returns
+    # (text, status).
+
+    def load_file(self, file_path="", debug_mode=False):
         """
-        # Check for file existence
-        if not os.path.exists(file_path) or not os.path.isfile(file_path):
+        Load a text file and return its non-comment contents.
+
+        1. If file_path does not exist or is not a file, return ("", status).
+        2. Skip any line whose first non-whitespace character is '#'.
+        3. Preserve original line text (indentation kept); only the line
+           terminator is removed.
+        4. Non-UTF-8 files are decoded lossily with errors='replace'.
+        5. Return (text, status) where text is the non-comment lines joined
+           with newlines and status is a short human-readable string.
+        """
+        # isfile implies existence, so a separate exists() check is redundant.
+        if not os.path.isfile(file_path):
             print(f"[LoadTextFileGraceful] Warning: File not found: {file_path}")
-            status = "File not found"
-            return "", status
+            return "", f"File not found: {file_path}"
 
-        # Attempt to read file lines, skipping comments
+        # Read file contents. UTF-8 first; fall back to a lossy decode so a
+        # non-UTF-8 text file still yields a usable string instead of an error.
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                raw_text = f.read()
+        except UnicodeDecodeError:
+            with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+                raw_text = f.read()
+            self._dprint(debug_mode, f"[LoadTextFileGraceful][DEBUG] Non-UTF-8 file, used lossy decode: {file_path}")
+        except OSError as e:
+            print(f"[LoadTextFileGraceful] Error reading file {file_path}: {e}")
+            return "", f"Error reading file: {file_path} ({e})"
+
+        # Split into lines and classify: comment vs. content. A line is a
+        # comment when its first non-whitespace character is '#'; inline
+        # trailing '#' is preserved. Original line text is kept (only the
+        # line terminator is removed by splitlines) so indentation survives.
         lines = []
         comments = []
-        try:
-            with open(file_path, 'r', encoding="utf-8") as f:
-                for idx, line in enumerate(f, 1):
-                    stripped = line.strip()
-                    if stripped.startswith('#'):
-                        comments.append(stripped)
-                        if debug_mode:
-                            print(f"[LoadTextFileGraceful][DEBUG] Skipping comment line {idx}: {stripped}")
-                    else:
-                        lines.append(stripped)
-                        if debug_mode:
-                            print(f"[LoadTextFileGraceful][DEBUG] Loaded line {idx}: {stripped}")
-        except Exception as e:
-            print(f"[LoadTextFileGraceful] Error reading file {file_path}: {e}")
-            status = f"Error reading file: {os.path.basename(file_path)}"
-            return "", status
+        for idx, line in enumerate(raw_text.splitlines(), 1):
+            lstripped = line.lstrip()
+            if lstripped.startswith('#'):
+                comments.append(lstripped.strip())
+                self._dprint(debug_mode, f"[LoadTextFileGraceful][DEBUG] Skipping comment line {idx}: {lstripped.strip()}")
+            else:
+                lines.append(line)
+                self._dprint(debug_mode, f"[LoadTextFileGraceful][DEBUG] Loaded line {idx}: {line}")
 
-        if debug_mode:
-            print(f"[LoadTextFileGraceful][DEBUG] Finished loading. {len(lines)} content lines, {len(comments)} comment lines.")
-            if comments:
-                print("[LoadTextFileGraceful][DEBUG] Comments found in file:")
-                for comment in comments:
-                    print(f"    {comment}")
+        self._dprint(
+            debug_mode,
+            f"[LoadTextFileGraceful][DEBUG] Finished loading. "
+            f"{len(lines)} content lines, {len(comments)} comment lines.",
+        )
+        if debug_mode and comments:
+            print("[LoadTextFileGraceful][DEBUG] Comments found in file:")
+            for comment in comments:
+                print(f"    {comment}")
 
-        # Join non-comment lines into a single string
+        # Join non-comment lines into a single string.
         text_output = "\n".join(lines)
 
-        # Status: show loaded filename
-        status = f"Loaded: {os.path.basename(file_path)}"
+        # Status distinguishes a file that loaded with content from one that
+        # was empty after comment stripping, so the two are not confused with
+        # each other or with the error/missing empty-string returns.
+        if lines:
+            status = f"Loaded: {file_path} ({len(lines)} lines)"
+        else:
+            status = f"Loaded (empty after comment strip): {file_path}"
 
-        # Return the text,  and status label
         return text_output, status
 
+    #endregion
+
+    #region UTIL
+    # Debug print helper: only emits output when debug_mode is True.
+
+    def _dprint(self, debug_mode, *args, **kwargs):
+        if debug_mode:
+            print(*args, **kwargs)
+
+    #endregion
+
+
+#region MAPPING
+# ComfyUI registration: node class + display name mappings exported via
+# __init__.py so ComfyUI can discover and instantiate the node.
 NODE_CLASS_MAPPINGS = {
-    "illumoraeLoadTextFileGracefulNode": illumoraeLoadTextFileGracefulNode, # ComfyUI needs to know which classes to load when scanning your .py file
+    "illumoraeLoadTextFileGracefulNode": illumoraeLoadTextFileGracefulNode,
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "illumoraeLoadTextFileGracefulNode": "Load Text File Graceful", # Provide a human-readable display name for your node
+    "illumoraeLoadTextFileGracefulNode": "Load Text File Graceful",
 }
+#endregion

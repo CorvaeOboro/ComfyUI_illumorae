@@ -1,0 +1,175 @@
+{
+  "id": "illumorae-workflow",
+  "revision": 0,
+  "last_node_id": 4,
+  "last_link_id": 1,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "illumoraeSaveImageExtendedFolderPathNode",
+      "pos": [
+        620,
+        360
+      ],
+      "size": [
+        320,
+        260
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 1
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfyui_illumorae",
+        "Node name for S&R": "illumoraeSaveImageExtendedFolderPathNode",
+        "aux_id": "CorvaeOboro/ComfyUI_illumorae",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "C:/output",
+        "gen",
+        "demo",
+        "underscore",
+        "enabled",
+        3,
+        "last"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 2,
+      "type": "EmptyImage",
+      "pos": [
+        120,
+        360
+      ],
+      "size": [
+        315,
+        130
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "EmptyImage",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        512,
+        512,
+        0,
+        1
+      ],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 3,
+      "type": "Note",
+      "pos": [
+        620,
+        60
+      ],
+      "size": [
+        360,
+        110
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "Save Image Extended FolderPath\n[illumoraeSaveImageExtendedFolderPathNode]\nGroup: Save  Status: working"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 4,
+      "type": "Note",
+      "pos": [
+        620,
+        690
+      ],
+      "size": [
+        420,
+        200
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "Saves images to a specified folder path with customizable naming, counters, and optional metadata.\n\nInputs (required): images:IMAGE, folderpath_input:STRING, foldername_prefix:STRING, filename_prefix:STRING, delimiter:ENUM, save_metadata:ENUM, counter_digits:ENUM, counter_position:ENUM\nOutputs: (none - output/saver node)\n\nSave-group node. An EmptyImage feeds the IMAGE input so the saver can run standalone; set folderpath_input to a writable folder before queueing."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      1,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Save: Save Image Extended FolderPath",
+      "bounding": [
+        80.0,
+        20.0,
+        1000.0,
+        910.0
+      ],
+      "color": "#8A8",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    "ue_links": [],
+    "links_added_by_ue": []
+  },
+  "version": 0.4
+}

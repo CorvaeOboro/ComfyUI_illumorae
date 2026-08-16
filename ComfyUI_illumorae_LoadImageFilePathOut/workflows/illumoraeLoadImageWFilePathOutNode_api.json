@@ -1,0 +1,72 @@
+{
+  "1": {
+    "class_type": "illumoraeLoadImageWFilePathOutNode",
+    "inputs": {
+      "image": "C:/path/to/your_image.png",
+      "debug_mode": false
+    }
+  },
+  "2": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "1",
+        0
+      ]
+    }
+  },
+  "3": {
+    "class_type": "MaskToImage",
+    "inputs": {
+      "mask": [
+        "1",
+        1
+      ]
+    }
+  },
+  "4": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "3",
+        0
+      ]
+    }
+  },
+  "5": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        2
+      ]
+    }
+  },
+  "6": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        3
+      ]
+    }
+  },
+  "7": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        4
+      ]
+    }
+  },
+  "8": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        5
+      ]
+    }
+  }
+}
