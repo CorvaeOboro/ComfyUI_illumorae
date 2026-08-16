@@ -14,12 +14,14 @@ priority.  a sequential, priority-driven, single-copy structure filler.
 #   regularized confidence and the data term.
 
 
-STATUS:: working
+STATUS::working
 TITLE::Image Infill Exemplar Region Fill
 DESCRIPTIONSHORT::Image Infill using exemplar region filling with isophote-driven priority. extends linear structures into the target region.
-VERSION::20260427
+VERSION::20260812
 IMAGE::comfyui_illumorae_image_infill_exemplar_regionfill.png
 GROUP::Image
+GROUPORDER::1
+LISTORDER::40
 """
 #region IMPORTS
 from __future__ import annotations

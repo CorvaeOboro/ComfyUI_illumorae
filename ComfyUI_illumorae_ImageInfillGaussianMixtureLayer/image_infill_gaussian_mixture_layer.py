@@ -17,12 +17,14 @@ Stationary-Gaussian texture inpainting via FFT moving-average + CG kriging.
 #     conditioning Gaussian simulations." Mathematical Geology 32(6),
 #     701-723.
 
-STATUS:: working
+STATUS::working
 TITLE::Image Infill Gaussian Mixture Layer
-DESCRIPTIONSHORT::Gaussian texture inpainting by FFT-based conditional simulation (Galerne-Leclaire 2017); best for homogeneous microtextures.
-VERSION::20260812
+DESCRIPTIONSHORT::Single stationary-Gaussian-field texture inpainting by FFT-based conditional simulation (Galerne-Leclaire 2017); best for homogeneous microtextures. (Name retains historical "Mixture" for compat; not a GMM.)
+VERSION::20260814
 IMAGE::comfyui_illumorae_image_infill_gaussian_mixture_layer.png
 GROUP::Image
+GROUPORDER::1
+LISTORDER::50
 """
 #region IMPORTS
 from __future__ import annotations
@@ -82,6 +84,13 @@ if TYPE_CHECKING:
 
 class illumoraeImageInfillGaussianMixtureLayerNode:
     """Gaussian-field texture inpainting (Galerne-Leclaire 2017).
+
+    Naming note: the node title and function name retain the historical
+    word "Mixture" for backwards compatibility with existing workflows,
+    but the implemented model is a **single stationary Gaussian random
+    field** (one texton, one PSD, one CG solve per channel) &mdash; not a
+    Gaussian Mixture Model. There is no per-region component selection
+    anywhere in the code.
 
     Terminology (consistent with the rest of this repository):
       - **target region** ``Omega`` : pixels to inpaint (mask == 1).
@@ -193,13 +202,16 @@ class illumoraeImageInfillGaussianMixtureLayerNode:
             src_f, (ksize, ksize), sigma_eff, sigma_eff,
             borderType=cv2.BORDER_REFLECT101,
         )
-        den_safe = np.maximum(den, 1e-6)
+        # Single threshold for both the safe-division floor and the
+        # global-mean fallback mask.
+        den_floor = 1e-6
+        den_safe = np.maximum(den, den_floor)
         m = num / den_safe[..., None]
-        # Global-mean fallback where normalization is small
-        global_mu = (masked.reshape(-1, image.shape[-1]).sum(axis=0)
-                     / n_src).astype(np.float32)
-        bad = (den < 1e-5)
+        bad = (den < den_floor)
         if bad.any():
+            # Global-mean fallback where normalization is small
+            global_mu = (masked.reshape(-1, image.shape[-1]).sum(axis=0)
+                         / n_src).astype(np.float32)
             m[bad] = global_mu
         return m.astype(np.float32)
     #endregion
@@ -225,8 +237,8 @@ class illumoraeImageInfillGaussianMixtureLayerNode:
         variance of the source sample as the image size grows.
 
         Strictly source-dependent: ``u`` is read only at positions
-        where ``M == 1``. Target-region values of ``u`` are silently
-        zeroed by the ``* M`` factor and never used.
+        where ``M == 1``. Target-region values of ``u`` are zeroed by
+        the ``* M`` factor and never used.
         """
         H, W = source_mask.shape
         n_src = float(source_mask.sum())
@@ -264,13 +276,15 @@ class illumoraeImageInfillGaussianMixtureLayerNode:
         return np.fft.irfft2(spectrum * F, s=field.shape[:2], axes=(0, 1))
     #endregion
 
-    #region C-KRIGE
+    #region C-KRIG
     def _apply_sigma(
         self,
         v_source: np.ndarray,
-        source_mask: np.ndarray,
         psd: np.ndarray,
         ridge: np.ndarray,
+        sy: np.ndarray,
+        sx: np.ndarray,
+        full_buf: np.ndarray,
     ) -> np.ndarray:
         """Apply the masked autocovariance operator ``Sigma_SS + ridge*I``.
 
@@ -287,6 +301,12 @@ class illumoraeImageInfillGaussianMixtureLayerNode:
         ``v_source`` has shape ``(N_S, C)``, ``psd`` has shape
         ``(H, W//2+1, C)``, ``ridge`` has shape ``(C,)``.
 
+        ``sy`` / ``sx`` are the precomputed row/column index arrays of
+        the source pixels (from ``np.where(source_mask > 0.5)``), and
+        ``full_buf`` is a caller-owned ``(H, W, C)`` float32 buffer
+        reused across CG iterations to avoid per-iteration allocation.
+        It is zeroed in-place here before scattering.
+
         The ridge term ``r * v`` is **Tikhonov regularization**: the
         bare ``Sigma_SS`` has compact-support / band-limited spectrum
         and is rank-deficient, so CG without ridge amplifies
@@ -297,18 +317,23 @@ class illumoraeImageInfillGaussianMixtureLayerNode:
         ``1 / regularization`` regardless of how concentrated the
         spectrum is.
         """
-        H, W = source_mask.shape
         C = v_source.shape[-1]
-        full = np.zeros((H, W, C), dtype=np.float32)
+        # Reuse the caller-provided full-image buffer (zeroed in-place).
+        full_buf.fill(0)
         # Scatter source vector to full field.
-        sy, sx = np.where(source_mask > 0.5)
-        full[sy, sx, :] = v_source.astype(np.float32)
+        # ORDERING REQUIREMENT: ``sy, sx`` come from ``np.where`` which
+        # returns indices in row-major (C) order, the SAME order
+        # produced by boolean-mask indexing ``arr[src_bool]`` used to
+        # build ``b`` and ``z`` in ``_run_single``. Any refactor that
+        # changes one indexing scheme without the other will misalign
+        # the CG vectors. Keep them in sync.
+        full_buf[sy, sx, :] = v_source
         # FFT-convolution with the PSD (Sigma_SS v).
-        conv = self._fft_convolve(psd, full).astype(np.float32)
+        conv = self._fft_convolve(psd, full_buf)
         # Tikhonov ridge: + ridge[c] * v_source[c] per channel.
         return (conv[sy, sx, :]
-                + ridge.reshape(1, C).astype(np.float32)
-                * v_source.astype(np.float32))
+                + ridge.reshape(1, C)
+                * v_source)
 
     def _conjugate_gradient(
         self,
@@ -328,6 +353,13 @@ class illumoraeImageInfillGaussianMixtureLayerNode:
 
         Returns ``(z, iterations_used, final_residual_norm)``.
         """
+        # Precompute source-pixel indices and a reusable full-image
+        # scatter buffer ONCE for the whole solve, instead of
+        # re-allocating them inside _apply_sigma on every iteration.
+        H, W = source_mask.shape
+        C = b_source.shape[-1]
+        sy, sx = np.where(source_mask > 0.5)
+        full_buf = np.zeros((H, W, C), dtype=np.float32)
         x = np.zeros_like(b_source, dtype=np.float32)
         r = b_source.astype(np.float32).copy()
         p = r.copy()
@@ -342,7 +374,7 @@ class illumoraeImageInfillGaussianMixtureLayerNode:
         last_rel = float("inf")
         it = 0
         for it in range(1, max_iter + 1):
-            Ap = self._apply_sigma(p, source_mask, psd, ridge)
+            Ap = self._apply_sigma(p, psd, ridge, sy, sx, full_buf)
             pAp = np.einsum('ij,ij->j', p, Ap).astype(np.float64)
             pAp_safe = np.where(np.abs(pAp) < 1e-30, 1e-30, pAp)
             alpha = (rs_old / pAp_safe).astype(np.float32)
@@ -475,11 +507,13 @@ class illumoraeImageInfillGaussianMixtureLayerNode:
         T = np.fft.rfft2(t, axes=(0, 1))
         psd = (T * np.conj(T)).real.astype(np.float32)
         psd_dc = psd[0, 0].astype(np.float64)
-        psd_peak = psd.reshape(-1, C).max(axis=0).astype(np.float64)
+        # Compute the per-channel PSD peak once (float32) and reuse it
+        # for both the debug log and the ridge scaling below.
+        psd_peak_per_ch = psd.reshape(-1, C).max(axis=0).astype(np.float32)
         self._debug_print(
             debug_prints,
             f"[step 2] PSD DC (expect ~0)={np.round(psd_dc, 8).tolist()} "
-            f"PSD peak={np.round(psd_peak, 5).tolist()}",
+            f"PSD peak={np.round(psd_peak_per_ch.astype(np.float64), 5).tolist()}",
         )
 
         # Tikhonov ridge per channel, scaled by the **spectral max**
@@ -502,7 +536,6 @@ class illumoraeImageInfillGaussianMixtureLayerNode:
         # Scaling by ``psd_peak`` instead makes ``kappa = 1/regularization``
         # regardless of how concentrated the spectrum is, so CG
         # converges in O(50) iterations on any input.
-        psd_peak_per_ch = psd.reshape(-1, C).max(axis=0).astype(np.float32)
         ridge = (float(regularization)
                  * np.maximum(psd_peak_per_ch, 1e-12))
         self._debug_print(
@@ -516,6 +549,14 @@ class illumoraeImageInfillGaussianMixtureLayerNode:
         )
 
         # ----- [step 3] unconditional sample F = mu + t (*) W ----
+        # NOTE: a SINGLE white-noise field ``W`` is drawn and shared across
+        # all channels (rather than one independent ``W_c`` per channel).
+        # This is a deliberate design choice: a shared innovation keeps the
+        # synthesized texture perfectly correlated across channels, which
+        # preserves the luminance/chrominance structure of the source and
+        # avoids rainbow / chroma-noise artefacts in RGB output. It is a
+        # deviation from a naive per-channel-independent Galerne-Leclaire
+        # and is intentional.
         rng = np.random.default_rng(int(seed) & 0xFFFFFFFF)
         if add_innovation:
             white = rng.standard_normal((H, W)).astype(np.float32)
@@ -600,12 +641,20 @@ class illumoraeImageInfillGaussianMixtureLayerNode:
         # Re-stamp source bit-exact (eliminates CG residual error).
         X[src_bool] = img[src_bool]
 
+        # Source gamut is needed by both the pre-clamp diagnostic (step 7)
+        # and the source-gamut clamp (step 8). Compute it once when either
+        # is active, instead of reducing img[src_bool] twice.
+        tgt_mask = ~src_bool
+        need_gamut = (clamp_to_source_gamut and n_src > 0 and n_tgt > 0) \
+            or (debug_prints and n_tgt > 0)
+        if need_gamut:
+            src_vals = img[src_bool]
+            src_min_c = src_vals.min(axis=0).astype(np.float32)
+            src_max_c = src_vals.max(axis=0).astype(np.float32)
+
         # Diagnostic: target-region gamut / saturation fractions BEFORE any clamping / clipping.
         if debug_prints and n_tgt > 0:
-            tgt = X[~src_bool]
-            src_vals = img[src_bool]
-            src_min_c = src_vals.min(axis=0)
-            src_max_c = src_vals.max(axis=0)
+            tgt = X[tgt_mask]
             below = (tgt < src_min_c[None, :] - 1e-6)
             above = (tgt > src_max_c[None, :] + 1e-6)
             oog_any = (below | above).any(axis=-1).mean()
@@ -621,24 +670,18 @@ class illumoraeImageInfillGaussianMixtureLayerNode:
             )
 
         # ----- [step 8] source-gamut safety clamp ----------------
+        # Clamp ONLY the target slice (source pixels are untouched and
+        # never pass through np.clip). The per-channel clamp count is
+        # derived from the clamp itself in one pass (no separate
+        # comparison loop).
         if clamp_to_source_gamut and n_src > 0 and n_tgt > 0:
-            src_vals = img[src_bool]
-            src_min_c = src_vals.min(axis=0).astype(np.float32)
-            src_max_c = src_vals.max(axis=0).astype(np.float32)
-            tgt_mask3 = np.broadcast_to(
-                (~src_bool)[..., None], X.shape
+            tgt_vals = X[tgt_mask]
+            clamped_tgt = np.clip(
+                tgt_vals,
+                src_min_c.reshape(1, C), src_max_c.reshape(1, C),
             )
-            X_tgt_clamped = np.clip(
-                X, src_min_c.reshape(1, 1, C), src_max_c.reshape(1, 1, C),
-            )
-            n_clamped_per_ch = np.zeros(C, dtype=np.int64)
-            for c in range(C):
-                tgt_slice = X[..., c][~src_bool]
-                clamped = (
-                    (tgt_slice < src_min_c[c]) | (tgt_slice > src_max_c[c])
-                )
-                n_clamped_per_ch[c] = int(clamped.sum())
-            X = np.where(tgt_mask3, X_tgt_clamped, X)
+            n_clamped_per_ch = (clamped_tgt != tgt_vals).sum(axis=0).astype(np.int64)
+            X[tgt_mask] = clamped_tgt
             self._debug_print(
                 debug_prints,
                 f"[step 8] source-gamut clamp applied: "
@@ -703,11 +746,17 @@ class illumoraeImageInfillGaussianMixtureLayerNode:
 
         Source pixels show ``(u - mu)`` rescaled; target pixels are
         zeroed. Useful for debugging the Gaussian-model fit.
+
+        Always returns a 3-channel ``(H, W, 3)`` float32 array to
+        satisfy the ComfyUI ``IMAGE`` format regardless of the input
+        channel count: grayscale (C=1) is broadcast to RGB; alpha
+        (C=4) is dropped; C=3 passes through unchanged.
         """
+        H, W = img.shape[:2]
         src_f = source_mask.astype(np.float32)
         n_src = float(src_f.sum())
         if n_src <= 0:
-            return np.zeros_like(img, dtype=np.float32)
+            return np.zeros((H, W, 3), dtype=np.float32)
         mu = (img.astype(np.float32) * src_f[..., None]
               ).reshape(-1, img.shape[-1]).sum(axis=0) / n_src
         centered = (img - mu) * src_f[..., None]
@@ -717,7 +766,15 @@ class illumoraeImageInfillGaussianMixtureLayerNode:
             vis = 0.5 + 0.5 * centered / m
         else:
             vis = np.full_like(img, 0.5, dtype=np.float32)
-        return vis.astype(np.float32)
+        vis = vis.astype(np.float32)
+        # Force 3-channel output for the IMAGE format.
+        C = vis.shape[-1]
+        if C == 3:
+            return vis
+        if C == 1:
+            return np.repeat(vis, 3, axis=-1)
+        # C == 4 (RGBA) or other: drop alpha / take first 3 channels.
+        return vis[..., :3]
     #endregion
 
     #region UI
@@ -837,15 +894,53 @@ class illumoraeImageInfillGaussianMixtureLayerNode:
                 output for diagnosis.
 
         Returns:
-            ``(infilled_image, texton_viz)``, both ``(B, H, W, 3)``
-            float32 in ``[0, 1]``. ``texton_viz`` shows the centered
-            source content (proxy for the texton) for debugging.
+            ``(infilled_image, texton_viz)``. ``infilled_image`` has the
+            same channel count as the input image, shape ``(B, H, W, C)``,
+            float32 in ``[0, 1]``. ``texton_viz`` is always 3-channel
+            ``(B, H, W, 3)`` float32 in ``[0, 1]`` (grayscale broadcast to
+            RGB, alpha dropped) to meet the ComfyUI ``IMAGE`` format;
+            it shows the centered source content (proxy for the texton)
+            for debugging.
         """
         if not _HAS_TORCH:
             raise RuntimeError(
                 "torch is required for the ComfyUI entry point "
                 "gaussian_mixture_infill; install torch or call "
                 "_run_single directly on numpy arrays."
+            )
+        # ----- input validation ----------------------------------
+        # ComfyUI IMAGE is (B, H, W, C); MASK is (B, H, W). Catch the
+        # common shape/rank mistakes early with a clear error instead of
+        # a confusing broadcast / indexing failure deep in _run_single.
+        if image.ndim != 4:
+            raise ValueError(
+                f"image must be 4-D (B, H, W, C); got shape "
+                f"{tuple(image.shape)} (ndim={image.ndim})."
+            )
+        if mask.ndim not in (3, 4):
+            raise ValueError(
+                f"mask must be 3-D (B, H, W) or 4-D (B, 1, H, W); got "
+                f"shape {tuple(mask.shape)} (ndim={mask.ndim})."
+            )
+        # Normalize a (B, 1, H, W) mask to (B, H, W) by squeezing the
+        # channel dim if present.
+        if mask.ndim == 4:
+            if mask.shape[1] != 1:
+                raise ValueError(
+                    f"4-D mask must have shape (B, 1, H, W); got "
+                    f"{tuple(mask.shape)}."
+                )
+            mask = mask.squeeze(1)
+        if image.shape[0] != mask.shape[0]:
+            raise ValueError(
+                f"image and mask batch size must match: image has "
+                f"{image.shape[0]}, mask has {mask.shape[0]}."
+            )
+        if image.shape[1:3] != mask.shape[1:3]:
+            raise ValueError(
+                f"image and mask spatial dims must match: image is "
+                f"{tuple(image.shape[1:3])}, mask is "
+                f"{tuple(mask.shape[1:3])}."
             )
         self._debug_print(debug_prints, f"image={tuple(image.shape)} "
                           f"mask={tuple(mask.shape)}")
@@ -858,7 +953,9 @@ class illumoraeImageInfillGaussianMixtureLayerNode:
             msk_np = mask[b].detach().cpu().numpy().astype(np.float32)
             if (msk_np > 0.5).sum() == 0:
                 filled = img_np.copy()
-                viz = np.zeros(img_np.shape, dtype=np.float32)
+                # texton_viz is always 3-channel per the IMAGE format.
+                viz = np.zeros((img_np.shape[0], img_np.shape[1], 3),
+                               dtype=np.float32)
             else:
                 filled, viz = self._run_single(
                     img_np, msk_np,

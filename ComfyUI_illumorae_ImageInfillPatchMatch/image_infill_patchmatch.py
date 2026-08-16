@@ -4,12 +4,14 @@ a rough approximation of the PatchMatch algorithm
 finding nearest neighbor patches to fill a masked area ,
 usage example = for the removal of objects from image then using the infilled image as guidance for inpainting
 
-STATUS:: working
+STATUS::working
 TITLE::Image Infill PatchMatch
 DESCRIPTIONSHORT::Approximate PatchMatch-style content fill to infill masked regions; useful as inpainting guidance.
-VERSION::20260425
+VERSION::20260812
 IMAGE::comfyui_illumorae_image_infill_patchmatch.png
 GROUP::Image
+GROUPORDER::1
+LISTORDER::60
 """
 #region IMPORTS
 from __future__ import annotations
@@ -385,7 +387,7 @@ class illumoraeImageInfillPatchMatchNode:
         An earlier version of this lookup fed the inverted mask, which
         instead labels *target* pixels - making the resulting LUT
         unreliable (boundary target pixels whose label was not claimed
-        by any source pixel during the iteration silently fell back to
+        by any source pixel during the iteration fell back to
         the default coordinate ``(0, 0)``, i.e. the image's top-left
         corner, which is often dark / brownish in real photos and showed
         up as a dark band along the target boundary in the blended

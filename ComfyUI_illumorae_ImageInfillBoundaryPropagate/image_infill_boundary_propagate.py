@@ -19,9 +19,12 @@ Terminology (Criminisi et al., 2004):
 
 TITLE::Image Infill Boundary Propagate
 DESCRIPTIONSHORT::Fills the target region by propagating colors inward from the target boundary using a random-weighted onion-peel rule (simple content fill for inpainting prep).
-VERSION::20260427
+VERSION::20260812
 IMAGE::comfyui_illumorae_image_infill_boundary_propagate.png
 GROUP::Image
+GROUPORDER::1
+LISTORDER::30
+STATUS::working
 """
 #region IMPORTS
 from __future__ import annotations

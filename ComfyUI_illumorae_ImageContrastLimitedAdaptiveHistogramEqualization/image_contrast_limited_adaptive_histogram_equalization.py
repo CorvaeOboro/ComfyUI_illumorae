@@ -7,7 +7,7 @@ Default Settings:
     - tile_grid_width: 8
     - tile_grid_height: 8
 
-How it works:
+Pipeline:
     1. The input image is expected in [B, H, W, C] format.
     2. For each image in the batch:
         - If the image is in float format (assumed in the range [0, 1]),
@@ -22,24 +22,30 @@ How it works:
 
 TITLE::Image CLAHE (Contrast Limited Adaptive Histogram Equalization)
 DESCRIPTIONSHORT::Applies CLAHE to enhance local contrast; useful for localized detail/contrast improvement.
-VERSION::20260113
+VERSION::20260812
 GROUP::Image
+GROUPORDER::1
+LISTORDER::10
+STATUS::working
+IMAGE::comfyui_illumorae_image_clahe.png
 """
+#region IMPORTS
 import cv2
 import torch
 import numpy as np
+#endregion
 
-class illumorae_CLAHEImageNode:
+class illumoraeImageContrastLimitedAdaptiveHistogramEqualizationNode:
     """
     A ComfyUI node that applies Contrast Limited Adaptive Histogram Equalization (CLAHE)
-    to enhance the localized relative contrast of an image. 
+    to enhance the localized relative contrast of an image.
 
     Default Settings:
       - clip_limit: 2.0
       - tile_grid_width: 8
       - tile_grid_height: 8
 
-    How it works:
+    Pipeline:
       1. The input image is expected in [B, H, W, C] format.
       2. For each image in the batch:
          - If the image is in float format (assumed in the range [0, 1]),
@@ -51,29 +57,8 @@ class illumorae_CLAHEImageNode:
       3. The processed images are reassembled into a torch tensor with the same
          device as the input.
     """
-    
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "input_image": ("IMAGE",),
-            },
-            "optional": {
-                "clip_limit": ("FLOAT", {"default": 3.0, "min": 0.0}),
-                "tile_grid_width": ("INT", {"default": 12, "min": 1}),
-                "tile_grid_height": ("INT", {"default": 12, "min": 1})
-            }
-        }
 
-    RETURN_TYPES = ("IMAGE",)
-    RETURN_NAMES = ("processed_image",)
-    FUNCTION = "apply_clahe"
-    CATEGORY = "illumorae"
-    DESCRIPTION = (
-        "Applies CLAHE Contrast Limited Adaptive Histogram Equalization to the input image. "
-        "useful for locally spatial relative contrast enhancement."
-    )
-
+    #region C-DRIVER
     def apply_clahe(self, input_image, clip_limit=2.0, tile_grid_width=8, tile_grid_height=8, **kwargs):
         """
         Applies CLAHE to each image in the input batch with configurable parameters.
@@ -97,6 +82,12 @@ class illumorae_CLAHEImageNode:
         processed_image_list = []
 
         # Define the CLAHE settings based on input parameters.
+        # Clamp grid to at least 2 and at most the image dimensions to
+        # avoid degenerate 1x1 grids (global HE) and OpenCV errors when
+        # the grid exceeds the image size.
+        h, w = image_batch_np.shape[1], image_batch_np.shape[2]
+        tile_grid_width = max(2, min(int(tile_grid_width), w))
+        tile_grid_height = max(2, min(int(tile_grid_height), h))
         clahe_tile_grid_size = (tile_grid_width, tile_grid_height)
         clahe_operator = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=clahe_tile_grid_size)
 
@@ -110,7 +101,9 @@ class illumorae_CLAHEImageNode:
 
             # Process RGB images.
             if single_image_uint8.shape[-1] == 3:
-                # Convert from RGB to LAB.
+                # Convert from RGB to LAB. On uint8 input, COLOR_RGB2LAB
+                # scales L to [0, 255] (not the perceptual [0, 100]);
+                # CLAHE operates on this 8-bit L directly.
                 image_lab = cv2.cvtColor(single_image_uint8, cv2.COLOR_RGB2LAB)
                 l_channel, a_channel, b_channel = cv2.split(image_lab)
                 # Apply CLAHE to the L channel.
@@ -146,13 +139,37 @@ class illumorae_CLAHEImageNode:
         output_images_tensor = output_images_tensor.to(input_image.device)
 
         return (output_images_tensor,)
+    #endregion
 
-# ComfyUI custom node classes to load 
+    #region UI
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "input_image": ("IMAGE",),
+            },
+            "optional": {
+                "clip_limit": ("FLOAT", {"default": 2.0, "min": 0.1}),
+                "tile_grid_width": ("INT", {"default": 8, "min": 2}),
+                "tile_grid_height": ("INT", {"default": 8, "min": 2})
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("processed_image",)
+    FUNCTION = "apply_clahe"
+    CATEGORY = "illumorae"
+    DESCRIPTION = "Applies CLAHE to enhance local contrast; useful for localized detail/contrast improvement."
+    #endregion
+
+#region REG
+# ComfyUI custom node classes to load
 NODE_CLASS_MAPPINGS = {
-    "illumoraeImageCLAHENode": illumorae_CLAHEImageNode,
+    "illumoraeImageContrastLimitedAdaptiveHistogramEqualizationNode": illumoraeImageContrastLimitedAdaptiveHistogramEqualizationNode,
 }
 
 # ComfyUI display name for node
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "illumoraeImageCLAHENode": "Image CLAHE Contrast Limited Adaptive Histogram Equalization",
+    "illumoraeImageContrastLimitedAdaptiveHistogramEqualizationNode": "Image CLAHE (Contrast Limited Adaptive Histogram Equalization)",
 }
+#endregion
