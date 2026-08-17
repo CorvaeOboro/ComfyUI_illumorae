@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>illumorae - Image Infill Exemplar Region Fill</title>
+<style>
+:root { --bg:#0d0d0d; --surface:#141414; --border:#2a2a2a; --text:#e0e0e0; --muted:#999; --accent:#4a7fb5; --link:#64b5f6; --code:#1e1e1e; }
+* { box-sizing:border-box; }
+html,body { margin:0; height:100%; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+.page { display:flex; height:100vh; }
+.sidebar { width:14%; min-width:200px; border-right:1px solid var(--border); background:var(--bg); }
+.sidebar iframe { width:100%; height:100%; border:none; }
+.content { flex:1; overflow-y:auto; }
+header { background:linear-gradient(90deg,#0a1520 0%,#0d0d0d 100%); border-bottom:2px solid var(--accent); padding:1.2rem 1rem; text-align:center; }
+header h1 { margin:0; font-size:2rem; color:#fff; }
+header p { margin:0.5rem 0 0; color:var(--muted); }
+.container { max-width:1000px; margin:0 auto; padding:2rem 1.5rem; }
+h2 { color:#fff; border-bottom:1px solid var(--border); padding-bottom:0.5rem; margin-top:2.5rem; font-size:1.4rem; }
+h3 { color:#fff; margin-top:1.5rem; font-size:1.1rem; }
+a { color:var(--link); text-decoration:none; }
+a:hover { text-decoration:underline; }
+ul,ol { padding-left:1.4rem; }
+li { margin-bottom:0.4rem; }
+table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:0.95rem; }
+th,td { border:1px solid var(--border); padding:0.5rem 0.7rem; text-align:left; vertical-align:top; }
+th { background:var(--surface); color:#fff; }
+td { background:#111; }
+code,pre { background:var(--code); border:1px solid var(--border); border-radius:4px; font-family:Consolas,Monaco,'Courier New',monospace; font-size:0.9rem; }
+code { padding:0.15rem 0.35rem; }
+pre { padding:0.8rem; overflow-x:auto; }
+.note { border-left:3px solid var(--accent); background:var(--surface); padding:0.8rem 1rem; margin:1rem 0; border-radius:0 6px 6px 0; }
+.meta-grid { display:grid; grid-template-columns:160px 1fr; gap:0.4rem 1rem; margin:1rem 0; font-size:0.95rem; }
+.meta-grid dt { color:var(--muted); }
+.meta-grid dd { margin:0; }
+.badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.75rem; border:1px solid var(--border); background:var(--surface); color:var(--muted); }
+.badge.status-working { color:#b5d65a; border-color:#5a8a3a; }
+.badge.status-broken { color:#ff6b6b; border-color:#a75a5a; }
+.badge.status-experimental { color:#d6b55a; border-color:#a79a5a; }
+img.node-shot { width:100%; border:1px solid var(--border); border-radius:4px; margin:1rem 0; }
+.img-missing { border:1px dashed var(--border); background:var(--surface); color:var(--muted); padding:2rem; text-align:center; border-radius:4px; margin:1rem 0; }
+footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0.9rem; border-top:1px solid var(--border); margin-top:3rem; }
+</style>
+</head>
+<body>
+<div class="page">
+    <div class="sidebar"><iframe src="../illumorae_menu.html"></iframe></div>
+    <div class="content">
+<header>
+    <h1>Image Infill Exemplar Region Fill</h1>
+    <p>Image Infill using exemplar region filling with isophote-driven priority. extends linear structures into the target region.</p>
+</header>
+<div class="container">
+
+<img class="node-shot" src="../comfyui_illumorae_image_infill_exemplar.png" alt="Image Infill Exemplar Region Fill">
+
+<h2>Metadata</h2>
+<dl class="meta-grid">
+<dt>Node ID</dt><dd><code>illumoraeImageInfillExemplarRegionFillNode</code></dd>
+<dt>Category</dt><dd><code>illumorae</code></dd>
+<dt>Group</dt><dd>Image Infill</dd>
+<dt>Version</dt><dd><code>20260812</code></dd>
+<dt>Function</dt><dd><code>exemplar_regionfill_infill</code></dd>
+<dt>Status</dt><dd><span class="badge status-working">working</span></dd>
+<dt>Package</dt><dd><code>ComfyUI_illumorae_ImageInfillExemplarRegionFill</code></dd>
+<dt>Source</dt><dd><code>image_infill_exemplar_regionfill.py</code></dd>
+</dl>
+
+<p>Image Infill using Criminisi-style exemplar region filling with isophote-driven priority; extends linear structures (edges) into the target region via single-copy patch placement instead of voting averages.</p><p class="note">Image Infill using exemplar region filling with isophote-driven priority. extends linear structures into the target region.</p>
+
+<h2>Inputs</h2>
+<table>
+<tr><th>Name</th><th>Type</th><th>Section</th><th>Default</th><th>Range</th><th>Options</th></tr>
+<tr><td><code>image</code></td><td>IMAGE</td><td>required</td><td></td><td></td><td></td></tr>
+<tr><td><code>mask</code></td><td>MASK</td><td>required</td><td></td><td></td><td></td></tr>
+<tr><td><code>patch_size</code></td><td>INT</td><td>required</td><td>9</td><td>3 .. 21 (step 2)</td><td><span class="badge">display=number</span></td></tr>
+<tr><td><code>max_steps</code></td><td>INT</td><td>optional</td><td>0</td><td>0 .. 1000000 (step 1)</td><td><span class="badge">display=number</span></td></tr>
+<tr><td><code>priority_mode</code></td><td>ANY</td><td>optional</td><td>criminisi_2004</td><td></td><td></td></tr>
+<tr><td><code>cheng_omega</code></td><td>FLOAT</td><td>optional</td><td>0.7</td><td>0 .. 1 (step 0.05)</td><td><span class="badge">display=number</span></td></tr>
+<tr><td><code>cheng_alpha</code></td><td>FLOAT</td><td>optional</td><td>0.2</td><td>0 .. 1 (step 0.05)</td><td><span class="badge">display=number</span></td></tr>
+<tr><td><code>cheng_beta</code></td><td>FLOAT</td><td>optional</td><td>0.8</td><td>0 .. 1 (step 0.05)</td><td><span class="badge">display=number</span></td></tr>
+<tr><td><code>use_variance_penalty</code></td><td>BOOLEAN</td><td>optional</td><td>true</td><td></td><td></td></tr>
+<tr><td><code>variance_alpha</code></td><td>FLOAT</td><td>optional</td><td>0.9</td><td>0 .. 1 (step 0.05)</td><td><span class="badge">display=number</span></td></tr>
+<tr><td><code>variance_beta</code></td><td>FLOAT</td><td>optional</td><td>0.5</td><td>0 .. 1 (step 0.05)</td><td><span class="badge">display=number</span></td></tr>
+<tr><td><code>variance_topk</code></td><td>INT</td><td>optional</td><td>64</td><td>1 .. 1024 (step 1)</td><td><span class="badge">display=number</span></td></tr>
+<tr><td><code>enforce_source_discipline</code></td><td>BOOLEAN</td><td>optional</td><td>false</td><td></td><td></td></tr>
+<tr><td><code>blend_width</code></td><td>INT</td><td>optional</td><td>0</td><td>0 .. 32 (step 1)</td><td><span class="badge">display=number</span></td></tr>
+<tr><td><code>seed</code></td><td>INT</td><td>optional</td><td>0</td><td>0 .. 4294967295 (step 1)</td><td></td></tr>
+<tr><td><code>debug_prints</code></td><td>BOOLEAN</td><td>optional</td><td>false</td><td></td><td></td></tr>
+</table>
+
+<h2>Outputs</h2>
+<table>
+<tr><th>#</th><th>Type</th><th>Name</th></tr>
+<tr><td>0</td><td><code>IMAGE</code></td><td>infilled_image</td></tr>
+<tr><td>1</td><td><code>IMAGE</code></td><td>fill_order_viz</td></tr>
+</table>
+
+</div>
+    </div>
+</div>
+</body>
+</html>

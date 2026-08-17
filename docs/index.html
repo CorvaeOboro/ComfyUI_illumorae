@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>illumorae - Overview</title>
+<style>
+:root { --bg:#0d0d0d; --surface:#141414; --border:#2a2a2a; --text:#e0e0e0; --muted:#999; --accent:#4a7fb5; --link:#64b5f6; --code:#1e1e1e; }
+* { box-sizing:border-box; }
+html,body { margin:0; height:100%; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+.page { display:flex; height:100vh; }
+.sidebar { width:14%; min-width:200px; border-right:1px solid var(--border); background:var(--bg); }
+.sidebar iframe { width:100%; height:100%; border:none; }
+.content { flex:1; overflow-y:auto; }
+header { background:linear-gradient(90deg,#0a1520 0%,#0d0d0d 100%); border-bottom:2px solid var(--accent); padding:1.2rem 1rem; text-align:center; }
+header h1 { margin:0; font-size:2rem; color:#fff; }
+header p { margin:0.5rem 0 0; color:var(--muted); }
+.container { max-width:1000px; margin:0 auto; padding:2rem 1.5rem; }
+h2 { color:#fff; border-bottom:1px solid var(--border); padding-bottom:0.5rem; margin-top:2.5rem; font-size:1.4rem; }
+h3 { color:#fff; margin-top:1.5rem; font-size:1.1rem; }
+a { color:var(--link); text-decoration:none; }
+a:hover { text-decoration:underline; }
+ul,ol { padding-left:1.4rem; }
+li { margin-bottom:0.4rem; }
+table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:0.95rem; }
+th,td { border:1px solid var(--border); padding:0.5rem 0.7rem; text-align:left; vertical-align:top; }
+th { background:var(--surface); color:#fff; }
+td { background:#111; }
+code,pre { background:var(--code); border:1px solid var(--border); border-radius:4px; font-family:Consolas,Monaco,'Courier New',monospace; font-size:0.9rem; }
+code { padding:0.15rem 0.35rem; }
+pre { padding:0.8rem; overflow-x:auto; }
+.note { border-left:3px solid var(--accent); background:var(--surface); padding:0.8rem 1rem; margin:1rem 0; border-radius:0 6px 6px 0; }
+.meta-grid { display:grid; grid-template-columns:160px 1fr; gap:0.4rem 1rem; margin:1rem 0; font-size:0.95rem; }
+.meta-grid dt { color:var(--muted); }
+.meta-grid dd { margin:0; }
+.badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.75rem; border:1px solid var(--border); background:var(--surface); color:var(--muted); }
+.badge.status-working { color:#b5d65a; border-color:#5a8a3a; }
+.badge.status-broken { color:#ff6b6b; border-color:#a75a5a; }
+.badge.status-experimental { color:#d6b55a; border-color:#a79a5a; }
+img.node-shot { width:100%; border:1px solid var(--border); border-radius:4px; margin:1rem 0; }
+.img-missing { border:1px dashed var(--border); background:var(--surface); color:var(--muted); padding:2rem; text-align:center; border-radius:4px; margin:1rem 0; }
+footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0.9rem; border-top:1px solid var(--border); margin-top:3rem; }
+
+.node-card { display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--border); border-radius:6px; overflow:hidden; text-decoration:none; color:inherit; transition:border-color 0.15s, transform 0.15s; }
+.node-card:hover { border-color:#4a7fb5; transform:translateY(-2px); }
+.card-img { width:100%; height:140px; object-fit:cover; display:block; background:#1a1a1a; }
+.card-img-missing { width:100%; height:140px; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:0.8rem; background:#1a1a1a; border-bottom:1px solid var(--border); }
+.card-body { padding:0.6rem 0.8rem; }
+.card-title { color:#4a7fb5; font-size:0.9rem; font-weight:600; margin-bottom:0.2rem; }
+.card-desc { color:var(--muted); font-size:0.78rem; line-height:1.3; }
+.card-group { margin-top:2rem; }
+.card-group h3 { color:#ffffff; font-size:0.95rem; text-transform:uppercase; margin:0 0 0.8rem 0; padding-bottom:0.3rem; border-bottom:1px solid var(--border); }
+.card-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:0.8rem; }
+.row-group { margin-top:2.5rem; }
+.row-group h3 { color:#ffffff; font-size:0.95rem; text-transform:uppercase; margin:0 0 0.8rem 0; padding-bottom:0.3rem; border-bottom:1px solid var(--border); }
+.row-table { width:100%; border-collapse:collapse; table-layout:fixed; }
+.row-table td { border:1px solid var(--border); padding:0.8rem; vertical-align:middle; background:#111; }
+.row-title { width:180px; text-align:center; vertical-align:middle; font-weight:600; }
+.row-title a { color:#4a7fb5; text-decoration:none; }
+.row-title a:hover { text-decoration:underline; }
+.row-media { text-align:center; }
+.row-img { display:block; margin:0 auto; max-width:1000px; width:100%; height:auto; border:1px solid var(--border); border-radius:4px; }
+.row-img-missing { max-width:1000px; width:100%; margin:0 auto; border:1px dashed var(--border); background:var(--surface); color:var(--muted); padding:2rem; text-align:center; border-radius:4px; }
+.row-desc { color:var(--muted); font-size:0.85rem; margin-top:0.5rem; text-align:center; }
+
+</style>
+</head>
+<body>
+<div class="page">
+    <div class="sidebar"><iframe src="illumorae_menu.html"></iframe></div>
+    <div class="content">
+<header>
+    <h1>ComfyUI ILLUMORAE</h1>
+</header>
+<div class="container">
+
+<table>
+<tr><td><strong>Image Infill</strong></td><td><a href="nodes/ImageInfillBoundaryPropagate.html">Image Infill Boundary Propagate</a> | <a href="nodes/ImageInfillExemplarRegionFill.html">Image Infill Exemplar Region Fill</a> | <a href="nodes/ImageInfillGaussianMixtureLayer.html">Image Infill Gaussian Mixture Layer</a> | <a href="nodes/ImageInfillPatchMatch.html">Image Infill PatchMatch</a></td></tr>
+<tr><td><strong>Image Adjustment</strong></td><td><a href="nodes/ImageContrastLimitedAdaptiveHistogramEqualization.html">Image CLAHE (Contrast Limited Adaptive Histogram Equalization)</a> | <a href="nodes/ImageMultiScaleRetinexColorRestoration.html">Image Retinex Enhancement (MSRCR)</a></td></tr>
+<tr><td><strong>Image Resize</strong></td><td><a href="nodes/ImageFaceAspectCrop.html">Image Face Aspect Crop</a> | <a href="nodes/ImageResizeFluxKontextOptions.html">Image Resize Flux Kontext Scale Options</a> | <a href="nodes/ImageResizeWanAdaptiveFraming.html">Image Resize WAN Adaptive Framing</a> | <a href="nodes/VideoResizeMatte.html">Image Resize w Matte</a></td></tr>
+<tr><td><strong>Image</strong></td><td><a href="nodes/GenProceduralPatterns.html">Procedural Patterns</a></td></tr>
+<tr><td><strong>Lora</strong></td><td><a href="nodes/LoraTextStrengthMultiplier.html">LoRA Strength Multiplier on Text</a> | <a href="nodes/LoraTextStrengthVariants.html">LoRA Strength Variants</a> | <a href="nodes/LoraTextVisualizer.html">LoRA Text Strength Visualizer</a> | <a href="nodes/Wan22I2VLoraLoaderByText.html">Wan2.2 I2V Lora Loader By Text</a> | <a href="nodes/Wan22LoraLoaderByText.html">Wan2.2 Lora Loader By Text</a></td></tr>
+<tr><td><strong>Text</strong></td><td><a href="nodes/TextEnclosureVisualizer.html">Enclosure Visualizer</a> | <a href="nodes/TextMultilineFindColorized.html">Text Multiline FindColorized</a> | <a href="nodes/TextReorder.html">Text Reorder</a> | <a href="nodes/TextShowMultilineColor.html">Text Show Multiline Color</a> | <a href="nodes/TextStrengthMultiplier.html">Text Strength Multiplier</a> | <a href="nodes/TextTokenCount.html">Text Token Count</a> | <a href="nodes/TextToStringSafeForFilename.html">Text To Filename Safe Text</a> | <a href="nodes/TextTruncateProtect.html">Text Truncate Protect</a></td></tr>
+<tr><td><strong>Select</strong></td><td><a href="nodes/SelectITEMbyAmountGenerated.html">Select ITEM By Amount Generated</a></td></tr>
+<tr><td><strong>Load</strong></td><td><a href="nodes/LoadImageFilePathOut.html">Load Image w FilePath Out</a> | <a href="nodes/LoadImageRandomVariants.html">Load Image Random Variant</a> | <a href="nodes/LoadRandomFileFromPathByPrefix.html">Load Random File From Path By Prefix</a> | <a href="nodes/LoadTextFileGraceful.html">Load Text File Graceful</a></td></tr>
+<tr><td><strong>Checkpoint</strong></td><td><a href="nodes/CheckpointLoaderByStringDirty.html">Checkpoint Loader By String Dirty</a> | <a href="nodes/CheckpointRandomSelector.html">Checkpoint Random Selector</a></td></tr>
+<tr><td><strong>Save</strong></td><td><a href="nodes/SaveAnimatedWebPExtendedFolderPath.html">Save Animated WEBP FolderPath</a> | <a href="nodes/SaveImageExtendedFolderPath.html">Save Image Extended FolderPath</a></td></tr>
+</table>
+
+<div class="card-group">
+<h3>Image Infill</h3>
+<div class="card-grid">
+<a class="node-card" href="nodes/ImageInfillBoundaryPropagate.html"><img class="card-img" src="comfyui_illumorae_image_infill_boundary.png" alt="Image Infill Boundary Propagate"><div class="card-body"><div class="card-title">Image Infill Boundary Propagate</div><div class="card-desc">Fills the target region by propagating colors inward from the target boundary using a random-weighted onion-peel rule (simple content fill for inpainting prep).</div></div></a>
+<a class="node-card" href="nodes/ImageInfillExemplarRegionFill.html"><img class="card-img" src="comfyui_illumorae_image_infill_exemplar.png" alt="Image Infill Exemplar Region Fill"><div class="card-body"><div class="card-title">Image Infill Exemplar Region Fill</div><div class="card-desc">Image Infill using exemplar region filling with isophote-driven priority. extends linear structures into the target region.</div></div></a>
+<a class="node-card" href="nodes/ImageInfillGaussianMixtureLayer.html"><img class="card-img" src="comfyui_illumorae_image_infill_gaussian.png" alt="Image Infill Gaussian Mixture Layer"><div class="card-body"><div class="card-title">Image Infill Gaussian Mixture Layer</div><div class="card-desc">Single stationary-Gaussian-field texture inpainting by FFT-based conditional simulation (Galerne-Leclaire 2017); best for homogeneous microtextures. (Name retains historical &quot;Mixture&quot; for compat; not a GMM.)</div></div></a>
+<a class="node-card" href="nodes/ImageInfillPatchMatch.html"><img class="card-img" src="comfyui_illumorae_image_infill_patchmatch.png" alt="Image Infill PatchMatch"><div class="card-body"><div class="card-title">Image Infill PatchMatch</div><div class="card-desc">Approximate PatchMatch-style content fill to infill masked regions; useful as inpainting guidance.</div></div></a>
+</div>
+</div>
+<div class="card-group">
+<h3>Image Adjustment</h3>
+<div class="card-grid">
+<a class="node-card" href="nodes/ImageContrastLimitedAdaptiveHistogramEqualization.html"><img class="card-img" src="comfyui_illumorae_image_clahe.png" alt="Image CLAHE (Contrast Limited Adaptive Histogram Equalization)"><div class="card-body"><div class="card-title">Image CLAHE (Contrast Limited Adaptive Histogram Equalization)</div><div class="card-desc">Applies CLAHE to enhance local contrast; useful for localized detail/contrast improvement.</div></div></a>
+<a class="node-card" href="nodes/ImageMultiScaleRetinexColorRestoration.html"><img class="card-img" src="comfyui_illumorae_image_retinex_enhancement_msrcr.png" alt="Image Retinex Enhancement (MSRCR)"><div class="card-body"><div class="card-title">Image Retinex Enhancement (MSRCR)</div><div class="card-desc">Applies Multi-Scale Retinex with Color Restoration (MSRCR) to enhance dynamic range and color constancy.</div></div></a>
+</div>
+</div>
+<div class="card-group">
+<h3>Image Resize</h3>
+<div class="card-grid">
+<a class="node-card" href="nodes/ImageFaceAspectCrop.html"><img class="card-img" src="comfyui_illumorae_image_face_aspect_crop.png" alt="Image Face Aspect Crop"><div class="card-body"><div class="card-title">Image Face Aspect Crop</div><div class="card-desc">Crops an image to a target aspect ratio with face-detection-biased anchoring and debug overlay output.</div></div></a>
+<a class="node-card" href="nodes/ImageResizeFluxKontextOptions.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Image Resize Flux Kontext Scale Options</div><div class="card-desc">Resizes images to preferred Flux Kontext resolutions with crop or stretch options.</div></div></a>
+<a class="node-card" href="nodes/ImageResizeWanAdaptiveFraming.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Image Resize WAN Adaptive Framing</div><div class="card-desc">Auto-selects WAN-friendly vertical/horizontal resolution and applies optional human-centric framing before resize.</div></div></a>
+<a class="node-card" href="nodes/VideoResizeMatte.html"><img class="card-img" src="comfyui_illumorae_image_resize_video_matte.png" alt="Image Resize w Matte"><div class="card-body"><div class="card-title">Image Resize w Matte</div><div class="card-desc">Resizes images with optional aspect preservation, divisibility constraints, and optional matte canvas compositing.</div></div></a>
+</div>
+</div>
+<div class="card-group">
+<h3>Image</h3>
+<div class="card-grid">
+<a class="node-card" href="nodes/GenProceduralPatterns.html"><img class="card-img" src="comfyui_illumorae_procedural_patterns.png" alt="Procedural Patterns"><div class="card-body"><div class="card-title">Procedural Patterns</div><div class="card-desc">Generates procedural symmetrical patterns (torus rings, radial beams, spiral rings, combined) for visual influence in image generation. Seed only affects output when pattern_type=&#x27;random&#x27; or chaos_mode=True.</div></div></a>
+</div>
+</div>
+<div class="card-group">
+<h3>Lora</h3>
+<div class="card-grid">
+<a class="node-card" href="nodes/LoraTextStrengthMultiplier.html"><img class="card-img" src="comfyui_illumorae_lora_strength_multiplier.png" alt="LoRA Strength Multiplier on Text"><div class="card-body"><div class="card-title">LoRA Strength Multiplier on Text</div><div class="card-desc">Parses &lt;lora:name:unet[:clip]&gt; tags, applies a multiplier with optional individual and total caps, preserving surrounding text.</div></div></a>
+<a class="node-card" href="nodes/LoraTextStrengthVariants.html"><img class="card-img" src="comfyui_illumorae_lora_strength_randomize.png" alt="LoRA Strength Variants"><div class="card-body"><div class="card-title">LoRA Strength Variants</div><div class="card-desc">Randomizes or highlights LoRA strengths in &lt;lora:name:strength&gt; tags with optional seed control.</div></div></a>
+<a class="node-card" href="nodes/LoraTextVisualizer.html"><img class="card-img" src="comfyui_illumorae_lora_strength_wordplot.png" alt="LoRA Text Strength Visualizer"><div class="card-body"><div class="card-title">LoRA Text Strength Visualizer</div><div class="card-desc">Creates an image visualization of LoRA strengths from &lt;lora:name:strength&gt; tags in prompt text.</div></div></a>
+<a class="node-card" href="nodes/Wan22I2VLoraLoaderByText.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Wan2.2 I2V Lora Loader By Text</div><div class="card-desc">Loads Wan2.2 I2V LoRA models (HIGH or LOW) by fuzzy text string matching from lora syntax tags.</div></div></a>
+<a class="node-card" href="nodes/Wan22LoraLoaderByText.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Wan2.2 Lora Loader By Text</div><div class="card-desc">Loads Wan2.2 LoRA models (HIGH/LOW pairs) by fuzzy text string matching from lora syntax tags.</div></div></a>
+</div>
+</div>
+<div class="card-group">
+<h3>Text</h3>
+<div class="card-grid">
+<a class="node-card" href="nodes/TextEnclosureVisualizer.html"><img class="card-img" src="comfyui_illumorae_text_enclosure_visualize.png" alt="Enclosure Visualizer"><div class="card-body"><div class="card-title">Enclosure Visualizer</div><div class="card-desc">Visualizes prompt text enclosure nesting and mismatched parenthesis, outputting an image and analysis strings.</div></div></a>
+<a class="node-card" href="nodes/TextMultilineFindColorized.html"><img class="card-img" src="comfyui_illumorae_text_multiline_findcolorized.png" alt="Text Multiline FindColorized"><div class="card-body"><div class="card-title">Text Multiline FindColorized</div><div class="card-desc">Editable multiline text input with search/find highlighting and syntax-colored LoRA bracket tags.</div></div></a>
+<a class="node-card" href="nodes/TextReorder.html"><img class="card-img" src="comfyui_illumorae_text_reorder.png" alt="Text Reorder"><div class="card-body"><div class="card-title">Text Reorder</div><div class="card-desc">Reorders prompt text sections (comma/sentence/paragraph) while preserving parenthesis-enclosed blocks; supports seeded shuffle and distance constraints.</div></div></a>
+<a class="node-card" href="nodes/TextShowMultilineColor.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Text Show Multiline Color</div><div class="card-desc">Displays multiline text with syntax highlighting in a persistent, selectable widget. Gracefully handles missing or broken inputs.</div></div></a>
+<a class="node-card" href="nodes/TextStrengthMultiplier.html"><img class="card-img" src="comfyui_illumorae_text_strength_multiplier.png" alt="Text Strength Multiplier"><div class="card-body"><div class="card-title">Text Strength Multiplier</div><div class="card-desc">Multiplies prompt section weights while preserving &lt;lora:...&gt; tags; supports individual caps/minimums and total cap scaling.</div></div></a>
+<a class="node-card" href="nodes/TextTokenCount.html"><img class="card-img" src="comfyui_illumorae_text_token_count.png" alt="Text Token Count"><div class="card-body"><div class="card-title">Text Token Count</div><div class="card-desc">Counts tokens for a string using a CLIP tokenizer if available, otherwise estimates.</div></div></a>
+<a class="node-card" href="nodes/TextToStringSafeForFilename.html"><img class="card-img" src="comfyui_illumorae_text_to_string_filename_safe.png" alt="Text To Filename Safe Text"><div class="card-body"><div class="card-title">Text To Filename Safe Text</div><div class="card-desc">Converts text into a filename-safe string (Windows-safe) with normalization, character filtering, and length truncation.</div></div></a>
+<a class="node-card" href="nodes/TextTruncateProtect.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Text Truncate Protect</div><div class="card-desc">Truncates text to a character limit with protection options for words, paragraphs, and enclosures.</div></div></a>
+</div>
+</div>
+<div class="card-group">
+<h3>Select</h3>
+<div class="card-grid">
+<a class="node-card" href="nodes/SelectITEMbyAmountGenerated.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Select ITEM By Amount Generated</div><div class="card-desc">Selects an item from a project folder structure prioritizing low-coverage generation/ranking status, with optional prompt requirements and seeded iteration.</div></div></a>
+</div>
+</div>
+<div class="card-group">
+<h3>Load</h3>
+<div class="card-grid">
+<a class="node-card" href="nodes/LoadImageFilePathOut.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Load Image w FilePath Out</div><div class="card-desc">Loads an image from a file path string and outputs image, mask, file name, and folder path.</div></div></a>
+<a class="node-card" href="nodes/LoadImageRandomVariants.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Load Image Random Variant</div><div class="card-desc">Loads an image from a folder with optional variant selection (subfolder + suffix pattern), with seed and override controls.</div></div></a>
+<a class="node-card" href="nodes/LoadRandomFileFromPathByPrefix.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Load Random File From Path By Prefix</div><div class="card-desc">Pick a random file from a folder filtered by filename prefix and extension; return its text contents and path.</div></div></a>
+<a class="node-card" href="nodes/LoadTextFileGraceful.html"><img class="card-img" src="comfyui_illumorae_load_text_graceful.png" alt="Load Text File Graceful"><div class="card-body"><div class="card-title">Load Text File Graceful</div><div class="card-desc">Loads a text file from a path and returns its contents without crashing if the file is missing.</div></div></a>
+</div>
+</div>
+<div class="card-group">
+<h3>Checkpoint</h3>
+<div class="card-grid">
+<a class="node-card" href="nodes/CheckpointLoaderByStringDirty.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Checkpoint Loader By String Dirty</div><div class="card-desc">Loads a checkpoint by fuzzy matching the text input finds available checkpoint files from partials</div></div></a>
+<a class="node-card" href="nodes/CheckpointRandomSelector.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Checkpoint Random Selector</div><div class="card-desc">Randomly selects a checkpoint from a category, changing each interval.</div></div></a>
+</div>
+</div>
+<div class="card-group">
+<h3>Save</h3>
+<div class="card-grid">
+<a class="node-card" href="nodes/SaveAnimatedWebPExtendedFolderPath.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Save Animated WEBP FolderPath</div><div class="card-desc">Saves an animated WebP to an external folder path</div></div></a>
+<a class="node-card" href="nodes/SaveImageExtendedFolderPath.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Save Image Extended FolderPath</div><div class="card-desc">Saves images to a specified folder path with customizable naming, counters, and optional metadata.</div></div></a>
+</div>
+</div>
+
+<div class="row-group">
+<h3>Image Infill</h3>
+<table class="row-table">
+<tr><td class="row-title"><a href="nodes/ImageInfillBoundaryPropagate.html">Image Infill Boundary Propagate</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_image_infill_boundary.png" alt="Image Infill Boundary Propagate"><div class="row-desc">Fills the target region by propagating colors inward from the target boundary using a random-weighted onion-peel rule (simple content fill for inpainting prep).</div></td></tr>
+<tr><td class="row-title"><a href="nodes/ImageInfillExemplarRegionFill.html">Image Infill Exemplar Region Fill</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_image_infill_exemplar.png" alt="Image Infill Exemplar Region Fill"><div class="row-desc">Image Infill using exemplar region filling with isophote-driven priority. extends linear structures into the target region.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/ImageInfillGaussianMixtureLayer.html">Image Infill Gaussian Mixture Layer</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_image_infill_gaussian.png" alt="Image Infill Gaussian Mixture Layer"><div class="row-desc">Single stationary-Gaussian-field texture inpainting by FFT-based conditional simulation (Galerne-Leclaire 2017); best for homogeneous microtextures. (Name retains historical &quot;Mixture&quot; for compat; not a GMM.)</div></td></tr>
+<tr><td class="row-title"><a href="nodes/ImageInfillPatchMatch.html">Image Infill PatchMatch</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_image_infill_patchmatch.png" alt="Image Infill PatchMatch"><div class="row-desc">Approximate PatchMatch-style content fill to infill masked regions; useful as inpainting guidance.</div></td></tr>
+</table>
+</div>
+<div class="row-group">
+<h3>Image Adjustment</h3>
+<table class="row-table">
+<tr><td class="row-title"><a href="nodes/ImageContrastLimitedAdaptiveHistogramEqualization.html">Image CLAHE (Contrast Limited Adaptive Histogram Equalization)</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_image_clahe.png" alt="Image CLAHE (Contrast Limited Adaptive Histogram Equalization)"><div class="row-desc">Applies CLAHE to enhance local contrast; useful for localized detail/contrast improvement.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/ImageMultiScaleRetinexColorRestoration.html">Image Retinex Enhancement (MSRCR)</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_image_retinex_enhancement_msrcr.png" alt="Image Retinex Enhancement (MSRCR)"><div class="row-desc">Applies Multi-Scale Retinex with Color Restoration (MSRCR) to enhance dynamic range and color constancy.</div></td></tr>
+</table>
+</div>
+<div class="row-group">
+<h3>Image Resize</h3>
+<table class="row-table">
+<tr><td class="row-title"><a href="nodes/ImageFaceAspectCrop.html">Image Face Aspect Crop</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_image_face_aspect_crop.png" alt="Image Face Aspect Crop"><div class="row-desc">Crops an image to a target aspect ratio with face-detection-biased anchoring and debug overlay output.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/ImageResizeFluxKontextOptions.html">Image Resize Flux Kontext Scale Options</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Resizes images to preferred Flux Kontext resolutions with crop or stretch options.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/ImageResizeWanAdaptiveFraming.html">Image Resize WAN Adaptive Framing</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Auto-selects WAN-friendly vertical/horizontal resolution and applies optional human-centric framing before resize.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/VideoResizeMatte.html">Image Resize w Matte</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_image_resize_video_matte.png" alt="Image Resize w Matte"><div class="row-desc">Resizes images with optional aspect preservation, divisibility constraints, and optional matte canvas compositing.</div></td></tr>
+</table>
+</div>
+<div class="row-group">
+<h3>Image</h3>
+<table class="row-table">
+<tr><td class="row-title"><a href="nodes/GenProceduralPatterns.html">Procedural Patterns</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_procedural_patterns.png" alt="Procedural Patterns"><div class="row-desc">Generates procedural symmetrical patterns (torus rings, radial beams, spiral rings, combined) for visual influence in image generation. Seed only affects output when pattern_type=&#x27;random&#x27; or chaos_mode=True.</div></td></tr>
+</table>
+</div>
+<div class="row-group">
+<h3>Lora</h3>
+<table class="row-table">
+<tr><td class="row-title"><a href="nodes/LoraTextStrengthMultiplier.html">LoRA Strength Multiplier on Text</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_lora_strength_multiplier.png" alt="LoRA Strength Multiplier on Text"><div class="row-desc">Parses &lt;lora:name:unet[:clip]&gt; tags, applies a multiplier with optional individual and total caps, preserving surrounding text.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/LoraTextStrengthVariants.html">LoRA Strength Variants</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_lora_strength_randomize.png" alt="LoRA Strength Variants"><div class="row-desc">Randomizes or highlights LoRA strengths in &lt;lora:name:strength&gt; tags with optional seed control.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/LoraTextVisualizer.html">LoRA Text Strength Visualizer</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_lora_strength_wordplot.png" alt="LoRA Text Strength Visualizer"><div class="row-desc">Creates an image visualization of LoRA strengths from &lt;lora:name:strength&gt; tags in prompt text.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/Wan22I2VLoraLoaderByText.html">Wan2.2 I2V Lora Loader By Text</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Loads Wan2.2 I2V LoRA models (HIGH or LOW) by fuzzy text string matching from lora syntax tags.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/Wan22LoraLoaderByText.html">Wan2.2 Lora Loader By Text</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Loads Wan2.2 LoRA models (HIGH/LOW pairs) by fuzzy text string matching from lora syntax tags.</div></td></tr>
+</table>
+</div>
+<div class="row-group">
+<h3>Text</h3>
+<table class="row-table">
+<tr><td class="row-title"><a href="nodes/TextEnclosureVisualizer.html">Enclosure Visualizer</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_text_enclosure_visualize.png" alt="Enclosure Visualizer"><div class="row-desc">Visualizes prompt text enclosure nesting and mismatched parenthesis, outputting an image and analysis strings.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/TextMultilineFindColorized.html">Text Multiline FindColorized</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_text_multiline_findcolorized.png" alt="Text Multiline FindColorized"><div class="row-desc">Editable multiline text input with search/find highlighting and syntax-colored LoRA bracket tags.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/TextReorder.html">Text Reorder</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_text_reorder.png" alt="Text Reorder"><div class="row-desc">Reorders prompt text sections (comma/sentence/paragraph) while preserving parenthesis-enclosed blocks; supports seeded shuffle and distance constraints.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/TextShowMultilineColor.html">Text Show Multiline Color</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Displays multiline text with syntax highlighting in a persistent, selectable widget. Gracefully handles missing or broken inputs.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/TextStrengthMultiplier.html">Text Strength Multiplier</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_text_strength_multiplier.png" alt="Text Strength Multiplier"><div class="row-desc">Multiplies prompt section weights while preserving &lt;lora:...&gt; tags; supports individual caps/minimums and total cap scaling.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/TextTokenCount.html">Text Token Count</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_text_token_count.png" alt="Text Token Count"><div class="row-desc">Counts tokens for a string using a CLIP tokenizer if available, otherwise estimates.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/TextToStringSafeForFilename.html">Text To Filename Safe Text</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_text_to_string_filename_safe.png" alt="Text To Filename Safe Text"><div class="row-desc">Converts text into a filename-safe string (Windows-safe) with normalization, character filtering, and length truncation.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/TextTruncateProtect.html">Text Truncate Protect</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Truncates text to a character limit with protection options for words, paragraphs, and enclosures.</div></td></tr>
+</table>
+</div>
+<div class="row-group">
+<h3>Select</h3>
+<table class="row-table">
+<tr><td class="row-title"><a href="nodes/SelectITEMbyAmountGenerated.html">Select ITEM By Amount Generated</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Selects an item from a project folder structure prioritizing low-coverage generation/ranking status, with optional prompt requirements and seeded iteration.</div></td></tr>
+</table>
+</div>
+<div class="row-group">
+<h3>Load</h3>
+<table class="row-table">
+<tr><td class="row-title"><a href="nodes/LoadImageFilePathOut.html">Load Image w FilePath Out</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Loads an image from a file path string and outputs image, mask, file name, and folder path.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/LoadImageRandomVariants.html">Load Image Random Variant</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Loads an image from a folder with optional variant selection (subfolder + suffix pattern), with seed and override controls.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/LoadRandomFileFromPathByPrefix.html">Load Random File From Path By Prefix</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Pick a random file from a folder filtered by filename prefix and extension; return its text contents and path.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/LoadTextFileGraceful.html">Load Text File Graceful</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_load_text_graceful.png" alt="Load Text File Graceful"><div class="row-desc">Loads a text file from a path and returns its contents without crashing if the file is missing.</div></td></tr>
+</table>
+</div>
+<div class="row-group">
+<h3>Checkpoint</h3>
+<table class="row-table">
+<tr><td class="row-title"><a href="nodes/CheckpointLoaderByStringDirty.html">Checkpoint Loader By String Dirty</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Loads a checkpoint by fuzzy matching the text input finds available checkpoint files from partials</div></td></tr>
+<tr><td class="row-title"><a href="nodes/CheckpointRandomSelector.html">Checkpoint Random Selector</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Randomly selects a checkpoint from a category, changing each interval.</div></td></tr>
+</table>
+</div>
+<div class="row-group">
+<h3>Save</h3>
+<table class="row-table">
+<tr><td class="row-title"><a href="nodes/SaveAnimatedWebPExtendedFolderPath.html">Save Animated WEBP FolderPath</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Saves an animated WebP to an external folder path</div></td></tr>
+<tr><td class="row-title"><a href="nodes/SaveImageExtendedFolderPath.html">Save Image Extended FolderPath</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Saves images to a specified folder path with customizable naming, counters, and optional metadata.</div></td></tr>
+</table>
+</div>
+
+</div>
+    </div>
+</div>
+</body>
+</html>
