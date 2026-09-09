@@ -4,7 +4,7 @@ DESCRIPTIONSHORT::Displays multiline text with syntax highlighting in a persiste
 VERSION::20260811
 IMAGE::comfyui_illumorae_text_show_multiline_color.png
 GROUP::Text
-GROUPORDER::5
+GROUPORDER::6
 LISTORDER::81
 STATUS::working
 """

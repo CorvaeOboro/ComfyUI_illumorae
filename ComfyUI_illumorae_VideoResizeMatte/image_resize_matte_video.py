@@ -3,7 +3,10 @@ TITLE::Image Resize w Matte
 DESCRIPTIONSHORT::Resizes images with optional aspect preservation, divisibility constraints, and optional matte canvas compositing.
 VERSION::20260127
 IMAGE::comfyui_illumorae_image_resize_video_matte.png
-GROUP::Image
+GROUP::Image Resize
+GROUPORDER::3
+LISTORDER::40
+STATUS::working
 """
 import os
 import sys

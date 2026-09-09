@@ -4,7 +4,7 @@ DESCRIPTIONSHORT::Parses <lora:name:unet[:clip]> tags, applies a multiplier with
 VERSION::20260816
 IMAGE::comfyui_illumorae_lora_strength_multiplier.png
 GROUP::Lora
-GROUPORDER::4
+GROUPORDER::5
 LISTORDER::1
 STATUS::working
 """

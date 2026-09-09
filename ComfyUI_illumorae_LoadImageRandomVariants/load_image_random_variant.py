@@ -24,7 +24,7 @@ DESCRIPTIONSHORT::Loads an image from a folder with optional variant selection (
 VERSION::20260127
 IMAGE::comfyui_illumorae_load_image_random_variant.png
 GROUP::Load
-GROUPORDER::3
+GROUPORDER::10
 LISTORDER::3
 STATUS::working
 """

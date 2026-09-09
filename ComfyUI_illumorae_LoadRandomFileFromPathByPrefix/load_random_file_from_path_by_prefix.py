@@ -27,7 +27,7 @@ DESCRIPTIONSHORT::Pick a random file from a folder filtered by filename prefix a
 VERSION::20260517
 IMAGE::comfyui_illumorae_load_random_file_from_path_by_prefix.png
 GROUP::Load
-GROUPORDER::3
+GROUPORDER::10
 LISTORDER::4
 STATUS::working
 """

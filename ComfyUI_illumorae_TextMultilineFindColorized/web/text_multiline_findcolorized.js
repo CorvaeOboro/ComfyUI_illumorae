@@ -464,107 +464,146 @@ app.registerExtension({
     async beforeRegisterNodeDef(nodeType, nodeData, app) {
         if (nodeData.name !== NODE_NAME) return;
 
+        // Build (or re-attach) the custom editor for a node instance.
+        // Idempotent: if the editor is already built and still attached with
+        // the same underlying textarea, it just resyncs the text. If the
+        // textarea element was swapped out by ComfyUI (e.g. after a widget
+        // re-render) or the editor was detached from the DOM, it rebuilds.
+        // Returns true when the editor is ready, false when it could not be
+        // built yet (widget/inputEl/parent not available).
+        nodeType.prototype._tmfc_ensureEditor = function () {
+            const textWidget = this.widgets?.find((w) => w.name === "text");
+            if (!textWidget?.inputEl) return false;
+
+            const textarea = textWidget.inputEl;
+            const parent = textarea.parentElement;
+            if (!parent) return false;
+
+            // Already built with the same textarea and still attached:
+            // just resync content and re-hide the textarea.
+            if (
+                this._tmfc_editor &&
+                this._tmfc_textarea === textarea &&
+                this._tmfc_editor.parentElement === parent
+            ) {
+                this._tmfc_resyncEditor();
+                return true;
+            }
+
+            // Editor exists but textarea changed or editor was detached:
+            // tear down the old observer/editor before rebuilding.
+            if (this._tmfc_styleObserver) {
+                this._tmfc_styleObserver.disconnect();
+                this._tmfc_styleObserver = null;
+            }
+            if (this._tmfc_editor && this._tmfc_editor.parentElement) {
+                this._tmfc_editor.parentElement.removeChild(this._tmfc_editor);
+            }
+
+            // Hide the native textarea. ComfyUI re-renders widgets after
+            // workflow execution and can reset these inline styles, so we
+            // also install a MutationObserver below to re-apply them.
+            const hideTextarea = () => {
+                textarea.style.display = "none";
+                textarea.style.height = "0px";
+                textarea.style.padding = "0px";
+                textarea.style.margin = "0px";
+                textarea.style.border = "none";
+                textarea.style.overflow = "hidden";
+                textarea.style.position = "absolute";
+                textarea.style.width = "1px";
+                textarea.style.opacity = "0";
+            };
+            hideTextarea();
+
+            // Create our advanced editor
+            const editor = buildEditor(
+                textarea.value,
+                (newText) => {
+                    textarea.value = newText;
+                    textWidget.value = newText;
+                }
+            );
+
+            // Insert before the hidden textarea
+            parent.insertBefore(editor, textarea);
+
+            // Keep the native textarea hidden even after ComfyUI re-renders
+            // widgets (e.g. on workflow execution / completion).
+            const styleObserver = new MutationObserver(() => {
+                if (textarea.style.display !== "none" ||
+                    textarea.style.height !== "0px") {
+                    hideTextarea();
+                }
+            });
+            styleObserver.observe(textarea, {
+                attributes: true,
+                attributeFilter: ["style", "class"],
+            });
+
+            // Re-sync editor content from the widget value and ensure our
+            // custom editor is still visible/attached.
+            const resyncEditor = () => {
+                hideTextarea();
+                if (editor.parentElement !== parent) {
+                    parent.insertBefore(editor, textarea);
+                }
+                editor.style.display = "flex";
+                const txt = textWidget.value ?? textarea.value ?? "";
+                editor._setText(txt);
+                editor._fitHeight(this.size?.[1]);
+            };
+
+            // Store refs on the node
+            this._tmfc_editor = editor;
+            this._tmfc_textarea = textarea;
+            this._tmfc_widget = textWidget;
+            this._tmfc_styleObserver = styleObserver;
+            this._tmfc_resyncEditor = resyncEditor;
+
+            // Fit the editor to the node's current height, then keep it
+            // in sync whenever the node is resized by the user.
+            const fitToNode = () => editor._fitHeight(this.size?.[1]);
+            fitToNode();
+
+            const origOnResize = this.onResize;
+            this.onResize = function (size) {
+                const rr = origOnResize ? origOnResize.apply(this, arguments) : undefined;
+                editor._fitHeight(size?.[1] ?? this.size?.[1]);
+                return rr;
+            };
+
+            return true;
+        };
+
+        // Try to build/resync the editor, retrying for a few frames if the
+        // widget DOM is not ready yet (common during workflow loading, where
+        // onNodeCreated and onConfigure rAFs can both fire before the
+        // textarea is attached to the DOM).
+        const ensureEditorWithRetry = (node, attemptsLeft) => {
+            requestAnimationFrame(() => {
+                if (node._tmfc_ensureEditor()) return;
+                if (attemptsLeft > 0) ensureEditorWithRetry(node, attemptsLeft - 1);
+            });
+        };
+        const ENSURE_RETRIES = 10;
+
         const onNodeCreated = nodeType.prototype.onNodeCreated;
         nodeType.prototype.onNodeCreated = function () {
             const r = onNodeCreated ? onNodeCreated.apply(this, arguments) : undefined;
-
-            requestAnimationFrame(() => {
-                const textWidget = this.widgets?.find((w) => w.name === "text");
-                if (!textWidget?.inputEl) return;
-
-                const textarea = textWidget.inputEl;
-                const parent = textarea.parentElement;
-                if (!parent) return;
-
-                // Hide the native textarea. ComfyUI re-renders widgets after
-                // workflow execution and can reset these inline styles, so we
-                // also install a MutationObserver below to re-apply them.
-                const hideTextarea = () => {
-                    textarea.style.display = "none";
-                    textarea.style.height = "0px";
-                    textarea.style.padding = "0px";
-                    textarea.style.margin = "0px";
-                    textarea.style.border = "none";
-                    textarea.style.overflow = "hidden";
-                    textarea.style.position = "absolute";
-                    textarea.style.width = "1px";
-                    textarea.style.opacity = "0";
-                };
-                hideTextarea();
-
-                // Create our advanced editor
-                const editor = buildEditor(
-                    textarea.value,
-                    (newText) => {
-                        textarea.value = newText;
-                        textWidget.value = newText;
-                    }
-                );
-
-                // Insert before the hidden textarea
-                parent.insertBefore(editor, textarea);
-
-                // Keep the native textarea hidden even after ComfyUI re-renders
-                // widgets (e.g. on workflow execution / completion).
-                const styleObserver = new MutationObserver(() => {
-                    if (textarea.style.display !== "none" ||
-                        textarea.style.height !== "0px") {
-                        hideTextarea();
-                    }
-                });
-                styleObserver.observe(textarea, {
-                    attributes: true,
-                    attributeFilter: ["style", "class"],
-                });
-
-                // Re-sync editor content from the widget value and ensure our
-                // custom editor is still visible/attached.
-                const resyncEditor = () => {
-                    hideTextarea();
-                    if (editor.parentElement !== parent) {
-                        parent.insertBefore(editor, textarea);
-                    }
-                    editor.style.display = "flex";
-                    const txt = textWidget.value ?? textarea.value ?? "";
-                    editor._setText(txt);
-                    editor._fitHeight(this.size?.[1]);
-                };
-
-                // Store refs on the node
-                this._tmfc_editor = editor;
-                this._tmfc_textarea = textarea;
-                this._tmfc_widget = textWidget;
-                this._tmfc_styleObserver = styleObserver;
-                this._tmfc_resyncEditor = resyncEditor;
-
-                // Fit the editor to the node's current height, then keep it
-                // in sync whenever the node is resized by the user.
-                const fitToNode = () => editor._fitHeight(this.size?.[1]);
-                fitToNode();
-
-                const origOnResize = this.onResize;
-                this.onResize = function (size) {
-                    const rr = origOnResize ? origOnResize.apply(this, arguments) : undefined;
-                    editor._fitHeight(size?.[1] ?? this.size?.[1]);
-                    return rr;
-                };
-            });
-
+            ensureEditorWithRetry(this, ENSURE_RETRIES);
             return r;
         };
 
-        // Re-sync editor content when a workflow is loaded
+        // Re-sync / build editor content when a workflow is loaded.
+        // During workflow loading, onNodeCreated's rAF may fire before the
+        // widget's textarea is attached to the DOM (parentElement is null),
+        // causing the editor to never be built. onConfigure fires after the
+        // widget values are applied, so retrying here catches that case.
         const onConfigure = nodeType.prototype.onConfigure;
         nodeType.prototype.onConfigure = function (o) {
             const r = onConfigure ? onConfigure.apply(this, arguments) : undefined;
-            requestAnimationFrame(() => {
-                const textWidget = this.widgets?.find((w) => w.name === "text");
-                if (textWidget && this._tmfc_editor) {
-                    const txt = textWidget.value || "";
-                    this._tmfc_editor._setText(txt);
-                    this._tmfc_editor._fitHeight(this.size?.[1]);
-                }
-            });
+            ensureEditorWithRetry(this, ENSURE_RETRIES);
             return r;
         };
 

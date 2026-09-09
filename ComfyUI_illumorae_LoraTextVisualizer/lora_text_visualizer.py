@@ -4,7 +4,7 @@ DESCRIPTIONSHORT::Creates an image visualization of LoRA strengths from <lora:na
 VERSION::20260816
 IMAGE::comfyui_illumorae_lora_strength_wordplot.png
 GROUP::Lora
-GROUPORDER::4
+GROUPORDER::5
 LISTORDER::3
 STATUS::working
 """

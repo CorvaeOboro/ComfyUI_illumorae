@@ -34,13 +34,13 @@ from text_enclosure_visualizer import (
 
 
 class TestParseEnclosures(unittest.TestCase):
-    """Tests for parse_enclosures — the core scanner."""
+    """Tests for parse_enclosures - the core scanner."""
 
     def setUp(self):
         self.node = illumoraeEnclosureVisualizerNode()
 
     def test_returns_three_values(self):
-        """parse_enclosures returns (char_info, warnings, max_depth) — 3 values."""
+        """parse_enclosures returns (char_info, warnings, max_depth) - 3 values."""
         char_info, warnings, max_depth = self.node.parse_enclosures("hello")
         self.assertIsInstance(char_info, list)
         self.assertIsInstance(warnings, list)
@@ -57,7 +57,7 @@ class TestParseEnclosures(unittest.TestCase):
             self.assertFalse(info['is_warning'])
 
     def test_single_level_nesting(self):
-        """(abc) → depth 1 for parens, depth 0 outside, max_depth 1."""
+        """(abc) -> depth 1 for parens, depth 0 outside, max_depth 1."""
         char_info, warnings, max_depth = self.node.parse_enclosures("a(bc)d")
         self.assertEqual(max_depth, 1)
         self.assertEqual(warnings, [])
@@ -72,7 +72,7 @@ class TestParseEnclosures(unittest.TestCase):
         self.assertEqual(paren_close['depth'], 1)
 
     def test_multi_level_nesting(self):
-        """(a(b)c) → max_depth 2, correct depths."""
+        """(a(b)c) -> max_depth 2, correct depths."""
         char_info, warnings, max_depth = self.node.parse_enclosures("(a(b)c)")
         self.assertEqual(max_depth, 2)
         self.assertEqual(warnings, [])
@@ -81,7 +81,7 @@ class TestParseEnclosures(unittest.TestCase):
         self.assertEqual(depths, [1, 1, 2, 2, 2, 1, 1])
 
     def test_hanging_closing_paren(self):
-        """Extra ) with empty stack → is_error True, hanging warning."""
+        """Extra ) with empty stack -> is_error True, hanging warning."""
         char_info, warnings, max_depth = self.node.parse_enclosures("abc)")
         self.assertEqual(max_depth, 0)
         self.assertEqual(len(warnings), 1)
@@ -93,7 +93,7 @@ class TestParseEnclosures(unittest.TestCase):
         self.assertTrue(close_info['is_error'])
 
     def test_unclosed_opening_paren(self):
-        """Unclosed ( → is_error True on the opener, hanging warning."""
+        """Unclosed ( -> is_error True on the opener, hanging warning."""
         char_info, warnings, max_depth = self.node.parse_enclosures("a(bc")
         self.assertEqual(max_depth, 1)
         self.assertEqual(len(warnings), 1)
@@ -106,7 +106,7 @@ class TestParseEnclosures(unittest.TestCase):
         self.assertTrue(opener['is_error'])
 
     def test_multiple_unclosed_opening(self):
-        """Multiple unclosed ( → all marked as error, all get warnings."""
+        """Multiple unclosed ( -> all marked as error, all get warnings."""
         char_info, warnings, max_depth = self.node.parse_enclosures("(((")
         self.assertEqual(max_depth, 3)
         self.assertEqual(len(warnings), 3)
@@ -115,14 +115,14 @@ class TestParseEnclosures(unittest.TestCase):
 
     def test_deep_nesting_warns_once(self):
         """Depth > 3 produces exactly one nesting warning per threshold crossing."""
-        # ((((a)))) → depth reaches 4, one warning
+        # ((((a)))) -> depth reaches 4, one warning
         char_info, warnings, max_depth = self.node.parse_enclosures("((((a))))")
         self.assertEqual(max_depth, 4)
         nesting_warnings = [w for cat, w in warnings if cat == "nesting"]
         self.assertEqual(len(nesting_warnings), 1)
 
     def test_deep_nesting_five_levels_still_one_warning(self):
-        """(((((a))))) → depth 5, still only one nesting warning (at threshold)."""
+        """(((((a))))) -> depth 5, still only one nesting warning (at threshold)."""
         char_info, warnings, max_depth = self.node.parse_enclosures("(((((a)))))")
         self.assertEqual(max_depth, 5)
         nesting_warnings = [w for cat, w in warnings if cat == "nesting"]
@@ -134,7 +134,7 @@ class TestParseEnclosures(unittest.TestCase):
         # Find the closing parens (last 4 chars)
         closers = [info for info in char_info if info['char'] == ')']
         self.assertEqual(len(closers), 4)
-        # The first two closers close depth 4 and 3 → depth 4 closer should be warning
+        # The first two closers close depth 4 and 3 -> depth 4 closer should be warning
         # Opener at depth 4 was deep, so its matching closer inherits is_warning
         deep_closer = closers[0]
         self.assertTrue(deep_closer['is_warning'])
@@ -163,7 +163,7 @@ class TestParseEnclosures(unittest.TestCase):
         self.assertEqual(chars, ['(', 'a', 'b', ')'])
 
     def test_empty_string(self):
-        """Empty text → empty char_info, no warnings, max_depth 0."""
+        """Empty text -> empty char_info, no warnings, max_depth 0."""
         char_info, warnings, max_depth = self.node.parse_enclosures("")
         self.assertEqual(char_info, [])
         self.assertEqual(warnings, [])
@@ -205,7 +205,7 @@ class TestGetColorForDepth(unittest.TestCase):
         self.assertEqual(color, self.node.base_color)
 
     def test_depth_cycles_through_muted_colors(self):
-        """Depth 1→colors[0], depth 2→colors[1], ..., depth 6→colors[0] (cycle)."""
+        """Depth 1->colors[0], depth 2->colors[1], ..., depth 6->colors[0] (cycle)."""
         for depth in range(1, 10):
             color = self.node.get_color_for_depth(depth, is_error=False, is_warning=False)
             expected = self.node.muted_colors[(depth - 1) % len(self.node.muted_colors)]
@@ -245,7 +245,7 @@ class TestFontLoading(unittest.TestCase):
 
 
 class TestCreateVisualizationImage(unittest.TestCase):
-    """Tests for create_visualization_image — rendering and dimensions."""
+    """Tests for create_visualization_image - rendering and dimensions."""
 
     def setUp(self):
         self.node = illumoraeEnclosureVisualizerNode()
@@ -288,7 +288,7 @@ class TestCreateVisualizationImage(unittest.TestCase):
     def test_image_width_accounts_for_warnings(self):
         """Image width must be wide enough to fit the longest warning string.
 
-        This is the fix for issue 3.5 — warnings were being clipped.
+        This is the fix for issue 3.5 - warnings were being clipped.
         """
         # A short text with a long warning message
         text = ")"
@@ -301,7 +301,7 @@ class TestCreateVisualizationImage(unittest.TestCase):
         )
 
         # The warning text "- Hanging closing parenthesis at position 0" is ~45 chars.
-        # At font_size 20 (warning font), char_width ~12px → ~540px + padding.
+        # At font_size 20 (warning font), char_width ~12px -> ~540px + padding.
         # Image width must be at least that, not just the 1-char text width.
         self.assertGreater(img.width, 100)
 

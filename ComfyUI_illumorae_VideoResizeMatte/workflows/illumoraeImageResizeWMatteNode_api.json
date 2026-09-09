@@ -1,0 +1,59 @@
+{
+  "1": {
+    "class_type": "illumoraeImageResizeWMatteNode",
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "keep_proportion": false,
+      "divisible_by": 2,
+      "apply_matte": false,
+      "matte_width": 512,
+      "matte_height": 512,
+      "crop": "disabled",
+      "image": [
+        "2",
+        0
+      ],
+      "get_image_size": [
+        "2",
+        0
+      ]
+    }
+  },
+  "2": {
+    "class_type": "EmptyImage",
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "color": 0,
+      "batch_size": 1
+    }
+  },
+  "3": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "1",
+        0
+      ]
+    }
+  },
+  "4": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        1
+      ]
+    }
+  },
+  "5": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "1",
+        2
+      ]
+    }
+  }
+}

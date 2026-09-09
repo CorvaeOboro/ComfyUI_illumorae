@@ -1,6 +1,7 @@
 """Regression tests for illumoraeLoadImageWFilePathOutNode.
 
-Covers the bugs fixed in the 20260816 review pass:
+Covers the bugs fixed in the 20260816 review pass and the 20260905
+date_modified output addition:
 
 - load_image: None input raises ValueError (no longer AttributeError);
   non-existent path raises ValueError; corrupt/non-image file raises
@@ -8,7 +9,8 @@ Covers the bugs fixed in the 20260816 review pass:
   (1, H, W, 3) float32 tensor in [0, 1] plus a 64x64 zero mask; RGBA
   image returns an inverted alpha mask matching image dimensions; palette
   (P) mode with transparency preserves alpha via RGBA conversion; file
-  name and folder path come from pathlib (stem / parent).
+  name and folder path come from pathlib (stem / parent); date modified
+  is a float matching the file's st_mtime.
 - _resolve_path: None -> None; a direct valid file path is used as-is;
   a non-existent path falls through to the annotation system then
   fallback; return annotation is Optional[Path].
@@ -110,14 +112,14 @@ class TestRegistration(unittest.TestCase):
         self.assertEqual(Node.FUNCTION, "load_image")
         self.assertEqual(
             Node.RETURN_TYPES,
-            ("IMAGE", "MASK", "STRING", "STRING", "INT", "INT"),
+            ("IMAGE", "MASK", "STRING", "STRING", "INT", "INT", "FLOAT"),
         )
         # RETURN_NAMES arity matches RETURN_TYPES.
         self.assertEqual(len(Node.RETURN_NAMES), len(Node.RETURN_TYPES))
         # All uppercase convention (review fix #6).
         self.assertEqual(
             Node.RETURN_NAMES,
-            ("IMAGE", "MASK", "FILE NAME", "FOLDER PATH", "WIDTH", "HEIGHT"),
+            ("IMAGE", "MASK", "FILE NAME", "FOLDER PATH", "WIDTH", "HEIGHT", "DATE MODIFIED"),
         )
 
     def test_input_types_shape(self):
@@ -192,7 +194,7 @@ class TestLoadImage(unittest.TestCase):
     def test_rgb_image_tensor_shape_and_range(self):
         p = self.root / "rgb.png"
         _make_rgb(p, w=8, h=6, color=(255, 0, 0))
-        img, mask, name, folder, w, h = self.node.load_image(str(p))
+        img, mask, name, folder, w, h, dm = self.node.load_image(str(p))
         self.assertEqual(img.shape, (1, 6, 8, 3))
         self.assertEqual(img.dtype, torch.float32)
         self.assertTrue(float(img.min()) >= 0.0)
@@ -205,7 +207,7 @@ class TestLoadImage(unittest.TestCase):
         # Review fix #7: documented 64x64 placeholder convention (kept by choice).
         p = self.root / "rgb.png"
         _make_rgb(p, w=8, h=6)
-        _, mask, _, _, _, _ = self.node.load_image(str(p))
+        _, mask, _, _, _, _, _ = self.node.load_image(str(p))
         self.assertEqual(mask.shape, (64, 64))
         self.assertTrue(float(mask.min()) == 0.0)
         self.assertTrue(float(mask.max()) == 0.0)
@@ -213,7 +215,7 @@ class TestLoadImage(unittest.TestCase):
     def test_rgba_alpha_mask_matches_image_dims(self):
         p = self.root / "rgba.png"
         _make_rgba(p, w=8, h=6, color=(255, 0, 0, 128))
-        _, mask, _, _, w, h = self.node.load_image(str(p))
+        _, mask, _, _, w, h, _ = self.node.load_image(str(p))
         self.assertEqual(mask.shape, (6, 8))
         # Alpha 128/255 ~= 0.502; inverted mask = 1 - 0.502 ~= 0.498.
         self.assertAlmostEqual(float(mask[0, 0]), 1.0 - 128 / 255.0, places=4)
@@ -223,7 +225,7 @@ class TestLoadImage(unittest.TestCase):
         # alpha is preserved instead of dropping to a 64x64 zero mask.
         p = self.root / "pal.png"
         _make_palette_with_transparency(p, w=4, h=4)
-        _, mask, _, _, w, h = self.node.load_image(str(p))
+        _, mask, _, _, w, h, _ = self.node.load_image(str(p))
         # Mask should match image dimensions, not the 64x64 placeholder.
         self.assertEqual(mask.shape, (4, 4))
         # Transparent pixels (index 0) -> alpha 0 -> inverted mask 1.0.
@@ -235,22 +237,49 @@ class TestLoadImage(unittest.TestCase):
         # Review fix #9: uses image_path.stem instead of os.path helper.
         p = self.root / "my.image.name.png"
         _make_rgb(p)
-        _, _, name, _, _, _ = self.node.load_image(str(p))
+        _, _, name, _, _, _, _ = self.node.load_image(str(p))
         # stem of "my.image.name.png" is "my.image.name" (only last suffix stripped).
         self.assertEqual(name, "my.image.name")
 
     def test_folder_path_is_parent(self):
         p = self.root / "img.png"
         _make_rgb(p)
-        _, _, _, folder, _, _ = self.node.load_image(str(p))
+        _, _, _, folder, _, _, _ = self.node.load_image(str(p))
         self.assertEqual(folder, str(self.root))
 
     def test_width_height_returned(self):
         p = self.root / "img.png"
         _make_rgb(p, w=10, h=7)
-        _, _, _, _, w, h = self.node.load_image(str(p))
+        _, _, _, _, w, h, _ = self.node.load_image(str(p))
         self.assertEqual(w, 10)
         self.assertEqual(h, 7)
+
+    def test_date_modified_matches_file_mtime(self):
+        import time as _time
+        p = self.root / "img.png"
+        _make_rgb(p)
+        # Set a known mtime.
+        known_ts = _time.time() - 3600
+        os.utime(p, (known_ts, known_ts))
+        _, _, _, _, _, _, dm = self.node.load_image(str(p))
+        self.assertIsInstance(dm, float)
+        self.assertAlmostEqual(dm, known_ts, places=1)
+
+    def test_date_modified_is_float(self):
+        p = self.root / "img.png"
+        _make_rgb(p)
+        _, _, _, _, _, _, dm = self.node.load_image(str(p))
+        self.assertIsInstance(dm, float)
+
+    def test_date_modified_changes_with_utime(self):
+        import time as _time
+        p = self.root / "img.png"
+        _make_rgb(p)
+        _, _, _, _, _, _, dm1 = self.node.load_image(str(p))
+        new_ts = _time.time() + 100
+        os.utime(p, (new_ts, new_ts))
+        _, _, _, _, _, _, dm2 = self.node.load_image(str(p))
+        self.assertNotAlmostEqual(dm1, dm2, places=1)
 
     def test_corrupt_file_raises_runtime_error(self):
         # Review fix #3: narrow except wraps the decode block.
@@ -265,11 +294,11 @@ class TestLoadImage(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             self.node.load_image(str(p))
 
-    def test_six_outputs_returned(self):
+    def test_seven_outputs_returned(self):
         p = self.root / "img.png"
         _make_rgb(p)
         out = self.node.load_image(str(p))
-        self.assertEqual(len(out), 6)
+        self.assertEqual(len(out), 7)
 
     def test_image_parameter_not_shadowed(self):
         # Review fix #8: the input `image` string is not overwritten by the

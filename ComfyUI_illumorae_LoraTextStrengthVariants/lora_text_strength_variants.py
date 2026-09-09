@@ -4,7 +4,7 @@ DESCRIPTIONSHORT::Randomizes or highlights LoRA strengths in <lora:name:strength
 VERSION::20260816
 IMAGE::comfyui_illumorae_lora_strength_randomize.png
 GROUP::Lora
-GROUPORDER::4
+GROUPORDER::5
 LISTORDER::2
 STATUS::working
 """

@@ -4,7 +4,7 @@ DESCRIPTIONSHORT::Reorders prompt text sections (comma/sentence/paragraph) while
 VERSION::20260127
 IMAGE::comfyui_illumorae_text_reorder.png
 GROUP::Text
-GROUPORDER::5
+GROUPORDER::6
 LISTORDER::70
 STATUS::working
 """

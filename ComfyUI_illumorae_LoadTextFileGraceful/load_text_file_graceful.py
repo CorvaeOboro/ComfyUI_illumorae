@@ -4,7 +4,7 @@ DESCRIPTIONSHORT::Loads a text file from a path and returns its contents without
 VERSION::20260816
 IMAGE::comfyui_illumorae_load_text_graceful.png
 GROUP::Load
-GROUPORDER::3
+GROUPORDER::10
 LISTORDER::5
 STATUS::working
 """

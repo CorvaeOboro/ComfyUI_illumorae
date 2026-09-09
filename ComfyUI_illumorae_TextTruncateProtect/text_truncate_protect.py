@@ -1,9 +1,12 @@
 """
 TITLE::Text Truncate Protect
 DESCRIPTIONSHORT::Truncates text to a character limit with protection options for words, paragraphs, and enclosures.
-VERSION::20260206
+VERSION::20260811
 IMAGE::comfyui_illumorae_text_truncate_protect.png
 GROUP::Text
+GROUPORDER::6
+LISTORDER::120
+STATUS::working
 """
 from typing import Tuple, List, Dict
 
@@ -380,7 +383,7 @@ class illumoraeTextTruncateProtectNode:
             f"Final length: {final_length} characters",
             f"Truncated: {truncated_chars} characters",
             f"Character target: {character_limit}",
-            f"Threshold: ±{threshold}",
+            f"Threshold: +/-{threshold}",
             f"Protection: {protection_str}",
             ""
         ]

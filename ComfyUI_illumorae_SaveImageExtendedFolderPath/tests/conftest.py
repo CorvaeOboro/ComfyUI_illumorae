@@ -4,7 +4,7 @@ The node module imports ``folder_paths`` at module load time. That module is
 provided by the ComfyUI runtime and is not installed in the test environment,
 so a lightweight stub is injected into ``sys.modules`` before the node is
 imported. The stub exposes ``get_output_directory`` and
-``get_save_image_path`` — the two functions the node actually calls.
+``get_save_image_path`` - the two functions the node actually calls.
 
 This file also puts the package directory on ``sys.path`` so the node module
 can be imported by its bare name (matching the convention used by the other

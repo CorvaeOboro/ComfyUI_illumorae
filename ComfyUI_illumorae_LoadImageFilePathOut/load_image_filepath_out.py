@@ -2,6 +2,7 @@
 illumoraeLoadImageFilePathOut - a ComfyUI Custom Node
 ------------------------------
 Load image from a specified file path string and outputs the filepath 
+and file metadata.
 
 Inputs:
     image: (str) Path to the image file to load
@@ -16,15 +17,19 @@ Outputs:
     folder path: Directory containing the image file
     width: (int) Image width in pixels
     height: (int) Image height in pixels
+    date modified: (float) File modification time as a POSIX timestamp
+        (seconds since epoch). Wire this into the Cached Preprocess Image
+        node's ``source_date_modified`` input to let the cache compare
+        freshness without re-reading the file's mtime.
 
 useful for workflows where you need to pass along the image's file path or name for downstream processing or logging.
 
 TITLE::Load Image w FilePath Out
-DESCRIPTIONSHORT::Loads an image from a file path string and outputs image, mask, file name, and folder path.
-VERSION::20260426
+DESCRIPTIONSHORT::Loads an image from a file path string and outputs image, mask, file name, folder path, dimensions, and date modified.
+VERSION::20260905
 IMAGE::comfyui_illumorae_load_image_filepath_out.png
 GROUP::Load
-GROUPORDER::3
+GROUPORDER::10
 LISTORDER::2
 STATUS::working
 """
@@ -85,12 +90,16 @@ class illumoraeLoadImageWFilePathOutNode:
             raise RuntimeError(f"Failed to load image '{image_path}': {e}") from e
         #endregion
 
-        #region META - extract file name stem and parent folder path
+        #region META - extract file name stem, parent folder path, and mtime
         file_name = image_path.stem
         folder_path = str(image_path.parent)
+        try:
+            date_modified = float(image_path.stat().st_mtime)
+        except OSError:
+            date_modified = 0.0
         #endregion
 
-        return (image_tensor, mask, file_name, folder_path, width, height)
+        return (image_tensor, mask, file_name, folder_path, width, height, date_modified)
     #endregion
 
     #region RESOLVE - _resolve_path: direct path or ComfyUI annotation lookup
@@ -181,10 +190,10 @@ class illumoraeLoadImageWFilePathOutNode:
                 }
 
     CATEGORY = "illumorae"
-    RETURN_TYPES = ("IMAGE", "MASK", "STRING", "STRING", "INT", "INT")
-    RETURN_NAMES = ("IMAGE", "MASK", "FILE NAME", "FOLDER PATH", "WIDTH", "HEIGHT")
+    RETURN_TYPES = ("IMAGE", "MASK", "STRING", "STRING", "INT", "INT", "FLOAT")
+    RETURN_NAMES = ("IMAGE", "MASK", "FILE NAME", "FOLDER PATH", "WIDTH", "HEIGHT", "DATE MODIFIED")
     FUNCTION = "load_image"
-    DESCRIPTION = "Loads an image from a file path string and outputs image, mask, file name, folder path, width, and height."
+    DESCRIPTION = "Loads an image from a file path string and outputs image, mask, file name, folder path, width, height, and date modified (POSIX timestamp)."
     #endregion
 
 

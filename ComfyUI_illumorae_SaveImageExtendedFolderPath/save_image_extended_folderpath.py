@@ -7,7 +7,7 @@ DESCRIPTIONSHORT::Saves images to a specified folder path with customizable nami
 VERSION::20260816
 IMAGE::comfyui_illumorae_save_image_extended_folderpath.png
 GROUP::Save
-GROUPORDER::7
+GROUPORDER::12
 LISTORDER::2
 STATUS::working
 """

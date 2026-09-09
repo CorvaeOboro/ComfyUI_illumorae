@@ -1,10 +1,10 @@
 """
 TITLE::Text Multiline FindColorized
 DESCRIPTIONSHORT::Editable multiline text input with search/find highlighting and syntax-colored LoRA bracket tags.
-VERSION::20260815
+VERSION::20260819
 IMAGE::comfyui_illumorae_text_multiline_findcolorized.png
 GROUP::Text
-GROUPORDER::5
+GROUPORDER::6
 LISTORDER::51
 STATUS::working
 """

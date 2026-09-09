@@ -46,7 +46,7 @@ class TestInputTypes(unittest.TestCase):
         self.inputs = self.node.INPUT_TYPES()
 
     def test_save_metadata_is_two_tuple(self):
-        """save_metadata must be (options_list, kwargs_dict) — not a 4-tuple."""
+        """save_metadata must be (options_list, kwargs_dict) - not a 4-tuple."""
         entry = self.inputs["required"]["save_metadata"]
         self.assertEqual(len(entry), 2, f"save_metadata entry has {len(entry)} elements, expected 2")
         options, kwargs = entry

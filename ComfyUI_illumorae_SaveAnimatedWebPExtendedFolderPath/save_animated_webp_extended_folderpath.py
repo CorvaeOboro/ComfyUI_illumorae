@@ -8,7 +8,7 @@ DESCRIPTIONSHORT::Saves an animated WebP to an external folder path
 VERSION::20260201
 IMAGE::comfyui_illumorae_save_animated_webp_folderpath.png
 GROUP::Save
-GROUPORDER::7
+GROUPORDER::12
 LISTORDER::1
 STATUS::working
 WORKFLOWNOTE::Saves to an external folder path; the ComfyUI preview panel will not populate because the file lives outside the managed output directory. Use the returned filepath output or the console log line to locate the saved WebP.

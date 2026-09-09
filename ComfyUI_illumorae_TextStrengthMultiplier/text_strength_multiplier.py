@@ -4,7 +4,7 @@ DESCRIPTIONSHORT::Multiplies prompt section weights while preserving <lora:...> 
 VERSION::20260816
 IMAGE::comfyui_illumorae_text_strength_multiplier.png
 GROUP::Text
-GROUPORDER::5
+GROUPORDER::6
 LISTORDER::90
 STATUS::working
 """

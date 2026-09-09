@@ -4,7 +4,7 @@ DESCRIPTIONSHORT::Visualizes prompt text enclosure nesting and mismatched parent
 VERSION::20260816
 IMAGE::comfyui_illumorae_text_enclosure_visualize.png
 GROUP::Text
-GROUPORDER::5
+GROUPORDER::6
 LISTORDER::40
 STATUS::working
 """

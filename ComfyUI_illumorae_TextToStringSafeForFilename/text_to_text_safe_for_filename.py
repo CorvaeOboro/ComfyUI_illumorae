@@ -3,7 +3,7 @@ TITLE::Text To Filename Safe Text
 DESCRIPTIONSHORT::Converts text into a filename-safe string (Windows-safe) with normalization, character filtering, and length truncation.
 IMAGE::comfyui_illumorae_text_to_string_filename_safe.png
 GROUP::Text
-GROUPORDER::5
+GROUPORDER::6
 LISTORDER::110
 VERSION::20260811
 STATUS::working
