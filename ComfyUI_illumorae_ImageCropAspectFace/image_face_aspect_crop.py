@@ -3,9 +3,9 @@ TITLE::Image Face Aspect Crop
 DESCRIPTIONSHORT::Crops an image to a target aspect ratio with face-detection-biased anchoring and debug overlay output.
 VERSION::20260815
 IMAGE::comfyui_illumorae_image_face_aspect_crop.png
-GROUP::Image
-GROUPORDER::1
-LISTORDER::20
+GROUP::Image Resize
+GROUPORDER::3
+LISTORDER::10
 STATUS::working
 
 Implementation notes (efficiency-first):

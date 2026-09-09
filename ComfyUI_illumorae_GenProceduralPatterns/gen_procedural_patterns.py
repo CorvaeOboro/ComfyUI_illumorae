@@ -16,8 +16,8 @@ DESCRIPTIONSHORT::Generates procedural symmetrical patterns (torus rings, radial
 VERSION::20260814
 IMAGE::comfyui_illumorae_procedural_patterns.png
 GROUP::Image
-GROUPORDER::1
-LISTORDER::100
+GROUPORDER::4
+LISTORDER::10
 STATUS::working
 """
 #region IMPORTS

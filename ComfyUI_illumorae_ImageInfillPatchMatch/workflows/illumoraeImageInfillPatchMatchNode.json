@@ -239,7 +239,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Image Infill PatchMatch\n[illumoraeImageInfillPatchMatchNode]\nGroup: Image  Status: working"
+        "Image Infill PatchMatch\n[illumoraeImageInfillPatchMatchNode]\nGroup: Image Infill  Status: working"
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -264,7 +264,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Approximate PatchMatch-style content fill to infill masked regions; useful as inpainting guidance.\n\nInputs (required): image:IMAGE, mask:MASK, patch_size:INT, iterations:INT, search_radius:INT, blend_width:INT\nOutputs: infilled_image:IMAGE, offset_map_viz:IMAGE\n\nImage-group node fed by an EmptyImage provider. Output is previewed with PreviewImage (or MaskToImage -> PreviewImage for MASK outputs)."
+        "Approximate PatchMatch-style content fill to infill masked regions; useful as inpainting guidance.\n\nInputs (required): image:IMAGE, mask:MASK, patch_size:INT, iterations:INT, search_radius:INT, blend_width:INT\nOutputs: infilled_image:IMAGE, offset_map_viz:IMAGE\n\nNode shown with generic providers for its connection inputs and PreviewAny sinks for its outputs."
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -307,7 +307,7 @@
   "groups": [
     {
       "id": 1,
-      "title": "Image: Image Infill PatchMatch",
+      "title": "Image Infill: Image Infill PatchMatch",
       "bounding": [
         80.0,
         20.0,

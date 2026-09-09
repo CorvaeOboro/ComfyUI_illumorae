@@ -126,8 +126,10 @@ Usage:
 Optional flags:
     --no-gui
     --export-json <path>
+    --reorder-groups <spec>   rewrite GROUPORDER:: fields (JSON or GroupName=N,...)
+    --dry-run                 with --reorder-groups: report without writing
 
-VERSION: 20260113
+VERSION: 20260816
 """
 #endregion
 
@@ -1045,8 +1047,9 @@ class NodeMetadataDashboard:
         self.group_filter.grid(row=0, column=5, sticky=tk.W, padx=5)
 
         ttk.Button(bar, text="Refresh", command=self.load_nodes).grid(row=0, column=7, sticky=tk.E, padx=(10, 0))
-        ttk.Button(bar, text="View All Imports", command=self.show_imports_summary).grid(row=0, column=8, sticky=tk.E, padx=5)
-        ttk.Button(bar, text="Export JSON Reports", command=self.export_json_reports).grid(row=0, column=9, sticky=tk.E, padx=5)
+        ttk.Button(bar, text="Reorder Groups", command=self.show_reorder_groups_dialog).grid(row=0, column=8, sticky=tk.E, padx=5)
+        ttk.Button(bar, text="View All Imports", command=self.show_imports_summary).grid(row=0, column=9, sticky=tk.E, padx=5)
+        ttk.Button(bar, text="Export JSON Reports", command=self.export_json_reports).grid(row=0, column=10, sticky=tk.E, padx=5)
 
     def _create_node_list(self, parent: tk.Widget) -> None:
         parent.columnconfigure(0, weight=1)
@@ -2273,6 +2276,114 @@ class NodeMetadataDashboard:
             return
         export_report(self.project_root, self.nodes, self.scanner.global_variables, path)
         self._log(f"[OK] Exported JSON: {os.path.basename(path)}")
+
+    def show_reorder_groups_dialog(self) -> None:
+        """Open a dialog showing current groups with editable GROUPORDER fields."""
+        if not self.nodes:
+            self._log("No nodes loaded. Click Refresh first.")
+            return
+
+        # Collect current group -> order mapping (use the minimum order per group)
+        group_orders: Dict[str, int] = {}
+        group_counts: Dict[str, int] = {}
+        for n in self.nodes:
+            group = n.python_frontmatter.get("GROUP", "")
+            if isinstance(group, list):
+                group = group[0] if group else ""
+            if not group:
+                continue
+            order = n.python_frontmatter.get("GROUPORDER")
+            if isinstance(order, list):
+                order = order[0] if order else None
+            try:
+                order_int = int(order) if order is not None else 99
+            except (TypeError, ValueError):
+                order_int = 99
+            if group not in group_orders or order_int < group_orders[group]:
+                group_orders[group] = order_int
+            group_counts[group] = group_counts.get(group, 0) + 1
+
+        if not group_orders:
+            self._log("No GROUP:: fields found in any node.")
+            return
+
+        # Build popup
+        popup = tk.Toplevel(self.root)
+        popup.title("Reorder Groups")
+        popup.geometry("500x500")
+        popup.configure(bg=COLORS["bg_app"])
+
+        ttk.Label(popup, text="Reorder Groups", font=("TkDefaultFont", 12, "bold")).pack(padx=10, pady=(10, 5))
+
+        info_label = ttk.Label(
+            popup,
+            text="Edit the order numbers below, then click Apply.\nGroups are sorted by GROUPORDER in the docs sidebar.",
+            foreground=COLORS["fg_dim"],
+        )
+        info_label.pack(padx=10, pady=(0, 10))
+
+        # Sortable list frame
+        list_frame = ttk.Frame(popup)
+        list_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+
+        order_vars: Dict[str, tk.StringVar] = {}
+        sorted_groups = sorted(group_orders.keys(), key=lambda g: (group_orders[g], g.lower()))
+
+        for i, group in enumerate(sorted_groups):
+            ttk.Label(list_frame, text=f"{group} ({group_counts[group]} nodes)").grid(
+                row=i, column=0, sticky=tk.W, pady=2
+            )
+            var = tk.StringVar(value=str(group_orders[group]))
+            entry = ttk.Entry(list_frame, textvariable=var, width=8)
+            entry.grid(row=i, column=1, sticky=tk.E, pady=2, padx=(10, 0))
+            order_vars[group] = var
+
+        # Auto-renumber button
+        def auto_renumber():
+            for i, group in enumerate(sorted_groups, start=1):
+                order_vars[group].set(str(i))
+
+        ttk.Button(popup, text="Auto Renumber (1, 2, 3...)", command=auto_renumber).pack(pady=5)
+
+        # Apply button
+        def apply_reorder():
+            new_map: Dict[str, int] = {}
+            for group, var in order_vars.items():
+                try:
+                    new_map[group] = int(var.get())
+                except ValueError:
+                    from tkinter import messagebox
+                    messagebox.showerror("Invalid Input", f"Invalid number for group '{group}': {var.get()}")
+                    return
+
+            changes = reorder_groups(self.project_root, new_map, dry_run=False)
+            print_group_order_report(changes)
+            self._log(f"[OK] Reordered groups: {len(changes)} file(s) updated")
+            popup.destroy()
+            self.load_nodes()
+
+        # Dry run button
+        def dry_run_reorder():
+            new_map: Dict[str, int] = {}
+            for group, var in order_vars.items():
+                try:
+                    new_map[group] = int(var.get())
+                except ValueError:
+                    from tkinter import messagebox
+                    messagebox.showerror("Invalid Input", f"Invalid number for group '{group}': {var.get()}")
+                    return
+
+            changes = reorder_groups(self.project_root, new_map, dry_run=True)
+            print_group_order_report(changes)
+            self._log(f"[Dry Run] Reorder groups: {len(changes)} file(s) would change")
+
+        btn_frame = ttk.Frame(popup)
+        btn_frame.pack(pady=10)
+        ttk.Button(btn_frame, text="Dry Run", command=dry_run_reorder).pack(side=tk.LEFT, padx=5)
+        ttk.Button(btn_frame, text="Apply", command=apply_reorder).pack(side=tk.LEFT, padx=5)
+        ttk.Button(btn_frame, text="Cancel", command=popup.destroy).pack(side=tk.LEFT, padx=5)
+
+        self._log(f"Reorder Groups dialog opened: {len(group_orders)} groups found")
     #endregion
 
     #region U-LOG
@@ -2307,6 +2418,174 @@ def export_report(project_root: str, nodes: List[NodeMetadata], globals_map: Dic
 #endregion
 
 
+#region REORDER
+# Group reordering: safely rewrite GROUPORDER:: fields across all node packages
+def _find_docstring_boundaries(lines: List[str]) -> Tuple[int, int, Optional[str]]:
+    """Return (start, end, quote_style) of the module docstring, or (-1, -1, None).
+
+    Handles optional string prefixes (r, b, f, rb, etc.) before the triple quotes.
+    """
+    in_docstring = False
+    docstring_start = -1
+    docstring_end = -1
+    quote_style = None
+
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if not in_docstring:
+            # Strip common string prefixes (r, b, f, rb, rf, etc.)
+            prefix_stripped = re.sub(r"^[rbfuRBFU]+", "", stripped)
+            if prefix_stripped.startswith('"""') or prefix_stripped.startswith("'''"):
+                in_docstring = True
+                docstring_start = i
+                quote_style = '"""' if prefix_stripped.startswith('"""') else "'''"
+                if prefix_stripped.endswith(quote_style) and len(prefix_stripped) > len(quote_style) * 2:
+                    docstring_end = i
+                    break
+        else:
+            if quote_style in line:
+                docstring_end = i
+                break
+
+    return docstring_start, docstring_end, quote_style
+
+
+def _extract_group_and_order(lines: List[str], doc_start: int, doc_end: int) -> Tuple[Optional[str], Optional[str]]:
+    """Extract GROUP:: and GROUPORDER:: values from docstring lines."""
+    group_val = None
+    order_val = None
+    for i in range(doc_start, doc_end + 1):
+        line = lines[i]
+        m_group = re.match(r"^\s*GROUP::\s*(.*?)\s*$", line)
+        if m_group:
+            group_val = m_group.group(1).strip()
+        m_order = re.match(r"^\s*GROUPORDER::\s*(.*?)\s*$", line)
+        if m_order:
+            order_val = m_order.group(1).strip()
+    return group_val, order_val
+
+
+def reorder_groups(project_root: str, group_order_map: Dict[str, int], dry_run: bool = False) -> List[Dict[str, Any]]:
+    """Rewrite GROUPORDER:: fields to match the provided group-to-order mapping.
+
+    Reads all files first, then writes - avoids cascading replacement conflicts
+    that occur with sequential in-place regex substitution.
+
+    Args:
+        project_root: absolute path to the repository root.
+        group_order_map: {group_name: new_group_order_integer}.
+        dry_run: if True, report changes without writing files.
+
+    Returns:
+        List of change records: {file, group, old_order, new_order, written}.
+    """
+    changes: List[Dict[str, Any]] = []
+
+    # Phase 1: read all files and collect pending writes
+    pending_writes: List[Tuple[str, str]] = []  # (path, new_content)
+
+    for name in sorted(os.listdir(project_root)):
+        folder_path = os.path.join(project_root, name)
+        if not name.startswith("ComfyUI_illumorae_"):
+            continue
+        if not os.path.isdir(folder_path):
+            continue
+
+        py_files = [
+            f for f in os.listdir(folder_path)
+            if f.endswith(".py") and f != "__init__.py" and os.path.isfile(os.path.join(folder_path, f))
+        ]
+
+        for py_file in py_files:
+            file_path = os.path.join(folder_path, py_file)
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+            except Exception:
+                continue
+
+            lines = content.split("\n")
+            doc_start, doc_end, _ = _find_docstring_boundaries(lines)
+            if doc_start == -1 or doc_end == -1:
+                continue
+
+            group_val, order_val = _extract_group_and_order(lines, doc_start, doc_end)
+            if group_val is None or order_val is None:
+                continue
+
+            if group_val not in group_order_map:
+                continue
+
+            new_order = group_order_map[group_val]
+            new_order_str = str(new_order)
+
+            if order_val == new_order_str:
+                continue
+
+            # Find the GROUPORDER:: line and update it, preserving leading whitespace
+            for i in range(doc_start, doc_end + 1):
+                m = re.match(r"^(\s*)GROUPORDER::\s*(.*?)\s*$", lines[i])
+                if m:
+                    leading_ws = m.group(1)
+                    lines[i] = f"{leading_ws}GROUPORDER::{new_order_str}"
+                    break
+
+            new_content = "\n".join(lines)
+            pending_writes.append((file_path, new_content))
+
+            changes.append({
+                "file": py_file,
+                "folder": name,
+                "group": group_val,
+                "old_order": order_val,
+                "new_order": new_order_str,
+                "written": not dry_run,
+            })
+
+    # Phase 2: write all pending files (only if not dry run)
+    if not dry_run:
+        for file_path, new_content in pending_writes:
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(new_content)
+
+    return changes
+
+
+def parse_group_order_spec(spec: str) -> Dict[str, int]:
+    """Parse a group order specification string into a {group: order} dict.
+
+    Accepts either JSON or a comma-separated list of GroupName=Number pairs.
+    Examples:
+        '{"Image Infill": 1, "Load": 10}'
+        'Image Infill=1, Image Adjustment=2, Load=10'
+    """
+    spec = spec.strip()
+    if spec.startswith("{"):
+        return {k: int(v) for k, v in json.loads(spec).items()}
+
+    result: Dict[str, int] = {}
+    for pair in spec.split(","):
+        pair = pair.strip()
+        if "=" not in pair:
+            continue
+        k, v = pair.rsplit("=", 1)
+        result[k.strip()] = int(v.strip())
+    return result
+
+
+def print_group_order_report(changes: List[Dict[str, Any]]) -> None:
+    """Print a human-readable summary of reorder changes."""
+    if not changes:
+        print("No GROUPORDER changes needed - all groups already match the target order.")
+        return
+
+    print(f"GROUPORDER changes ({len(changes)} file(s)):")
+    for c in changes:
+        status = "written" if c["written"] else "dry-run"
+        print(f"  {c['folder']}/{c['file']}: [{c['group']}] {c['old_order']} -> {c['new_order']} ({status})")
+#endregion
+
+
 #region MAIN
 # CLI entry point: argparse, scanner, optional GUI launch
 def main() -> int:
@@ -2314,11 +2593,31 @@ def main() -> int:
     parser.add_argument("project_root", nargs="?", default=None)
     parser.add_argument("--no-gui", action="store_true")
     parser.add_argument("--export-json", default=None)
+    parser.add_argument(
+        "--reorder-groups",
+        default=None,
+        help=(
+            "Rewrite GROUPORDER:: fields to match the given mapping. "
+            "Accepts JSON ('{\"Image\": 1, \"Load\": 10}') or "
+            "comma-separated pairs ('Image Infill=1, Load=10')."
+        ),
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="With --reorder-groups: report changes without writing files.",
+    )
 
     args = parser.parse_args()
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.abspath(args.project_root or os.path.join(script_dir, ".."))
+
+    if args.reorder_groups:
+        group_order_map = parse_group_order_spec(args.reorder_groups)
+        changes = reorder_groups(project_root, group_order_map, dry_run=args.dry_run)
+        print_group_order_report(changes)
+        return 0
 
     scanner = NodeMetadataScanner(project_root)
     nodes = scanner.scan()

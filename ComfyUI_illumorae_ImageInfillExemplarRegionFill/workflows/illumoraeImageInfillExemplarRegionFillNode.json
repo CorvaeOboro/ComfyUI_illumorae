@@ -241,7 +241,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Image Infill Exemplar Region Fill\n[illumoraeImageInfillExemplarRegionFillNode]\nGroup: Image  Status: working"
+        "Image Infill Exemplar Region Fill\n[illumoraeImageInfillExemplarRegionFillNode]\nGroup: Image Infill  Status: working"
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -266,7 +266,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Image Infill using exemplar region filling with isophote-driven priority. extends linear structures into the target region.\n\nInputs (required): image:IMAGE, mask:MASK, patch_size:INT\nOutputs: infilled_image:IMAGE, fill_order_viz:IMAGE\n\nImage-group node fed by an EmptyImage provider. Output is previewed with PreviewImage (or MaskToImage -> PreviewImage for MASK outputs)."
+        "Image Infill using exemplar region filling with isophote-driven priority. extends linear structures into the target region.\n\nInputs (required): image:IMAGE, mask:MASK, patch_size:INT\nOutputs: infilled_image:IMAGE, fill_order_viz:IMAGE\n\nNode shown with generic providers for its connection inputs and PreviewAny sinks for its outputs."
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -309,7 +309,7 @@
   "groups": [
     {
       "id": 1,
-      "title": "Image: Image Infill Exemplar Region Fill",
+      "title": "Image Infill: Image Infill Exemplar Region Fill",
       "bounding": [
         80.0,
         20.0,

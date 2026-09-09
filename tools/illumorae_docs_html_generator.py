@@ -16,10 +16,13 @@ For each node package the generator:
   - reads CATEGORY , FUNCTION , DESCRIPTION class attributes
   - looks up the IMAGE:: screenshot under docs/ and embeds it when found
 
+Nodes with STATUS::unapproved (not yet tracked in git) and packages with no
+main .py file are skipped and do not appear in the sidebar or docs.
+
 Output layout (docs/nodes/ subfolder, images referenced as ../<img>.png):
   docs/index.html            overview page (sidebar + welcome content)
-  docs/illumorae_menu.htm    sidebar menu, grouped by GROUP::
-  docs/nodes/<NodeName>.html one page per node, iframe sidebar -> ../illumorae_menu.htm
+  docs/illumorae_menu.html   sidebar menu, grouped by GROUP::
+  docs/nodes/<NodeName>.html one page per node, iframe sidebar -> ../illumorae_menu.html
 
 Refresh policy:
   default               generate only MISSING node pages (skip existing),
@@ -59,7 +62,7 @@ from typing import Any, Dict, List, Optional, Tuple
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 DOCS_DIR = os.path.join(REPO_ROOT, "docs")
 NODES_DIR = os.path.join(DOCS_DIR, "nodes")
-MENU_FILE = os.path.join(DOCS_DIR, "illumorae_menu.htm")
+MENU_FILE = os.path.join(DOCS_DIR, "illumorae_menu.html")
 INDEX_FILE = os.path.join(DOCS_DIR, "index.html")
 
 NODE_FOLDER_PREFIX = "ComfyUI_illumorae_"
@@ -539,6 +542,14 @@ def scan_nodes(project_root: str) -> List[NodeDoc]:
 
         node.page_filename = _page_filename_for(node)
         node.page_rel_from_docs = f"nodes/{node.page_filename}"
+
+        # Skip nodes that are not yet tracked in git (STATUS::unapproved) or
+        # have no parseable main .py file (broken/missing module).
+        if not node.main_py_path or not os.path.isfile(node.main_py_path):
+            continue
+        if node.status.lower() == "unapproved":
+            continue
+
         nodes.append(node)
 
     return nodes
@@ -692,7 +703,7 @@ def render_node_page(node: NodeDoc) -> str:
 </head>
 <body>
 <div class="page">
-    <div class="sidebar"><iframe src="../illumorae_menu.htm"></iframe></div>
+    <div class="sidebar"><iframe src="../illumorae_menu.html"></iframe></div>
     <div class="content">
 <header>
     <h1>{_esc(title)}</h1>
@@ -756,7 +767,7 @@ def render_menu(nodes: List[NodeDoc]) -> str:
 <body>
 <center>
 <br>
-<h2 style="color:#4a7fb5; margin:0; font-size:1.1rem;">ComfyUI ILLUMORAE</h2>
+<h2 style="color:#ffffff; margin:0; font-size:1.1rem;">ComfyUI ILLUMORAE</h2>
 <a href="index.html" target="_parent">Overview</a>
 {chr(10).join(sections)}
 </center>
@@ -775,7 +786,7 @@ def render_index(nodes: List[NodeDoc]) -> str:
     group_rows: List[str] = []
     for g in groups:
         members = sorted([n for n in nodes if n.group == g], key=lambda n: (n.list_order, n.title.lower()))
-        links = ", ".join(
+        links = " | ".join(
             f'<a href="nodes/{_esc(n.page_filename)}">{_esc(n.title)}</a>' for n in members
         )
         group_rows.append(f"<tr><td><strong>{_esc(g)}</strong></td><td>{links}</td></tr>")
@@ -812,6 +823,36 @@ def render_index(nodes: List[NodeDoc]) -> str:
             f'</div>'
         )
 
+    # Per-row table: one row per node, title on the left (centered),
+    # image (max 1000px) with description below it on the right.
+    row_sections: List[str] = []
+    for g in groups:
+        members = sorted([n for n in nodes if n.group == g], key=lambda n: (n.list_order, n.title.lower()))
+        rows_html: List[str] = []
+        for n in members:
+            if n.image_filename and n.image_exists:
+                media_html = (
+                    f'<img class="row-img" src="{_esc(n.image_filename)}" '
+                    f'alt="{_esc(n.title)}">'
+                )
+            else:
+                media_html = '<div class="row-img-missing">no screenshot</div>'
+            desc = n.description_short or ""
+            rows_html.append(
+                "<tr>"
+                f'<td class="row-title"><a href="nodes/{_esc(n.page_filename)}">{_esc(n.title)}</a></td>'
+                f'<td class="row-media">{media_html}<div class="row-desc">{_esc(desc)}</div></td>'
+                "</tr>"
+            )
+        row_sections.append(
+            f'<div class="row-group">\n'
+            f'<h3>{_esc(g)}</h3>\n'
+            f'<table class="row-table">\n'
+            f'{chr(10).join(rows_html)}\n'
+            f'</table>\n'
+            f'</div>'
+        )
+
     index_css = """
 .node-card { display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--border); border-radius:6px; overflow:hidden; text-decoration:none; color:inherit; transition:border-color 0.15s, transform 0.15s; }
 .node-card:hover { border-color:#4a7fb5; transform:translateY(-2px); }
@@ -823,6 +864,21 @@ def render_index(nodes: List[NodeDoc]) -> str:
 .card-group { margin-top:2rem; }
 .card-group h3 { color:#ffffff; font-size:0.95rem; text-transform:uppercase; margin:0 0 0.8rem 0; padding-bottom:0.3rem; border-bottom:1px solid var(--border); }
 .card-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:0.8rem; }
+.row-group { margin-top:2.5rem; }
+.row-group h3 { color:#ffffff; font-size:0.95rem; text-transform:uppercase; margin:0 0 0.8rem 0; padding-bottom:0.3rem; border-bottom:1px solid var(--border); }
+.row-table { width:100%; border-collapse:collapse; table-layout:fixed; }
+.row-table td { border:1px solid var(--border); padding:0.8rem; vertical-align:middle; background:#111; }
+.row-title { width:180px; text-align:center; vertical-align:middle; font-weight:600; }
+.row-title a { color:#4a7fb5; text-decoration:none; }
+.row-title a:hover { text-decoration:underline; }
+.row-media { text-align:center; }
+.row-img { display:block; margin:0 auto; max-width:1000px; width:100%; height:auto; border:1px solid var(--border); border-radius:4px; }
+.row-img-missing { max-width:1000px; width:100%; margin:0 auto; border:1px dashed var(--border); background:var(--surface); color:var(--muted); padding:2rem; text-align:center; border-radius:4px; }
+.row-desc { color:var(--muted); font-size:0.85rem; margin-top:0.5rem; text-align:center; }
+.banner-img { max-width:100%; height:auto; max-height:200px; display:block; margin:0 auto; }
+.header-links { margin-top:0.8rem; font-size:1rem; }
+.header-links a { color:var(--link); text-decoration:none; font-weight:600; }
+.header-links a:hover { text-decoration:underline; }
 """
 
     return f"""<!DOCTYPE html>
@@ -838,10 +894,15 @@ def render_index(nodes: List[NodeDoc]) -> str:
 </head>
 <body>
 <div class="page">
-    <div class="sidebar"><iframe src="illumorae_menu.htm"></iframe></div>
+    <div class="sidebar"><iframe src="illumorae_menu.html"></iframe></div>
     <div class="content">
 <header>
-    <h1>ComfyUI ILLUMORAE</h1>
+    <img class="banner-img" src="comfyui_illumorae_title.png" alt="ComfyUI ILLUMORAE">
+    <div class="header-links">
+        <a href="https://github.com/CorvaeOboro/ComfyUI_illumorae/archive/refs/heads/main.zip">DOWNLOAD</a>
+        &nbsp;|&nbsp;
+        <a href="https://github.com/CorvaeOboro/ComfyUI_illumorae">GITHUB</a>
+    </div>
 </header>
 <div class="container">
 
@@ -850,6 +911,8 @@ def render_index(nodes: List[NodeDoc]) -> str:
 </table>
 
 {chr(10).join(card_sections)}
+
+{chr(10).join(row_sections)}
 
 </div>
     </div>

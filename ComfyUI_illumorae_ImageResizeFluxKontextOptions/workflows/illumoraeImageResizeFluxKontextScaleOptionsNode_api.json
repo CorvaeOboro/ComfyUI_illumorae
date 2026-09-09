@@ -1,0 +1,32 @@
+{
+  "1": {
+    "class_type": "illumoraeImageResizeFluxKontextScaleOptionsNode",
+    "inputs": {
+      "resize_mode": "crop",
+      "interpolation": "lanczos",
+      "crop_anchor": "center",
+      "image": [
+        "2",
+        0
+      ]
+    }
+  },
+  "2": {
+    "class_type": "EmptyImage",
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "color": 0,
+      "batch_size": 1
+    }
+  },
+  "3": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "1",
+        0
+      ]
+    }
+  }
+}

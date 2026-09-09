@@ -1,9 +1,9 @@
 import { app } from "../../scripts/app.js";
 
 app.registerExtension({
-    name: "Comfy.illumoraeTextTokenCount",
+    name: "Comfy.illumoraeDisplayTokenCount",
     async beforeRegisterNodeDef(nodeType, nodeData, app) {
-        if (nodeData.name !== "illumoraeTextTokenCountNode") return;
+        if (nodeData.name !== "illumoraeDisplayTokenCountNode") return;
 
         const onNodeCreated = nodeType.prototype.onNodeCreated;
         nodeType.prototype.onNodeCreated = function() {

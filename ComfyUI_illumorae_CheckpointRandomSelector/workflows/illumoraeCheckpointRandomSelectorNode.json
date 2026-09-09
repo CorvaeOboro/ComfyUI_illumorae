@@ -59,7 +59,9 @@
         "Pony",
         "SD15",
         true,
-        ".safetensors,.sft"
+        ".safetensors,.sft",
+        false,
+        "Checkpoint"
       ],
       "color": "#332922",
       "bgcolor": "#593930"

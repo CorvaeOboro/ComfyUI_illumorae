@@ -3,9 +3,9 @@ TITLE::Image Resize WAN Adaptive Framing
 DESCRIPTIONSHORT::Auto-selects WAN-friendly vertical/horizontal resolution and applies optional human-centric framing before resize.
 VERSION::20260511
 IMAGE::comfyui_illumorae_image_resize_wan_adaptive_framing.png
-GROUP::Image
-GROUPORDER::1
-LISTORDER::91
+GROUP::Image Resize
+GROUPORDER::3
+LISTORDER::30
 STATUS::working
 
 NOTES:

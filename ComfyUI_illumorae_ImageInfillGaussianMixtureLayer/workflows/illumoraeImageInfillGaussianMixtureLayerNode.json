@@ -236,7 +236,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Image Infill Gaussian Mixture Layer\n[illumoraeImageInfillGaussianMixtureLayerNode]\nGroup: Image  Status: working"
+        "Image Infill Gaussian Mixture Layer\n[illumoraeImageInfillGaussianMixtureLayerNode]\nGroup: Image Infill  Status: working"
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -261,7 +261,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Single stationary-Gaussian-field texture inpainting by FFT-based conditional simulation (Galerne-Leclaire 2017); best for homogeneous microtextures. (Name retains historical \"Mixture\" for compat; not a GMM.)\n\nInputs (required): image:IMAGE, mask:MASK\nOutputs: infilled_image:IMAGE, texton_viz:IMAGE\n\nImage-group node fed by an EmptyImage provider. Output is previewed with PreviewImage (or MaskToImage -> PreviewImage for MASK outputs)."
+        "Single stationary-Gaussian-field texture inpainting by FFT-based conditional simulation (Galerne-Leclaire 2017); best for homogeneous microtextures. (Name retains historical \"Mixture\" for compat; not a GMM.)\n\nInputs (required): image:IMAGE, mask:MASK\nOutputs: infilled_image:IMAGE, texton_viz:IMAGE\n\nNode shown with generic providers for its connection inputs and PreviewAny sinks for its outputs."
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -304,7 +304,7 @@
   "groups": [
     {
       "id": 1,
-      "title": "Image: Image Infill Gaussian Mixture Layer",
+      "title": "Image Infill: Image Infill Gaussian Mixture Layer",
       "bounding": [
         80.0,
         20.0,

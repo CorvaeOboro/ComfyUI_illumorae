@@ -555,6 +555,12 @@ def scan_nodes(project_root: str) -> List[NodeInfo]:
             fields, classes = _parse_node_classes(src)
             if not classes:
                 continue
+            # Skip unapproved nodes (not yet tracked in git).
+            status_val = fields.get(FIELD_STATUS)
+            if isinstance(status_val, list):
+                status_val = status_val[0] if status_val else None
+            if status_val and str(status_val).strip().lower() == "unapproved":
+                continue
             for (
                 cls_name,
                 category,

@@ -1,12 +1,12 @@
 {
   "id": "illumorae-workflow",
   "revision": 0,
-  "last_node_id": 6,
-  "last_link_id": 3,
+  "last_node_id": 5,
+  "last_link_id": 2,
   "nodes": [
     {
       "id": 1,
-      "type": "illumoraeImageFaceAspectCropNode",
+      "type": "illumoraeImageResizeFluxKontextScaleOptionsNode",
       "pos": [
         620,
         360
@@ -27,40 +27,24 @@
       ],
       "outputs": [
         {
-          "name": "cropped_image",
+          "name": "IMAGE",
           "type": "IMAGE",
           "links": [
             2
           ],
           "slot_index": 0
-        },
-        {
-          "name": "debug_image",
-          "type": "IMAGE",
-          "links": [
-            3
-          ],
-          "slot_index": 1
         }
       ],
       "properties": {
         "cnr_id": "comfyui_illumorae",
-        "Node name for S&R": "illumoraeImageFaceAspectCropNode",
+        "Node name for S&R": "illumoraeImageResizeFluxKontextScaleOptionsNode",
         "aux_id": "CorvaeOboro/ComfyUI_illumorae",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        1024,
-        576,
-        0.9,
-        0.1,
-        0.2,
-        0.15,
-        1.0,
-        1.1,
-        5,
-        3.0,
-        false
+        "crop",
+        "lanczos",
+        "center"
       ],
       "color": "#332922",
       "bgcolor": "#593930"
@@ -137,37 +121,6 @@
     },
     {
       "id": 4,
-      "type": "PreviewImage",
-      "pos": [
-        1080,
-        580
-      ],
-      "size": [
-        210,
-        250
-      ],
-      "flags": {},
-      "order": 3,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 3
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "Node name for S&R": "PreviewImage",
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [],
-      "color": "#222",
-      "bgcolor": "#000"
-    },
-    {
-      "id": 5,
       "type": "Note",
       "pos": [
         620,
@@ -178,7 +131,7 @@
         110
       ],
       "flags": {},
-      "order": 4,
+      "order": 3,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -186,13 +139,13 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Image Face Aspect Crop\n[illumoraeImageFaceAspectCropNode]\nGroup: Image  Status: working"
+        "Image Resize Flux Kontext Scale Options\n[illumoraeImageResizeFluxKontextScaleOptionsNode]\nGroup: Image Resize  Status: working"
       ],
       "color": "#432",
       "bgcolor": "#653"
     },
     {
-      "id": 6,
+      "id": 5,
       "type": "Note",
       "pos": [
         620,
@@ -203,7 +156,7 @@
         200
       ],
       "flags": {},
-      "order": 5,
+      "order": 4,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -211,7 +164,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Crops an image to a target aspect ratio with face-detection-biased anchoring and debug overlay output.\n\nInputs (required): image:IMAGE, width:INT, height:INT, face_anchor_strength:FLOAT, center_bias_weight:FLOAT, subject_top_bias:FLOAT, secondary_face_weight:FLOAT, max_anchor_shift_ratio:FLOAT, detect_scale_factor:FLOAT, detect_min_neighbors:INT, min_face_percent:FLOAT\nOutputs: cropped_image:IMAGE, debug_image:IMAGE\n\nImage-group node fed by an EmptyImage provider. Output is previewed with PreviewImage (or MaskToImage -> PreviewImage for MASK outputs)."
+        "Resizes images to preferred Flux Kontext resolutions with crop or stretch options.\n\nInputs (required): image:IMAGE, resize_mode:ENUM, interpolation:ENUM, crop_anchor:ENUM\nOutputs: IMAGE\n\nNode shown with generic providers for its connection inputs and PreviewAny sinks for its outputs."
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -233,20 +186,12 @@
       3,
       0,
       "IMAGE"
-    ],
-    [
-      3,
-      1,
-      1,
-      4,
-      0,
-      "IMAGE"
     ]
   ],
   "groups": [
     {
       "id": 1,
-      "title": "Image: Image Face Aspect Crop",
+      "title": "Image Resize: Image Resize Flux Kontext Scale Options",
       "bounding": [
         80.0,
         20.0,

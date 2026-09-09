@@ -84,6 +84,8 @@ SKIP_DIR_NAMES = {
     ".pytest_cache", ".mypy_cache", ".ruff_cache",
     # venv used by the linter runner tools; named differently from "venv"
     "venv_linters",
+    # Vendored reference snapshots of upstream repos; not our prose to audit
+    "ref",
 }
 
 # Extra path globs to skip (matched against relative posix path)
@@ -180,6 +182,9 @@ DISALLOWED: dict[str, str] = {
     "\U0001f4cb": "CLIPBOARD",
     "\U0001f3af": "DIRECT HIT",
     "\U0001f4cd": "ROUND PUSHPIN",
+    "\u0305": "COMBINING OVERLINE",
+    "\ufeff": "ZERO WIDTH NO-BREAK SPACE",
+    "\U0001f52c": "MICROSCOPE",
 }
 
 # Safe ASCII replacements used by --fix.
@@ -254,6 +259,9 @@ FIX_REPLACEMENTS: dict[str, str] = {
     "\U0001f4cb": "[list]",
     "\U0001f3af": "[target]",
     "\U0001f4cd": "[pin]",
+    "\u0305": "",
+    "\ufeff": "[BOM]",
+    "\U0001f52c": "",
 }
 
 # Also catch unicode escape sequences written as \uXXXX or \UXXXXXXXX in source.
@@ -775,9 +783,9 @@ _NAME_KEYWORD_MAP: list[tuple[str, str]] = [
     ("BLACK LEFT-POINTING TRIANGLE", "<"),
     # --- misc technical ---
     ("REPLACEMENT CHARACTER", "?"),
-    ("HOUSE", "[house]"),
-    ("WATCH", "[watch]"),
-    ("HOURGLASS", "[hourglass]"),
+    ("HOUSE", ""),
+    ("WATCH", ""),
+    ("HOURGLASS", ""),
     ("ENTER SYMBOL", "[enter]"),
     ("ALTERNATIVE KEY SYMBOL", "[alt]"),
     ("OPTION KEY", "[opt]"),
@@ -866,16 +874,16 @@ _NAME_KEYWORD_MAP: list[tuple[str, str]] = [
     ("BOTTOM LEFT CROP", "+"),
     ("TOP RIGHT CROP", "+"),
     ("TOP LEFT CROP", "+"),
-    ("TELEPHONE RECORDER", "[rec]"),
+    ("TELEPHONE RECORDER", ""),
     ("SQUARE LOZENGE", "[]"),
     # --- emoji (U+1F300+) ---
-    ("ELECTRIC LIGHT BULB", "[idea]"),
-    ("PARTY POPPER", "[party]"),
-    ("ROCKET", "[rocket]"),
-    ("WRENCH", "[wrench]"),
-    ("BAR CHART", "[chart]"),
-    ("TEST TUBE", "[test]"),
-    ("SPARKLES", "[sparkle]"),
+    ("ELECTRIC LIGHT BULB", ""),
+    ("PARTY POPPER", ""),
+    ("ROCKET", ""),
+    ("WRENCH", ""),
+    ("BAR CHART", ""),
+    ("TEST TUBE", ""),
+    ("SPARKLES", ""),
     ("LARGE ORANGE DIAMOND", "[diamond]"),
     ("LARGE BLUE DIAMOND", "[diamond]"),
     ("SMALL ORANGE DIAMOND", "[diamond]"),
@@ -896,21 +904,21 @@ _NAME_KEYWORD_MAP: list[tuple[str, str]] = [
     # --- misc emoji / symbols ---
     ("WHITE MEDIUM STAR", "*"),
     ("BLACK MEDIUM STAR", "*"),
-    ("HIGH VOLTAGE SIGN", "[voltage]"),
-    ("PACKAGE", "[package]"),
+    ("HIGH VOLTAGE SIGN", ""),
+    ("PACKAGE", ""),
     ("PER MILLE SIGN", "%%"),
     ("PER TEN THOUSAND SIGN", "%%"),
     ("INTERROBANG", "?!"),
     ("MULTIPLICATION X", "x"),
     ("HEAVY MULTIPLICATION X", "x"),
-    ("BALLOT X", "[X]"),
+    ("BALLOT X", "X"),
     ("EXCESS", "excess"),
     ("HOMOTHETIC", "homo"),
     ("EQUIANGULAR TO", "ang="),
-    ("MEASURED BY", "meas"),
+    ("MEASURED BY", "measured by"),
     ("BETWEEN", "between"),
-    ("ORIGINAL OF", "orig"),
-    ("IMAGE OF", "img"),
+    ("ORIGINAL OF", "original of"),
+    ("IMAGE OF", "image of"),
     ("Z NOTATION BAG MEMBERSHIP", "bag"),
     ("CONTAINS WITH LONG HORIZONTAL STROKE", "ni"),
     ("CONTAINS WITH VERTICAL BAR AT END", "ni"),
@@ -1017,6 +1025,8 @@ _NAME_KEYWORD_MAP: list[tuple[str, str]] = [
     ("LONG RIGHTWARDS DOUBLE ARROW", "=>"),
     ("LONG LEFTWARDS DOUBLE ARROW", "<="),
     ("LONG LEFT RIGHT DOUBLE ARROW", "<=>"),
+    # --- emoji names (heuristic fallback) ---
+    ("MICROSCOPE", ""),
 ]
 
 # Greek letter name lookups for _generate_replacement.

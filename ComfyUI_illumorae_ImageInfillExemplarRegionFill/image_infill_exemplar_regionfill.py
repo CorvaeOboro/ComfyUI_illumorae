@@ -18,10 +18,10 @@ STATUS::working
 TITLE::Image Infill Exemplar Region Fill
 DESCRIPTIONSHORT::Image Infill using exemplar region filling with isophote-driven priority. extends linear structures into the target region.
 VERSION::20260812
-IMAGE::comfyui_illumorae_image_infill_exemplar_regionfill.png
-GROUP::Image
+IMAGE::comfyui_illumorae_image_infill_exemplar.png
+GROUP::Image Infill
 GROUPORDER::1
-LISTORDER::40
+LISTORDER::20
 """
 #region IMPORTS
 from __future__ import annotations

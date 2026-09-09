@@ -21,10 +21,10 @@ STATUS::working
 TITLE::Image Infill Gaussian Mixture Layer
 DESCRIPTIONSHORT::Single stationary-Gaussian-field texture inpainting by FFT-based conditional simulation (Galerne-Leclaire 2017); best for homogeneous microtextures. (Name retains historical "Mixture" for compat; not a GMM.)
 VERSION::20260814
-IMAGE::comfyui_illumorae_image_infill_gaussian_mixture_layer.png
-GROUP::Image
+IMAGE::comfyui_illumorae_image_infill_gaussian.png
+GROUP::Image Infill
 GROUPORDER::1
-LISTORDER::50
+LISTORDER::30
 """
 #region IMPORTS
 from __future__ import annotations

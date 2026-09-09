@@ -1,15 +1,15 @@
 """
-TITLE::Text Token Count
+TITLE::Display Token Count
 DESCRIPTIONSHORT::Counts tokens for a string using a CLIP tokenizer if available, otherwise estimates.
 VERSION::20260814
 IMAGE::comfyui_illumorae_text_token_count.png
-GROUP::Text
-GROUPORDER::5
-LISTORDER::100
+GROUP::Display
+GROUPORDER::13
+LISTORDER::2
 STATUS::working
 """
 
-class illumoraeTextTokenCountNode:
+class illumoraeDisplayTokenCountNode:
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -61,9 +61,9 @@ class illumoraeTextTokenCountNode:
 
 
 NODE_CLASS_MAPPINGS = {
-    'illumoraeTextTokenCountNode': illumoraeTextTokenCountNode,
+    'illumoraeDisplayTokenCountNode': illumoraeDisplayTokenCountNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    'illumoraeTextTokenCountNode': 'Text Token Count',
+    'illumoraeDisplayTokenCountNode': 'Display Token Count',
 }

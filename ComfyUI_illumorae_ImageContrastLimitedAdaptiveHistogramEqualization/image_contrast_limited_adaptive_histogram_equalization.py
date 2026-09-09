@@ -23,8 +23,8 @@ Pipeline:
 TITLE::Image CLAHE (Contrast Limited Adaptive Histogram Equalization)
 DESCRIPTIONSHORT::Applies CLAHE to enhance local contrast; useful for localized detail/contrast improvement.
 VERSION::20260812
-GROUP::Image
-GROUPORDER::1
+GROUP::Image Adjustment
+GROUPORDER::2
 LISTORDER::10
 STATUS::working
 IMAGE::comfyui_illumorae_image_clahe.png

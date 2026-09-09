@@ -2,7 +2,9 @@
 Checkpoint Loader By String Dirty - a ComfyUI Custom Node
 
 Loads a Diffusion checkpoint by matching a partial string input to available checkpoint files.
-supporting full paths, relative paths, or filenames 
+supporting full paths, relative paths, or filenames.
+When the input is an absolute path that exists on disk, the checkpoint is loaded
+directly, even if its directory is not registered as a ComfyUI checkpoint search path.
 
 Inputs:
     ckpt_name: The name or path of the checkpoint to load (string).
@@ -19,11 +21,11 @@ Outputs:
 TITLE::Checkpoint Loader By String Dirty
 DESCRIPTIONSHORT::Loads a checkpoint by fuzzy matching the text input finds available checkpoint files from partials
 GROUP::Checkpoint
-GROUPORDER::2
+GROUPORDER::11
 LISTORDER::1
 IMAGE::comfyui_illumorae_checkpoint_loader_by_string_dirty.png
 STATUS::working
-VERSION::20260815
+VERSION::20260906
 """
 import json
 import os
@@ -252,8 +254,43 @@ class illumoraeCheckpointLoaderByStringDirtyNode:
     # Entry points invoked by ComfyUI. load_checkpoint dispatches to safe or
     # dirty mode; load_checkpoint_safe validates the safetensors header before
     # delegating to the core CheckpointLoaderSimple.
+    #
+    # When the input is an absolute path that exists on disk but is not in a
+    # registered checkpoint directory, the node loads it directly via
+    # comfy.sd.load_checkpoint_guess_config, bypassing the directory search.
+
+    @staticmethod
+    def _load_from_absolute_path(full_path, DEBUG_MODE=False):
+        """Load a checkpoint from an absolute filesystem path that exists but
+        may not be in a registered checkpoint directory. Uses
+        ``comfy.sd.load_checkpoint_guess_config`` directly since
+        ``CheckpointLoaderSimple`` resolves paths via ``folder_paths`` and
+        cannot handle files outside registered directories.
+        """
+        import comfy.sd
+        _debug_message(f"Loading checkpoint directly from absolute path: {full_path}", DEBUG_MODE)
+        out = comfy.sd.load_checkpoint_guess_config(
+            full_path,
+            output_vae=True,
+            output_clip=True,
+            embedding_directory=folder_paths.get_folder_paths("embeddings"),
+        )
+        model, clip, vae = out[:3]
+        _debug_message(f"Checkpoint loaded from absolute path: model={type(model)}, clip={type(clip)}, vae={type(vae)}", DEBUG_MODE)
+        return model, clip, vae, os.path.basename(full_path)
+
     def load_checkpoint(self, ckpt_name, DEBUG_MODE=False, safe_mode=True, file_extensions=".safetensors,.sft"):
         _debug_message(f"load_checkpoint called with ckpt_name='{ckpt_name}', DEBUG_MODE={DEBUG_MODE}, safe_mode={safe_mode}, file_extensions='{file_extensions}'", DEBUG_MODE)
+
+        # Direct absolute-path fallback: if the input is an absolute path and
+        # the file exists on disk, load it directly, bypassing the registered-
+        # directory search. This handles files in directories that ComfyUI
+        # does not have registered as checkpoint search paths.
+        if ckpt_name and os.path.isabs(ckpt_name) and os.path.isfile(ckpt_name):
+            if safe_mode:
+                self._validate_safetensors_header(ckpt_name)
+                _debug_message(f"[SAFE MODE] File '{ckpt_name}' is a valid safetensors file.", DEBUG_MODE)
+            return self._load_from_absolute_path(ckpt_name, DEBUG_MODE=DEBUG_MODE)
 
         if safe_mode:
             return self.load_checkpoint_safe(ckpt_name, DEBUG_MODE=DEBUG_MODE, file_extensions=file_extensions)
@@ -281,6 +318,13 @@ class illumoraeCheckpointLoaderByStringDirtyNode:
         ``.safetensors`` / ``.sft`` entries are kept.
         """
         _debug_message(f"load_checkpoint_safe called with ckpt_name='{ckpt_name}', DEBUG_MODE={DEBUG_MODE}, file_extensions='{file_extensions}'", DEBUG_MODE)
+
+        # Direct absolute-path fallback: if the input is an absolute path and
+        # the file exists on disk, validate and load it directly.
+        if ckpt_name and os.path.isabs(ckpt_name) and os.path.isfile(ckpt_name):
+            self._validate_safetensors_header(ckpt_name)
+            _debug_message(f"[SAFE MODE] File '{ckpt_name}' is a valid safetensors file.", DEBUG_MODE)
+            return self._load_from_absolute_path(ckpt_name, DEBUG_MODE=DEBUG_MODE)
 
         # Restrict to safetensors-style extensions. Intersect the user-provided
         # extensions with the safe set so the input still has observable effect.

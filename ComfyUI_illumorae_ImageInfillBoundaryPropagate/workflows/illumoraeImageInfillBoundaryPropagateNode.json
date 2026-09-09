@@ -276,7 +276,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Image Infill Boundary Propagate\n[illumoraeImageInfillBoundaryPropagateNode]\nGroup: Image  Status: working"
+        "Image Infill Boundary Propagate\n[illumoraeImageInfillBoundaryPropagateNode]\nGroup: Image Infill  Status: working"
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -301,7 +301,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Fills the target region by propagating colors inward from the target boundary using a random-weighted onion-peel rule (simple content fill for inpainting prep).\n\nInputs (required): image:IMAGE, mask:MASK, mask_mode:ENUM, propagate_iterations:INT, use_angular_drift:BOOLEAN, drift_radius:INT, use_center_blend:BOOLEAN, center_blend_strength:FLOAT, blur_center:BOOLEAN, blur_strength:FLOAT, blur_falloff_distance:INT, feather_amount:INT\nOutputs: infilled_image:IMAGE, distance_map_viz:IMAGE, blur_weight_viz:IMAGE\n\nImage-group node fed by an EmptyImage provider. Output is previewed with PreviewImage (or MaskToImage -> PreviewImage for MASK outputs)."
+        "Fills the target region by propagating colors inward from the target boundary using a random-weighted onion-peel rule (simple content fill for inpainting prep).\n\nInputs (required): image:IMAGE, mask:MASK, mask_mode:ENUM, propagate_iterations:INT, use_angular_drift:BOOLEAN, drift_radius:INT, use_center_blend:BOOLEAN, center_blend_strength:FLOAT, blur_center:BOOLEAN, blur_strength:FLOAT, blur_falloff_distance:INT, feather_amount:INT\nOutputs: infilled_image:IMAGE, distance_map_viz:IMAGE, blur_weight_viz:IMAGE\n\nNode shown with generic providers for its connection inputs and PreviewAny sinks for its outputs."
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -352,7 +352,7 @@
   "groups": [
     {
       "id": 1,
-      "title": "Image: Image Infill Boundary Propagate",
+      "title": "Image Infill: Image Infill Boundary Propagate",
       "bounding": [
         80.0,
         20.0,

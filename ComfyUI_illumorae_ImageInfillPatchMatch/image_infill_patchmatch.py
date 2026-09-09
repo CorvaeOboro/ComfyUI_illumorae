@@ -9,9 +9,9 @@ TITLE::Image Infill PatchMatch
 DESCRIPTIONSHORT::Approximate PatchMatch-style content fill to infill masked regions; useful as inpainting guidance.
 VERSION::20260812
 IMAGE::comfyui_illumorae_image_infill_patchmatch.png
-GROUP::Image
+GROUP::Image Infill
 GROUPORDER::1
-LISTORDER::60
+LISTORDER::40
 """
 #region IMPORTS
 from __future__ import annotations

@@ -8,7 +8,10 @@ TITLE::Image Resize Flux Kontext Scale Options
 DESCRIPTIONSHORT::Resizes images to preferred Flux Kontext resolutions with crop or stretch options.
 VERSION::20260127
 IMAGE::comfyui_illumorae_image_resize_flux_kontext_options.png
-GROUP::Image
+GROUP::Image Resize
+GROUPORDER::3
+LISTORDER::20
+STATUS::working
 
 Inputs:
     image: The input image to resize.
@@ -18,8 +21,6 @@ Inputs:
 
 Outputs:
     image: The resized image.
-
-GROUP::Image
 """
 import comfy.utils
 

@@ -9,7 +9,9 @@
       "pony_folder_name": "Pony",
       "sd15_folder_name": "SD15",
       "safe_mode": true,
-      "file_extensions": ".safetensors,.sft"
+      "file_extensions": ".safetensors,.sft",
+      "use_checkpoint_subfolder": false,
+      "checkpoint_subfolder_name": "Checkpoint"
     }
   },
   "2": {

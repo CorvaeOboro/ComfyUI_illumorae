@@ -304,7 +304,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Image Resize WAN Adaptive Framing\n[illumoraeImageResizeWanAdaptiveFramingNode]\nGroup: Image  Status: working"
+        "Image Resize WAN Adaptive Framing\n[illumoraeImageResizeWanAdaptiveFramingNode]\nGroup: Image Resize  Status: working"
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -329,7 +329,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Auto-selects WAN-friendly vertical/horizontal resolution and applies optional human-centric framing before resize.\n\nInputs (required): image:IMAGE, orientation_mode:ENUM, framing_mode:ENUM, resize_mode:ENUM, resolution_tier:ENUM, upscale_method:ENUM, anchor_strength:FLOAT, top_bias:FLOAT, face_min_percent:FLOAT, detect_scale_factor:FLOAT, detect_min_neighbors:INT\nOutputs: resized_image:IMAGE, debug_image:IMAGE, width:INT, height:INT, selected_preset:STRING\n\nImage-group node fed by an EmptyImage provider. Output is previewed with PreviewImage (or MaskToImage -> PreviewImage for MASK outputs)."
+        "Auto-selects WAN-friendly vertical/horizontal resolution and applies optional human-centric framing before resize.\n\nInputs (required): image:IMAGE, orientation_mode:ENUM, framing_mode:ENUM, resize_mode:ENUM, resolution_tier:ENUM, upscale_method:ENUM, anchor_strength:FLOAT, top_bias:FLOAT, face_min_percent:FLOAT, detect_scale_factor:FLOAT, detect_min_neighbors:INT\nOutputs: resized_image:IMAGE, debug_image:IMAGE, width:INT, height:INT, selected_preset:STRING\n\nNode shown with generic providers for its connection inputs and PreviewAny sinks for its outputs."
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -388,7 +388,7 @@
   "groups": [
     {
       "id": 1,
-      "title": "Image: Image Resize WAN Adaptive Framing",
+      "title": "Image Resize: Image Resize WAN Adaptive Framing",
       "bounding": [
         80.0,
         20.0,

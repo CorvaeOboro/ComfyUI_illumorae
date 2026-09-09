@@ -6,7 +6,7 @@
   "nodes": [
     {
       "id": 1,
-      "type": "illumoraeTextTokenCountNode",
+      "type": "illumoraeImageFaceAspectCropNode",
       "pos": [
         620,
         360
@@ -20,50 +20,60 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "text",
-          "type": "STRING",
-          "link": 1,
-          "widget": {
-            "name": "text"
-          }
-        },
-        {
-          "name": "clip",
-          "type": "CLIP",
-          "link": 2
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1
         }
       ],
       "outputs": [
         {
-          "name": "token_count",
-          "type": "STRING",
+          "name": "cropped_image",
+          "type": "IMAGE",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "debug_image",
+          "type": "IMAGE",
           "links": [
             3
           ],
-          "slot_index": 0
+          "slot_index": 1
         }
       ],
       "properties": {
         "cnr_id": "comfyui_illumorae",
-        "Node name for S&R": "illumoraeTextTokenCountNode",
+        "Node name for S&R": "illumoraeImageFaceAspectCropNode",
         "aux_id": "CorvaeOboro/ComfyUI_illumorae",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        700
+        1024,
+        576,
+        0.9,
+        0.1,
+        0.2,
+        0.15,
+        1.0,
+        1.1,
+        5,
+        3.0,
+        false
       ],
       "color": "#332922",
       "bgcolor": "#593930"
     },
     {
       "id": 2,
-      "type": "PrimitiveStringMultiline",
+      "type": "EmptyImage",
       "pos": [
         120,
         360
       ],
       "size": [
-        300,
+        315,
         130
       ],
       "flags": {},
@@ -72,8 +82,8 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "STRING",
-          "type": "STRING",
+          "name": "IMAGE",
+          "type": "IMAGE",
           "links": [
             1
           ],
@@ -82,92 +92,74 @@
       ],
       "properties": {
         "cnr_id": "comfy-core",
-        "Node name for S&R": "PrimitiveStringMultiline",
+        "Node name for S&R": "EmptyImage",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "( berry : 1.2) , carrot , ( radish :1.3)\nplants , <lora:berry:0.6>\n<lora:carrot:0.3>",
-        [
-          false,
-          true
-        ]
+        512,
+        512,
+        0,
+        1
       ],
       "color": "#222",
       "bgcolor": "#000"
     },
     {
       "id": 3,
-      "type": "CheckpointLoaderSimple",
-      "pos": [
-        120,
-        800
-      ],
-      "size": [
-        320,
-        100
-      ],
-      "flags": {},
-      "order": 2,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": [],
-          "slot_index": 0
-        },
-        {
-          "name": "CLIP",
-          "type": "CLIP",
-          "links": [
-            2
-          ],
-          "slot_index": 1
-        },
-        {
-          "name": "VAE",
-          "type": "VAE",
-          "links": [],
-          "slot_index": 2
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "Node name for S&R": "CheckpointLoaderSimple",
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "sd_xl_base_1.0.safetensors"
-      ],
-      "color": "#222",
-      "bgcolor": "#000"
-    },
-    {
-      "id": 4,
-      "type": "PreviewAny",
+      "type": "PreviewImage",
       "pos": [
         1080,
         360
       ],
       "size": [
-        240,
-        120
+        210,
+        250
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewImage",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 4,
+      "type": "PreviewImage",
+      "pos": [
+        1080,
+        580
+      ],
+      "size": [
+        210,
+        250
       ],
       "flags": {},
       "order": 3,
       "mode": 0,
       "inputs": [
         {
-          "name": "source",
-          "type": "*",
+          "name": "images",
+          "type": "IMAGE",
           "link": 3
         }
       ],
       "outputs": [],
       "properties": {
         "cnr_id": "comfy-core",
-        "Node name for S&R": "PreviewAny",
+        "Node name for S&R": "PreviewImage",
         "widget_ue_connectable": {}
       },
       "widgets_values": [],
@@ -194,7 +186,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Text Token Count\n[illumoraeTextTokenCountNode]\nGroup: Text  Status: working"
+        "Image Face Aspect Crop\n[illumoraeImageFaceAspectCropNode]\nGroup: Image Resize  Status: working"
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -219,7 +211,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Counts tokens for a string using a CLIP tokenizer if available, otherwise estimates.\n\nInputs (required): text:STRING, threshold:INT\nOutputs: token_count:STRING\n\nText-group node shown in a prompt pipeline. The primary text input is fed from a PrimitiveStringMultiline so the node can be chained before CLIPTextEncode / KSampler."
+        "Crops an image to a target aspect ratio with face-detection-biased anchoring and debug overlay output.\n\nInputs (required): image:IMAGE, width:INT, height:INT, face_anchor_strength:FLOAT, center_bias_weight:FLOAT, subject_top_bias:FLOAT, secondary_face_weight:FLOAT, max_anchor_shift_ratio:FLOAT, detect_scale_factor:FLOAT, detect_min_neighbors:INT, min_face_percent:FLOAT\nOutputs: cropped_image:IMAGE, debug_image:IMAGE\n\nNode shown with generic providers for its connection inputs and PreviewAny sinks for its outputs."
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -232,34 +224,34 @@
       0,
       1,
       0,
-      "STRING"
+      "IMAGE"
     ],
     [
       2,
+      1,
+      0,
       3,
-      1,
-      1,
-      1,
-      "CLIP"
+      0,
+      "IMAGE"
     ],
     [
       3,
       1,
-      0,
+      1,
       4,
       0,
-      "*"
+      "IMAGE"
     ]
   ],
   "groups": [
     {
       "id": 1,
-      "title": "Text: Text Token Count",
+      "title": "Image Resize: Image Face Aspect Crop",
       "bounding": [
         80.0,
         20.0,
-        1280.0,
-        920.0
+        1250.0,
+        910.0
       ],
       "color": "#8A8",
       "font_size": 24,

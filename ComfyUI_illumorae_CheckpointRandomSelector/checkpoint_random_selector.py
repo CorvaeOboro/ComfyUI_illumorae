@@ -19,6 +19,12 @@ Inputs:
         file_extensions is ignored. When False, file_extensions is used instead.
     file_extensions (optional): Comma-separated extension list used only when
         safe_mode is False (default: ".safetensors,.sft"). A leading dot is optional.
+    use_checkpoint_subfolder (optional): When True, an extra subfolder level
+        (named by checkpoint_subfolder_name) is appended after the category
+        subfolder, so the resolved path becomes
+        base_folder/<category_subfolder>/<checkpoint_subfolder>.
+    checkpoint_subfolder_name (optional): Name of the trailing subfolder
+        used only when use_checkpoint_subfolder is True (default: "Checkpoint").
 
 Outputs:
     folder_path: The local folder path used
@@ -27,9 +33,9 @@ Outputs:
 
 TITLE::Checkpoint Random Selector
 DESCRIPTIONSHORT::Randomly selects a checkpoint from a category, changing each interval.
-VERSION::20260815
+VERSION::20260906
 GROUP::Checkpoint
-GROUPORDER::2
+GROUPORDER::11
 LISTORDER::2
 STATUS::working
 IMAGE::comfyui_illumorae_checkpoint_random_selector.png
@@ -61,6 +67,8 @@ class illumoraeCheckpointRandomSelectorNode:
             "optional": {
                 "safe_mode": ("BOOLEAN", {"default": True}),
                 "file_extensions": ("STRING", {"default": ".safetensors,.sft"}),
+                "use_checkpoint_subfolder": ("BOOLEAN", {"default": False}),
+                "checkpoint_subfolder_name": ("STRING", {"default": "Checkpoint"}),
             }
         }
 
@@ -106,7 +114,7 @@ class illumoraeCheckpointRandomSelectorNode:
     # Main execution: resolve the category folder, collect and sort candidate
     # checkpoint files, derive a deterministic seed from the current interval
     # bucket, and pick one file via an isolated RNG instance.
-    def select_checkpoint(self, base_folder, category, interval_minutes, sdxl_folder_name, pony_folder_name, sd15_folder_name, safe_mode=True, file_extensions=".safetensors,.sft"):
+    def select_checkpoint(self, base_folder, category, interval_minutes, sdxl_folder_name, pony_folder_name, sd15_folder_name, safe_mode=True, file_extensions=".safetensors,.sft", use_checkpoint_subfolder=False, checkpoint_subfolder_name="Checkpoint"):
         folder_name_map = {
             "SDXL": sdxl_folder_name,
             "PONY": pony_folder_name,
@@ -115,7 +123,13 @@ class illumoraeCheckpointRandomSelectorNode:
         if category not in folder_name_map:
             raise ValueError(f"Unknown category: {category}. Expected one of {self._CATEGORIES}.")
         folder_name = folder_name_map[category]
-        folder = os.path.abspath(os.path.join(base_folder, folder_name))
+        # When use_checkpoint_subfolder is enabled, append the named
+        # subfolder after the category subfolder, so the resolved path
+        # becomes base_folder/<category_subfolder>/<checkpoint_subfolder>.
+        if use_checkpoint_subfolder:
+            folder = os.path.abspath(os.path.join(base_folder, folder_name, checkpoint_subfolder_name))
+        else:
+            folder = os.path.abspath(os.path.join(base_folder, folder_name))
         if not os.path.isdir(folder):
             raise FileNotFoundError(f"Checkpoint folder does not exist: {folder}")
 
