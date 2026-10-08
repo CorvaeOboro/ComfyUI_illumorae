@@ -67,6 +67,11 @@ INDEX_FILE = os.path.join(DOCS_DIR, "index.html")
 
 NODE_FOLDER_PREFIX = "ComfyUI_illumorae_"
 
+# External links reused in the sidebar menu and the overview header.
+GITHUB_URL = "https://github.com/CorvaeOboro/ComfyUI_illumorae"
+GITHUB_DOWNLOAD_URL = "https://github.com/CorvaeOboro/ComfyUI_illumorae/archive/refs/heads/main.zip"
+COMFYUI_MANAGER_URL = "https://github.com/Comfy-Org/ComfyUI-Manager"
+
 # Obsidian-style DataView field keys we care about (uppercased).
 FIELD_TITLE = "TITLE"
 FIELD_DESC_SHORT = "DESCRIPTIONSHORT"
@@ -121,6 +126,8 @@ a:active { color:#4a7fb5; }
 .menu-section { margin-top:0.6rem; }
 .menu-section h3 { color:#ffffff; font-size:0.85rem; text-transform:uppercase; margin:0 0 0.2rem 0; padding-bottom:0.15rem; border-bottom:1px solid #2a2a2a; }
 .menu-section a { font-size:0.85rem; padding:2px 0; }
+.menu-links { margin:0.6rem 0 0.4rem 0; padding-top:0.4rem; border-top:1px solid #2a2a2a; }
+.menu-links a { font-size:0.8rem; font-weight:600; padding:2px 0; }
 .external { margin-top:1rem; padding-top:0.6rem; border-top:1px solid #2a2a2a; }"""
 #endregion
 
@@ -769,6 +776,10 @@ def render_menu(nodes: List[NodeDoc]) -> str:
 <br>
 <h2 style="color:#ffffff; margin:0; font-size:1.1rem;">ComfyUI ILLUMORAE</h2>
 <a href="index.html" target="_parent">Overview</a>
+<div class="menu-links">
+<a href="{GITHUB_DOWNLOAD_URL}" target="_blank">Download</a>
+<a href="{GITHUB_URL}" target="_blank">GitHub</a>
+</div>
 {chr(10).join(sections)}
 </center>
 </body>
@@ -879,6 +890,11 @@ def render_index(nodes: List[NodeDoc]) -> str:
 .header-links { margin-top:0.8rem; font-size:1rem; }
 .header-links a { color:var(--link); text-decoration:none; font-weight:600; }
 .header-links a:hover { text-decoration:underline; }
+.intro { margin-bottom:1.5rem; }
+.intro h2 { margin-top:0; }
+.intro h3 { margin-top:1.2rem; }
+.intro p { margin:0.5rem 0; }
+.intro ul { margin:0.4rem 0; }
 """
 
     return f"""<!DOCTYPE html>
@@ -899,12 +915,27 @@ def render_index(nodes: List[NodeDoc]) -> str:
 <header>
     <img class="banner-img" src="comfyui_illumorae_title.png" alt="ComfyUI ILLUMORAE">
     <div class="header-links">
-        <a href="https://github.com/CorvaeOboro/ComfyUI_illumorae/archive/refs/heads/main.zip">DOWNLOAD</a>
+        <a href="{GITHUB_DOWNLOAD_URL}">DOWNLOAD</a>
         &nbsp;|&nbsp;
-        <a href="https://github.com/CorvaeOboro/ComfyUI_illumorae">GITHUB</a>
+        <a href="{GITHUB_URL}">GITHUB</a>
     </div>
 </header>
 <div class="container">
+
+<div class="intro">
+<h2>ComfyUI illumorae</h2>
+<p>comfyUI custom nodes focused on randomization and image variant exploration</p>
+<ul>
+<li>loading files by partial string match , randomizing lora string strength , text reordering</li>
+<li>image infill and contrast adjustment</li>
+<li>each node is self-contained and could be installed separately if prefer specific nodes</li>
+</ul>
+<h3>Install</h3>
+<ul>
+<li>install thru the <a href="{COMFYUI_MANAGER_URL}">ComfyUI Manager</a> search for "illumorae" or manually <a href="{GITHUB_DOWNLOAD_URL}">download</a> as a zip and extract as folder into the ComfyUI <code>custom_nodes</code> directory</li>
+<li>OPTIONAL may install nodes individually by copying a nodes subfolder into the ComfyUI <code>custom_nodes</code> directory , each has been setup to function independently</li>
+</ul>
+</div>
 
 <table>
 {chr(10).join(group_rows)}

@@ -62,6 +62,15 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
 .row-img { display:block; margin:0 auto; max-width:1000px; width:100%; height:auto; border:1px solid var(--border); border-radius:4px; }
 .row-img-missing { max-width:1000px; width:100%; margin:0 auto; border:1px dashed var(--border); background:var(--surface); color:var(--muted); padding:2rem; text-align:center; border-radius:4px; }
 .row-desc { color:var(--muted); font-size:0.85rem; margin-top:0.5rem; text-align:center; }
+.banner-img { max-width:100%; height:auto; max-height:200px; display:block; margin:0 auto; }
+.header-links { margin-top:0.8rem; font-size:1rem; }
+.header-links a { color:var(--link); text-decoration:none; font-weight:600; }
+.header-links a:hover { text-decoration:underline; }
+.intro { margin-bottom:1.5rem; }
+.intro h2 { margin-top:0; }
+.intro h3 { margin-top:1.2rem; }
+.intro p { margin:0.5rem 0; }
+.intro ul { margin:0.4rem 0; }
 
 </style>
 </head>
@@ -70,21 +79,42 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
     <div class="sidebar"><iframe src="illumorae_menu.html"></iframe></div>
     <div class="content">
 <header>
-    <h1>ComfyUI ILLUMORAE</h1>
+    <img class="banner-img" src="comfyui_illumorae_title.png" alt="ComfyUI ILLUMORAE">
+    <div class="header-links">
+        <a href="https://github.com/CorvaeOboro/ComfyUI_illumorae/archive/refs/heads/main.zip">DOWNLOAD</a>
+        &nbsp;|&nbsp;
+        <a href="https://github.com/CorvaeOboro/ComfyUI_illumorae">GITHUB</a>
+    </div>
 </header>
 <div class="container">
+
+<div class="intro">
+<h2>ComfyUI illumorae</h2>
+<p>comfyUI custom nodes focused on randomization and image variant exploration</p>
+<ul>
+<li>loading files by partial string match , randomizing lora string strength , text reordering</li>
+<li>image infill and contrast adjustment</li>
+<li>each node is self-contained and could be installed separately if prefer specific nodes</li>
+</ul>
+<h3>Install</h3>
+<ul>
+<li>install thru the <a href="https://github.com/Comfy-Org/ComfyUI-Manager">ComfyUI Manager</a> search for "illumorae" or manually <a href="https://github.com/CorvaeOboro/ComfyUI_illumorae/archive/refs/heads/main.zip">download</a> as a zip and extract as folder into the ComfyUI <code>custom_nodes</code> directory</li>
+<li>OPTIONAL may install nodes individually by copying a nodes subfolder into the ComfyUI <code>custom_nodes</code> directory , each has been setup to function independently</li>
+</ul>
+</div>
 
 <table>
 <tr><td><strong>Image Infill</strong></td><td><a href="nodes/ImageInfillBoundaryPropagate.html">Image Infill Boundary Propagate</a> | <a href="nodes/ImageInfillExemplarRegionFill.html">Image Infill Exemplar Region Fill</a> | <a href="nodes/ImageInfillGaussianMixtureLayer.html">Image Infill Gaussian Mixture Layer</a> | <a href="nodes/ImageInfillPatchMatch.html">Image Infill PatchMatch</a></td></tr>
 <tr><td><strong>Image Adjustment</strong></td><td><a href="nodes/ImageContrastLimitedAdaptiveHistogramEqualization.html">Image CLAHE (Contrast Limited Adaptive Histogram Equalization)</a> | <a href="nodes/ImageMultiScaleRetinexColorRestoration.html">Image Retinex Enhancement (MSRCR)</a></td></tr>
-<tr><td><strong>Image Resize</strong></td><td><a href="nodes/ImageFaceAspectCrop.html">Image Face Aspect Crop</a> | <a href="nodes/ImageResizeFluxKontextOptions.html">Image Resize Flux Kontext Scale Options</a> | <a href="nodes/ImageResizeWanAdaptiveFraming.html">Image Resize WAN Adaptive Framing</a> | <a href="nodes/VideoResizeMatte.html">Image Resize w Matte</a></td></tr>
-<tr><td><strong>Image</strong></td><td><a href="nodes/GenProceduralPatterns.html">Procedural Patterns</a></td></tr>
+<tr><td><strong>Image Resize</strong></td><td><a href="nodes/ImageCropAspectFace.html">Image Face Aspect Crop</a> | <a href="nodes/ImageResizeFluxKontextOptions.html">Image Resize Flux Kontext Scale Options</a> | <a href="nodes/ImageResizeWanAdaptiveFraming.html">Image Resize WAN Adaptive Framing</a> | <a href="nodes/VideoResizeMatte.html">Image Resize w Matte</a></td></tr>
+<tr><td><strong>Image</strong></td><td><a href="nodes/GenProceduralPatterns.html">Procedural Patterns</a> | <a href="nodes/ControlnetImagePreprocessCached.html">Controlnet Image Preprocess Cached</a></td></tr>
 <tr><td><strong>Lora</strong></td><td><a href="nodes/LoraTextStrengthMultiplier.html">LoRA Strength Multiplier on Text</a> | <a href="nodes/LoraTextStrengthVariants.html">LoRA Strength Variants</a> | <a href="nodes/LoraTextVisualizer.html">LoRA Text Strength Visualizer</a> | <a href="nodes/Wan22I2VLoraLoaderByText.html">Wan2.2 I2V Lora Loader By Text</a> | <a href="nodes/Wan22LoraLoaderByText.html">Wan2.2 Lora Loader By Text</a></td></tr>
-<tr><td><strong>Text</strong></td><td><a href="nodes/TextEnclosureVisualizer.html">Enclosure Visualizer</a> | <a href="nodes/TextMultilineFindColorized.html">Text Multiline FindColorized</a> | <a href="nodes/TextReorder.html">Text Reorder</a> | <a href="nodes/TextShowMultilineColor.html">Text Show Multiline Color</a> | <a href="nodes/TextStrengthMultiplier.html">Text Strength Multiplier</a> | <a href="nodes/TextTokenCount.html">Text Token Count</a> | <a href="nodes/TextToStringSafeForFilename.html">Text To Filename Safe Text</a> | <a href="nodes/TextTruncateProtect.html">Text Truncate Protect</a></td></tr>
+<tr><td><strong>Text</strong></td><td><a href="nodes/TextRandomLine.html">Text Random Line</a> | <a href="nodes/TextEnclosureVisualizer.html">Enclosure Visualizer</a> | <a href="nodes/TextMultilineFindColorized.html">Text Multiline FindColorized</a> | <a href="nodes/TextReorder.html">Text Reorder</a> | <a href="nodes/TextShowMultilineColor.html">Text Show Multiline Color</a> | <a href="nodes/TextStrengthMultiplier.html">Text Strength Multiplier</a> | <a href="nodes/TextToStringSafeForFilename.html">Text To Filename Safe Text</a> | <a href="nodes/TextTruncateProtect.html">Text Truncate Protect</a></td></tr>
 <tr><td><strong>Select</strong></td><td><a href="nodes/SelectITEMbyAmountGenerated.html">Select ITEM By Amount Generated</a></td></tr>
-<tr><td><strong>Load</strong></td><td><a href="nodes/LoadImageFilePathOut.html">Load Image w FilePath Out</a> | <a href="nodes/LoadImageRandomVariants.html">Load Image Random Variant</a> | <a href="nodes/LoadRandomFileFromPathByPrefix.html">Load Random File From Path By Prefix</a> | <a href="nodes/LoadTextFileGraceful.html">Load Text File Graceful</a></td></tr>
+<tr><td><strong>Load</strong></td><td><a href="nodes/LoadImageFilePathOut.html">Load Image w FilePath Out</a> | <a href="nodes/LoadImageRandomVariants.html">Load Image Random Variant</a> | <a href="nodes/LoadRandomFileFromPathByPrefix.html">Load Random File From Path By Prefix</a> | <a href="nodes/LoadTextFileGraceful.html">Load Text File Graceful</a> | <a href="nodes/LoadPromptFilesByCheckpoint.html">Load Prompt Files By Checkpoint</a></td></tr>
 <tr><td><strong>Checkpoint</strong></td><td><a href="nodes/CheckpointLoaderByStringDirty.html">Checkpoint Loader By String Dirty</a> | <a href="nodes/CheckpointRandomSelector.html">Checkpoint Random Selector</a></td></tr>
 <tr><td><strong>Save</strong></td><td><a href="nodes/SaveAnimatedWebPExtendedFolderPath.html">Save Animated WEBP FolderPath</a> | <a href="nodes/SaveImageExtendedFolderPath.html">Save Image Extended FolderPath</a></td></tr>
+<tr><td><strong>Display</strong></td><td><a href="nodes/DisplayLabelText.html">Display Label Text</a> | <a href="nodes/DisplayTokenCount.html">Display Token Count</a></td></tr>
 </table>
 
 <div class="card-group">
@@ -106,7 +136,7 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
 <div class="card-group">
 <h3>Image Resize</h3>
 <div class="card-grid">
-<a class="node-card" href="nodes/ImageFaceAspectCrop.html"><img class="card-img" src="comfyui_illumorae_image_face_aspect_crop.png" alt="Image Face Aspect Crop"><div class="card-body"><div class="card-title">Image Face Aspect Crop</div><div class="card-desc">Crops an image to a target aspect ratio with face-detection-biased anchoring and debug overlay output.</div></div></a>
+<a class="node-card" href="nodes/ImageCropAspectFace.html"><img class="card-img" src="comfyui_illumorae_image_face_aspect_crop.png" alt="Image Face Aspect Crop"><div class="card-body"><div class="card-title">Image Face Aspect Crop</div><div class="card-desc">Crops an image to a target aspect ratio with face-detection-biased anchoring and debug overlay output.</div></div></a>
 <a class="node-card" href="nodes/ImageResizeFluxKontextOptions.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Image Resize Flux Kontext Scale Options</div><div class="card-desc">Resizes images to preferred Flux Kontext resolutions with crop or stretch options.</div></div></a>
 <a class="node-card" href="nodes/ImageResizeWanAdaptiveFraming.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Image Resize WAN Adaptive Framing</div><div class="card-desc">Auto-selects WAN-friendly vertical/horizontal resolution and applies optional human-centric framing before resize.</div></div></a>
 <a class="node-card" href="nodes/VideoResizeMatte.html"><img class="card-img" src="comfyui_illumorae_image_resize_video_matte.png" alt="Image Resize w Matte"><div class="card-body"><div class="card-title">Image Resize w Matte</div><div class="card-desc">Resizes images with optional aspect preservation, divisibility constraints, and optional matte canvas compositing.</div></div></a>
@@ -116,6 +146,7 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
 <h3>Image</h3>
 <div class="card-grid">
 <a class="node-card" href="nodes/GenProceduralPatterns.html"><img class="card-img" src="comfyui_illumorae_procedural_patterns.png" alt="Procedural Patterns"><div class="card-body"><div class="card-title">Procedural Patterns</div><div class="card-desc">Generates procedural symmetrical patterns (torus rings, radial beams, spiral rings, combined) for visual influence in image generation. Seed only affects output when pattern_type=&#x27;random&#x27; or chaos_mode=True.</div></div></a>
+<a class="node-card" href="nodes/ControlnetImagePreprocessCached.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Controlnet Image Preprocess Cached</div><div class="card-desc">Caches aux controlnet preprocessor outputs (Canny, LineArt, LeReS depth) to disk and only recomputes when the source image is newer than the cache.</div></div></a>
 </div>
 </div>
 <div class="card-group">
@@ -131,12 +162,12 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
 <div class="card-group">
 <h3>Text</h3>
 <div class="card-grid">
+<a class="node-card" href="nodes/TextRandomLine.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Text Random Line</div><div class="card-desc">Picks one line of the incoming text at random, chosen by a seeded RNG for reproducible output.</div></div></a>
 <a class="node-card" href="nodes/TextEnclosureVisualizer.html"><img class="card-img" src="comfyui_illumorae_text_enclosure_visualize.png" alt="Enclosure Visualizer"><div class="card-body"><div class="card-title">Enclosure Visualizer</div><div class="card-desc">Visualizes prompt text enclosure nesting and mismatched parenthesis, outputting an image and analysis strings.</div></div></a>
 <a class="node-card" href="nodes/TextMultilineFindColorized.html"><img class="card-img" src="comfyui_illumorae_text_multiline_findcolorized.png" alt="Text Multiline FindColorized"><div class="card-body"><div class="card-title">Text Multiline FindColorized</div><div class="card-desc">Editable multiline text input with search/find highlighting and syntax-colored LoRA bracket tags.</div></div></a>
 <a class="node-card" href="nodes/TextReorder.html"><img class="card-img" src="comfyui_illumorae_text_reorder.png" alt="Text Reorder"><div class="card-body"><div class="card-title">Text Reorder</div><div class="card-desc">Reorders prompt text sections (comma/sentence/paragraph) while preserving parenthesis-enclosed blocks; supports seeded shuffle and distance constraints.</div></div></a>
 <a class="node-card" href="nodes/TextShowMultilineColor.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Text Show Multiline Color</div><div class="card-desc">Displays multiline text with syntax highlighting in a persistent, selectable widget. Gracefully handles missing or broken inputs.</div></div></a>
 <a class="node-card" href="nodes/TextStrengthMultiplier.html"><img class="card-img" src="comfyui_illumorae_text_strength_multiplier.png" alt="Text Strength Multiplier"><div class="card-body"><div class="card-title">Text Strength Multiplier</div><div class="card-desc">Multiplies prompt section weights while preserving &lt;lora:...&gt; tags; supports individual caps/minimums and total cap scaling.</div></div></a>
-<a class="node-card" href="nodes/TextTokenCount.html"><img class="card-img" src="comfyui_illumorae_text_token_count.png" alt="Text Token Count"><div class="card-body"><div class="card-title">Text Token Count</div><div class="card-desc">Counts tokens for a string using a CLIP tokenizer if available, otherwise estimates.</div></div></a>
 <a class="node-card" href="nodes/TextToStringSafeForFilename.html"><img class="card-img" src="comfyui_illumorae_text_to_string_filename_safe.png" alt="Text To Filename Safe Text"><div class="card-body"><div class="card-title">Text To Filename Safe Text</div><div class="card-desc">Converts text into a filename-safe string (Windows-safe) with normalization, character filtering, and length truncation.</div></div></a>
 <a class="node-card" href="nodes/TextTruncateProtect.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Text Truncate Protect</div><div class="card-desc">Truncates text to a character limit with protection options for words, paragraphs, and enclosures.</div></div></a>
 </div>
@@ -150,10 +181,11 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
 <div class="card-group">
 <h3>Load</h3>
 <div class="card-grid">
-<a class="node-card" href="nodes/LoadImageFilePathOut.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Load Image w FilePath Out</div><div class="card-desc">Loads an image from a file path string and outputs image, mask, file name, and folder path.</div></div></a>
+<a class="node-card" href="nodes/LoadImageFilePathOut.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Load Image w FilePath Out</div><div class="card-desc">Loads an image from a file path string and outputs image, mask, file name, folder path, dimensions, and date modified.</div></div></a>
 <a class="node-card" href="nodes/LoadImageRandomVariants.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Load Image Random Variant</div><div class="card-desc">Loads an image from a folder with optional variant selection (subfolder + suffix pattern), with seed and override controls.</div></div></a>
 <a class="node-card" href="nodes/LoadRandomFileFromPathByPrefix.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Load Random File From Path By Prefix</div><div class="card-desc">Pick a random file from a folder filtered by filename prefix and extension; return its text contents and path.</div></div></a>
 <a class="node-card" href="nodes/LoadTextFileGraceful.html"><img class="card-img" src="comfyui_illumorae_load_text_graceful.png" alt="Load Text File Graceful"><div class="card-body"><div class="card-title">Load Text File Graceful</div><div class="card-desc">Loads a text file from a path and returns its contents without crashing if the file is missing.</div></div></a>
+<a class="node-card" href="nodes/LoadPromptFilesByCheckpoint.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Load Prompt Files By Checkpoint</div><div class="card-desc">Loads per-checkpoint prompt files (sd15/sdxl/flux/krea2/wan22, positive+negative where applicable) from a folder and/or a prompt.json, returning each as a string; missing files yield empty strings (no crash).</div></div></a>
 </div>
 </div>
 <div class="card-group">
@@ -168,6 +200,13 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
 <div class="card-grid">
 <a class="node-card" href="nodes/SaveAnimatedWebPExtendedFolderPath.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Save Animated WEBP FolderPath</div><div class="card-desc">Saves an animated WebP to an external folder path</div></div></a>
 <a class="node-card" href="nodes/SaveImageExtendedFolderPath.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Save Image Extended FolderPath</div><div class="card-desc">Saves images to a specified folder path with customizable naming, counters, and optional metadata.</div></div></a>
+</div>
+</div>
+<div class="card-group">
+<h3>Display</h3>
+<div class="card-grid">
+<a class="node-card" href="nodes/DisplayLabelText.html"><div class="card-img-missing">no screenshot</div><div class="card-body"><div class="card-title">Display Label Text</div><div class="card-desc">Frontend-only floating text label for the graph. No backend execution; styled via the properties panel.</div></div></a>
+<a class="node-card" href="nodes/DisplayTokenCount.html"><img class="card-img" src="comfyui_illumorae_text_token_count.png" alt="Display Token Count"><div class="card-body"><div class="card-title">Display Token Count</div><div class="card-desc">Counts tokens for a string using a CLIP tokenizer if available, otherwise estimates.</div></div></a>
 </div>
 </div>
 
@@ -190,7 +229,7 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
 <div class="row-group">
 <h3>Image Resize</h3>
 <table class="row-table">
-<tr><td class="row-title"><a href="nodes/ImageFaceAspectCrop.html">Image Face Aspect Crop</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_image_face_aspect_crop.png" alt="Image Face Aspect Crop"><div class="row-desc">Crops an image to a target aspect ratio with face-detection-biased anchoring and debug overlay output.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/ImageCropAspectFace.html">Image Face Aspect Crop</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_image_face_aspect_crop.png" alt="Image Face Aspect Crop"><div class="row-desc">Crops an image to a target aspect ratio with face-detection-biased anchoring and debug overlay output.</div></td></tr>
 <tr><td class="row-title"><a href="nodes/ImageResizeFluxKontextOptions.html">Image Resize Flux Kontext Scale Options</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Resizes images to preferred Flux Kontext resolutions with crop or stretch options.</div></td></tr>
 <tr><td class="row-title"><a href="nodes/ImageResizeWanAdaptiveFraming.html">Image Resize WAN Adaptive Framing</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Auto-selects WAN-friendly vertical/horizontal resolution and applies optional human-centric framing before resize.</div></td></tr>
 <tr><td class="row-title"><a href="nodes/VideoResizeMatte.html">Image Resize w Matte</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_image_resize_video_matte.png" alt="Image Resize w Matte"><div class="row-desc">Resizes images with optional aspect preservation, divisibility constraints, and optional matte canvas compositing.</div></td></tr>
@@ -200,6 +239,7 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
 <h3>Image</h3>
 <table class="row-table">
 <tr><td class="row-title"><a href="nodes/GenProceduralPatterns.html">Procedural Patterns</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_procedural_patterns.png" alt="Procedural Patterns"><div class="row-desc">Generates procedural symmetrical patterns (torus rings, radial beams, spiral rings, combined) for visual influence in image generation. Seed only affects output when pattern_type=&#x27;random&#x27; or chaos_mode=True.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/ControlnetImagePreprocessCached.html">Controlnet Image Preprocess Cached</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Caches aux controlnet preprocessor outputs (Canny, LineArt, LeReS depth) to disk and only recomputes when the source image is newer than the cache.</div></td></tr>
 </table>
 </div>
 <div class="row-group">
@@ -215,12 +255,12 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
 <div class="row-group">
 <h3>Text</h3>
 <table class="row-table">
+<tr><td class="row-title"><a href="nodes/TextRandomLine.html">Text Random Line</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Picks one line of the incoming text at random, chosen by a seeded RNG for reproducible output.</div></td></tr>
 <tr><td class="row-title"><a href="nodes/TextEnclosureVisualizer.html">Enclosure Visualizer</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_text_enclosure_visualize.png" alt="Enclosure Visualizer"><div class="row-desc">Visualizes prompt text enclosure nesting and mismatched parenthesis, outputting an image and analysis strings.</div></td></tr>
 <tr><td class="row-title"><a href="nodes/TextMultilineFindColorized.html">Text Multiline FindColorized</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_text_multiline_findcolorized.png" alt="Text Multiline FindColorized"><div class="row-desc">Editable multiline text input with search/find highlighting and syntax-colored LoRA bracket tags.</div></td></tr>
 <tr><td class="row-title"><a href="nodes/TextReorder.html">Text Reorder</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_text_reorder.png" alt="Text Reorder"><div class="row-desc">Reorders prompt text sections (comma/sentence/paragraph) while preserving parenthesis-enclosed blocks; supports seeded shuffle and distance constraints.</div></td></tr>
 <tr><td class="row-title"><a href="nodes/TextShowMultilineColor.html">Text Show Multiline Color</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Displays multiline text with syntax highlighting in a persistent, selectable widget. Gracefully handles missing or broken inputs.</div></td></tr>
 <tr><td class="row-title"><a href="nodes/TextStrengthMultiplier.html">Text Strength Multiplier</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_text_strength_multiplier.png" alt="Text Strength Multiplier"><div class="row-desc">Multiplies prompt section weights while preserving &lt;lora:...&gt; tags; supports individual caps/minimums and total cap scaling.</div></td></tr>
-<tr><td class="row-title"><a href="nodes/TextTokenCount.html">Text Token Count</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_text_token_count.png" alt="Text Token Count"><div class="row-desc">Counts tokens for a string using a CLIP tokenizer if available, otherwise estimates.</div></td></tr>
 <tr><td class="row-title"><a href="nodes/TextToStringSafeForFilename.html">Text To Filename Safe Text</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_text_to_string_filename_safe.png" alt="Text To Filename Safe Text"><div class="row-desc">Converts text into a filename-safe string (Windows-safe) with normalization, character filtering, and length truncation.</div></td></tr>
 <tr><td class="row-title"><a href="nodes/TextTruncateProtect.html">Text Truncate Protect</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Truncates text to a character limit with protection options for words, paragraphs, and enclosures.</div></td></tr>
 </table>
@@ -234,10 +274,11 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
 <div class="row-group">
 <h3>Load</h3>
 <table class="row-table">
-<tr><td class="row-title"><a href="nodes/LoadImageFilePathOut.html">Load Image w FilePath Out</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Loads an image from a file path string and outputs image, mask, file name, and folder path.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/LoadImageFilePathOut.html">Load Image w FilePath Out</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Loads an image from a file path string and outputs image, mask, file name, folder path, dimensions, and date modified.</div></td></tr>
 <tr><td class="row-title"><a href="nodes/LoadImageRandomVariants.html">Load Image Random Variant</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Loads an image from a folder with optional variant selection (subfolder + suffix pattern), with seed and override controls.</div></td></tr>
 <tr><td class="row-title"><a href="nodes/LoadRandomFileFromPathByPrefix.html">Load Random File From Path By Prefix</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Pick a random file from a folder filtered by filename prefix and extension; return its text contents and path.</div></td></tr>
 <tr><td class="row-title"><a href="nodes/LoadTextFileGraceful.html">Load Text File Graceful</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_load_text_graceful.png" alt="Load Text File Graceful"><div class="row-desc">Loads a text file from a path and returns its contents without crashing if the file is missing.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/LoadPromptFilesByCheckpoint.html">Load Prompt Files By Checkpoint</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Loads per-checkpoint prompt files (sd15/sdxl/flux/krea2/wan22, positive+negative where applicable) from a folder and/or a prompt.json, returning each as a string; missing files yield empty strings (no crash).</div></td></tr>
 </table>
 </div>
 <div class="row-group">
@@ -252,6 +293,13 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
 <table class="row-table">
 <tr><td class="row-title"><a href="nodes/SaveAnimatedWebPExtendedFolderPath.html">Save Animated WEBP FolderPath</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Saves an animated WebP to an external folder path</div></td></tr>
 <tr><td class="row-title"><a href="nodes/SaveImageExtendedFolderPath.html">Save Image Extended FolderPath</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Saves images to a specified folder path with customizable naming, counters, and optional metadata.</div></td></tr>
+</table>
+</div>
+<div class="row-group">
+<h3>Display</h3>
+<table class="row-table">
+<tr><td class="row-title"><a href="nodes/DisplayLabelText.html">Display Label Text</a></td><td class="row-media"><div class="row-img-missing">no screenshot</div><div class="row-desc">Frontend-only floating text label for the graph. No backend execution; styled via the properties panel.</div></td></tr>
+<tr><td class="row-title"><a href="nodes/DisplayTokenCount.html">Display Token Count</a></td><td class="row-media"><img class="row-img" src="comfyui_illumorae_text_token_count.png" alt="Display Token Count"><div class="row-desc">Counts tokens for a string using a CLIP tokenizer if available, otherwise estimates.</div></td></tr>
 </table>
 </div>
 

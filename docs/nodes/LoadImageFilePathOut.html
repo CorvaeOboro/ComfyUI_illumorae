@@ -48,7 +48,7 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
     <div class="content">
 <header>
     <h1>Load Image w FilePath Out</h1>
-    <p>Loads an image from a file path string and outputs image, mask, file name, and folder path.</p>
+    <p>Loads an image from a file path string and outputs image, mask, file name, folder path, dimensions, and date modified.</p>
 </header>
 <div class="container">
 
@@ -59,14 +59,14 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
 <dt>Node ID</dt><dd><code>illumoraeLoadImageWFilePathOutNode</code></dd>
 <dt>Category</dt><dd><code>illumorae</code></dd>
 <dt>Group</dt><dd>Load</dd>
-<dt>Version</dt><dd><code>20260426</code></dd>
+<dt>Version</dt><dd><code>20260905</code></dd>
 <dt>Function</dt><dd><code>load_image</code></dd>
 <dt>Status</dt><dd><span class="badge status-working">working</span></dd>
 <dt>Package</dt><dd><code>ComfyUI_illumorae_LoadImageFilePathOut</code></dd>
 <dt>Source</dt><dd><code>load_image_filepath_out.py</code></dd>
 </dl>
 
-<p>Loads an image from a file path string and outputs image, mask, file name, folder path, width, and height.</p><p class="note">Loads an image from a file path string and outputs image, mask, file name, and folder path.</p>
+<p>Loads an image from a file path string and outputs image, mask, file name, folder path, width, height, and date modified (POSIX timestamp).</p><p class="note">Loads an image from a file path string and outputs image, mask, file name, folder path, dimensions, and date modified.</p>
 
 <h2>Inputs</h2>
 <table>
@@ -84,6 +84,7 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
 <tr><td>3</td><td><code>STRING</code></td><td>FOLDER PATH</td></tr>
 <tr><td>4</td><td><code>INT</code></td><td>WIDTH</td></tr>
 <tr><td>5</td><td><code>INT</code></td><td>HEIGHT</td></tr>
+<tr><td>6</td><td><code>FLOAT</code></td><td>DATE MODIFIED</td></tr>
 </table>
 
 </div>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>illumorae - Checkpoint Random Selector</title>
+<title>illumorae - Display Label Text</title>
 <style>
 :root { --bg:#0d0d0d; --surface:#141414; --border:#2a2a2a; --text:#e0e0e0; --muted:#999; --accent:#4a7fb5; --link:#64b5f6; --code:#1e1e1e; }
 * { box-sizing:border-box; }
@@ -47,49 +47,28 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
     <div class="sidebar"><iframe src="../illumorae_menu.html"></iframe></div>
     <div class="content">
 <header>
-    <h1>Checkpoint Random Selector</h1>
-    <p>Randomly selects a checkpoint from a category, changing each interval.</p>
+    <h1>Display Label Text</h1>
+    <p>Frontend-only floating text label for the graph. No backend execution; styled via the properties panel.</p>
 </header>
 <div class="container">
 
-<div class="img-missing">Screenshot declared as <code>comfyui_illumorae_checkpoint_random_selector.png</code> but not found under docs/.</div>
+<div class="img-missing">No screenshot declared (IMAGE:: field missing).</div>
 
 <h2>Metadata</h2>
 <dl class="meta-grid">
-<dt>Node ID</dt><dd><code>illumoraeCheckpointRandomSelectorNode</code></dd>
-<dt>Category</dt><dd><code>illumorae</code></dd>
-<dt>Group</dt><dd>Checkpoint</dd>
+<dt>Node ID</dt><dd><code>DisplayLabelText</code></dd>
+<dt>Group</dt><dd>Display</dd>
 <dt>Version</dt><dd><code>20260906</code></dd>
-<dt>Function</dt><dd><code>select_checkpoint</code></dd>
 <dt>Status</dt><dd><span class="badge status-working">working</span></dd>
-<dt>Package</dt><dd><code>ComfyUI_illumorae_CheckpointRandomSelector</code></dd>
-<dt>Source</dt><dd><code>checkpoint_random_selector.py</code></dd>
+<dt>Package</dt><dd><code>ComfyUI_illumorae_DisplayLabelText</code></dd>
+<dt>Source</dt><dd><code>display_label_text.py</code></dd>
 </dl>
 
-<p>Randomly selects a checkpoint from a category, changing each interval.</p>
+<p class="note">Frontend-only floating text label for the graph. No backend execution; styled via the properties panel.</p>
 
-<h2>Inputs</h2>
-<table>
-<tr><th>Name</th><th>Type</th><th>Section</th><th>Default</th><th>Range</th><th>Options</th></tr>
-<tr><td><code>base_folder</code></td><td>STRING</td><td>required</td><td>D:/CODE/STABLEDIFFUSION_AUTO/models/Stable-diffusion</td><td></td><td></td></tr>
-<tr><td><code>category</code></td><td>STRING</td><td>required</td><td>SDXL</td><td></td><td><span class="badge">choices=[&#x27;SDXL&#x27;, &#x27;PONY&#x27;, &#x27;SD15&#x27;]</span></td></tr>
-<tr><td><code>interval_minutes</code></td><td>INT</td><td>required</td><td>60</td><td>1 .. 1440</td><td></td></tr>
-<tr><td><code>sdxl_folder_name</code></td><td>STRING</td><td>required</td><td>SDXL 10</td><td></td><td></td></tr>
-<tr><td><code>pony_folder_name</code></td><td>STRING</td><td>required</td><td>Pony</td><td></td><td></td></tr>
-<tr><td><code>sd15_folder_name</code></td><td>STRING</td><td>required</td><td>SD15</td><td></td><td></td></tr>
-<tr><td><code>safe_mode</code></td><td>BOOLEAN</td><td>optional</td><td>true</td><td></td><td></td></tr>
-<tr><td><code>file_extensions</code></td><td>STRING</td><td>optional</td><td>.safetensors,.sft</td><td></td><td></td></tr>
-<tr><td><code>use_checkpoint_subfolder</code></td><td>BOOLEAN</td><td>optional</td><td>false</td><td></td><td></td></tr>
-<tr><td><code>checkpoint_subfolder_name</code></td><td>STRING</td><td>optional</td><td>Checkpoint</td><td></td><td></td></tr>
-</table>
+<h2>Inputs</h2><p class="note">No INPUT_TYPES parameters parsed.</p>
 
-<h2>Outputs</h2>
-<table>
-<tr><th>#</th><th>Type</th><th>Name</th></tr>
-<tr><td>0</td><td><code>STRING</code></td><td>folder_path</td></tr>
-<tr><td>1</td><td><code>STRING</code></td><td>file_path</td></tr>
-<tr><td>2</td><td><code>STRING</code></td><td>filename</td></tr>
-</table>
+
 
 </div>
     </div>

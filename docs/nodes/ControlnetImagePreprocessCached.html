@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>illumorae - Text Token Count</title>
+<title>illumorae - Controlnet Image Preprocess Cached</title>
 <style>
 :root { --bg:#0d0d0d; --surface:#141414; --border:#2a2a2a; --text:#e0e0e0; --muted:#999; --accent:#4a7fb5; --link:#64b5f6; --code:#1e1e1e; }
 * { box-sizing:border-box; }
@@ -47,39 +47,52 @@ footer { text-align:center; padding:1.2rem 1rem; color:var(--muted); font-size:0
     <div class="sidebar"><iframe src="../illumorae_menu.html"></iframe></div>
     <div class="content">
 <header>
-    <h1>Text Token Count</h1>
-    <p>Counts tokens for a string using a CLIP tokenizer if available, otherwise estimates.</p>
+    <h1>Controlnet Image Preprocess Cached</h1>
+    <p>Caches aux controlnet preprocessor outputs (Canny, LineArt, LeReS depth) to disk and only recomputes when the source image is newer than the cache.</p>
 </header>
 <div class="container">
 
-<img class="node-shot" src="../comfyui_illumorae_text_token_count.png" alt="Text Token Count">
+<div class="img-missing">No screenshot declared (IMAGE:: field missing).</div>
 
 <h2>Metadata</h2>
 <dl class="meta-grid">
-<dt>Node ID</dt><dd><code>illumoraeTextTokenCountNode</code></dd>
+<dt>Node ID</dt><dd><code>illumoraeControlnetImagePreprocessCachedNode</code></dd>
 <dt>Category</dt><dd><code>illumorae</code></dd>
-<dt>Group</dt><dd>Text</dd>
-<dt>Version</dt><dd><code>20260814</code></dd>
-<dt>Function</dt><dd><code>count_tokens</code></dd>
+<dt>Group</dt><dd>Image</dd>
+<dt>Version</dt><dd><code>20260905</code></dd>
+<dt>Function</dt><dd><code>execute</code></dd>
 <dt>Status</dt><dd><span class="badge status-working">working</span></dd>
-<dt>Package</dt><dd><code>ComfyUI_illumorae_TextTokenCount</code></dd>
-<dt>Source</dt><dd><code>text_token_count.py</code></dd>
+<dt>Package</dt><dd><code>ComfyUI_illumorae_ControlnetImagePreprocessCached</code></dd>
+<dt>Source</dt><dd><code>controlnet_image_preprocess_cached.py</code></dd>
 </dl>
 
-<p>Counts tokens for a string using a CLIP tokenizer if available, otherwise estimates.</p>
+<p>Caches aux controlnet preprocessor outputs (Canny, LineArt, LeReS depth) to disk beside the source image. When update_cache_if_newer is True (default), recomputes only when the source is newer than the cache. When False, always uses the cache if found. Use force_refresh to bypass the cache entirely. source_date_modified overrides the file mtime when provided.</p><p class="note">Caches aux controlnet preprocessor outputs (Canny, LineArt, LeReS depth) to disk and only recomputes when the source image is newer than the cache.</p>
 
 <h2>Inputs</h2>
 <table>
 <tr><th>Name</th><th>Type</th><th>Section</th><th>Default</th><th>Range</th><th>Options</th></tr>
-<tr><td><code>text</code></td><td>STRING</td><td>required</td><td></td><td></td><td></td></tr>
-<tr><td><code>threshold</code></td><td>INT</td><td>required</td><td>700</td><td>0 .. 99999</td><td></td></tr>
-<tr><td><code>clip</code></td><td>CLIP</td><td>optional</td><td></td><td></td><td></td></tr>
+<tr><td><code>source_path</code></td><td>STRING</td><td>required</td><td></td><td></td><td></td></tr>
+<tr><td><code>preprocessor</code></td><td>ANY</td><td>required</td><td></td><td></td><td></td></tr>
+<tr><td><code>update_cache_if_newer</code></td><td>BOOLEAN</td><td>required</td><td>true</td><td></td><td></td></tr>
+<tr><td><code>force_refresh</code></td><td>BOOLEAN</td><td>required</td><td>false</td><td></td><td></td></tr>
+<tr><td><code>image</code></td><td>IMAGE</td><td>optional</td><td></td><td></td><td></td></tr>
+<tr><td><code>source_name</code></td><td>STRING</td><td>optional</td><td></td><td></td><td></td></tr>
+<tr><td><code>source_date_modified</code></td><td>FLOAT</td><td>optional</td><td>0</td><td>0 .. 1000000000000 (step 1)</td><td></td></tr>
+<tr><td><code>debug</code></td><td>BOOLEAN</td><td>optional</td><td>false</td><td></td><td></td></tr>
+<tr><td><code>low_threshold</code></td><td>FLOAT</td><td>optional</td><td>0.15</td><td>0 .. 1 (step 0.01)</td><td></td></tr>
+<tr><td><code>high_threshold</code></td><td>FLOAT</td><td>optional</td><td>0.3</td><td>0 .. 1 (step 0.01)</td><td></td></tr>
+<tr><td><code>coarse</code></td><td>FLOAT</td><td>optional</td><td>1</td><td>0 .. 10 (step 0.1)</td><td></td></tr>
+<tr><td><code>resolution</code></td><td>INT</td><td>optional</td><td>512</td><td>64 .. 8192 (step 64)</td><td></td></tr>
+<tr><td><code>rm_nearest</code></td><td>FLOAT</td><td>optional</td><td>0</td><td>0 .. 100 (step 0.1)</td><td></td></tr>
+<tr><td><code>rm_background</code></td><td>FLOAT</td><td>optional</td><td>0</td><td>0 .. 100 (step 0.1)</td><td></td></tr>
+<tr><td><code>boost</code></td><td>ANY</td><td>optional</td><td></td><td></td><td></td></tr>
 </table>
 
 <h2>Outputs</h2>
 <table>
 <tr><th>#</th><th>Type</th><th>Name</th></tr>
-<tr><td>0</td><td><code>STRING</code></td><td>token_count</td></tr>
+<tr><td>0</td><td><code>IMAGE</code></td><td>image</td></tr>
+<tr><td>1</td><td><code>BOOLEAN</code></td><td>cache_hit</td></tr>
 </table>
 
 </div>

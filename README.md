@@ -6,7 +6,7 @@
 
 comfyUI custom nodes focused on randomization and image variant exploration
 - loading files by partial string match , randomizing lora string strength , text reordering
-- load and save with external folderpath and filename outputs for project structures
+- image infill and contrast adjustment 
 - each node is self-contained and could be installed separately if prefer specific nodes
 
 <a href="https://corvaeoboro.github.io/ComfyUI_illumorae/nodes/CheckpointLoaderByStringDirty.html"><img src="docs/comfyui_illumorae_load_checkpoint_text_file_basic.png" width="800" caption="workflow"/></a>
